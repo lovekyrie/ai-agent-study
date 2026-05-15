@@ -1,0 +1,20 @@
+{
+  "name": "stage9-evals",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Stage 9: Agent Evaluation System",
+  "scripts": {
+    "dev": "tsx src/example.ts",
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-agent-study/llm-client": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  }
+}

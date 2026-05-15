@@ -1,0 +1,26 @@
+{
+  "name": "stage5-advanced-rag",
+  "version": "0.1.0",
+  "description": "Stage 5: Advanced RAG - Chunking、Embedding、Hybrid Search、Rerank、Query Rewrite",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/example.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-agent-study/config": "workspace:*",
+    "@ai-agent-study/llm-client": "workspace:*",
+    "@ai-agent-study/logger": "workspace:*",
+    "@ai-agent-study/memory": "workspace:*",
+    "@ai-agent-study/vectorstore": "workspace:*",
+    "@ai-agent-study/prompt": "workspace:*",
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

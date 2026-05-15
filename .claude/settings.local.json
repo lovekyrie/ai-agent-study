@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install *)",
+      "Bash(pnpm *)",
+      "Bash(node --loader tsx/esm src/example.ts)",
+      "Bash(node --import tsx/esm src/example.ts)"
+    ]
+  }
+}

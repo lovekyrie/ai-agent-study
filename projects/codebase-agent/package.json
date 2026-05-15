@@ -1,0 +1,28 @@
+{
+  "name": "@ai-agent-study/codebase-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AI Codebase Agent - Intelligent Codebase Q&A Assistant",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx src/example.ts",
+    "build": "tsc",
+    "test": "vitest",
+    "index": "tsx src/cli.ts index"
+  },
+  "dependencies": {
+    "@ai-agent-study/llm-client": "workspace:*",
+    "@ai-agent-study/vectorstore": "workspace:*",
+    "@ai-agent-study/tools": "workspace:*",
+    "@ai-agent-study/memory": "workspace:*",
+    "@ai-agent-study/mcp": "workspace:*",
+    "glob": "^10.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  }
+}
