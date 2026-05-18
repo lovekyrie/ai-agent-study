@@ -1,0 +1,23 @@
+{
+  "name": "stage05-memory-context",
+  "version": "0.1.0",
+  "description": "Stage 05: Memory & Context Engineering — 短期/长期记忆、Token 预算、上下文压缩、Session 持久化",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/example.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-agent-study/config": "workspace:*",
+    "@ai-agent-study/llm-client": "workspace:*",
+    "@ai-agent-study/logger": "workspace:*",
+    "@ai-agent-study/memory": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

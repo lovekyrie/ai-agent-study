@@ -233,7 +233,7 @@ importers:
         specifier: ^1.2.0
         version: 1.6.1(@types/node@20.19.41)(@vitest/ui@2.1.9(vitest@2.1.9))
 
-  stages/stage0-engineering:
+  stages/stage00-engineering:
     dependencies:
       '@ai-agent-study/config':
         specifier: workspace:*
@@ -255,7 +255,7 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
 
-  stages/stage1-llm-api:
+  stages/stage01-llm-api:
     dependencies:
       '@ai-agent-study/config':
         specifier: workspace:*
@@ -280,47 +280,7 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
 
-  stages/stage10-production:
-    dependencies:
-      '@ai-agent-study/llm-client':
-        specifier: workspace:*
-        version: link:../../packages/llm-client
-      pino:
-        specifier: ^8.17.0
-        version: 8.21.0
-      pino-pretty:
-        specifier: ^10.3.0
-        version: 10.3.1
-    devDependencies:
-      '@types/node':
-        specifier: ^20.11.0
-        version: 20.19.41
-      tsx:
-        specifier: ^4.7.0
-        version: 4.22.0
-      typescript:
-        specifier: ^5.3.0
-        version: 5.9.3
-      vitest:
-        specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.41)(@vitest/ui@2.1.9(vitest@2.1.9))
-
-  stages/stage11-security:
-    devDependencies:
-      '@types/node':
-        specifier: ^20.11.0
-        version: 20.19.41
-      tsx:
-        specifier: ^4.7.0
-        version: 4.22.0
-      typescript:
-        specifier: ^5.3.0
-        version: 5.9.3
-      vitest:
-        specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.41)(@vitest/ui@2.1.9(vitest@2.1.9))
-
-  stages/stage2-prompt-context:
+  stages/stage02-prompt-context:
     dependencies:
       '@ai-agent-study/config':
         specifier: workspace:*
@@ -348,7 +308,7 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
 
-  stages/stage3-tool-calling:
+  stages/stage03-tool-calling:
     dependencies:
       '@ai-agent-study/config':
         specifier: workspace:*
@@ -376,7 +336,7 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
 
-  stages/stage4-agent-runtime:
+  stages/stage04-agent-runtime:
     dependencies:
       '@ai-agent-study/config':
         specifier: workspace:*
@@ -410,7 +370,35 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
 
-  stages/stage5-advanced-rag:
+  stages/stage05-memory-context:
+    dependencies:
+      '@ai-agent-study/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@ai-agent-study/llm-client':
+        specifier: workspace:*
+        version: link:../../packages/llm-client
+      '@ai-agent-study/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@ai-agent-study/memory':
+        specifier: workspace:*
+        version: link:../../packages/memory
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.19
+      tsx:
+        specifier: ^4.15.0
+        version: 4.22.0
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
+
+  stages/stage06-rag-foundations:
     dependencies:
       '@ai-agent-study/config':
         specifier: workspace:*
@@ -447,7 +435,7 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
 
-  stages/stage6-agentic-rag:
+  stages/stage07-agentic-rag:
     dependencies:
       '@ai-agent-study/config':
         specifier: workspace:*
@@ -484,7 +472,7 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
 
-  stages/stage7-mcp:
+  stages/stage08-mcp:
     dependencies:
       '@ai-agent-study/config':
         specifier: workspace:*
@@ -527,7 +515,7 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
 
-  stages/stage8-workflow:
+  stages/stage09-workflow:
     dependencies:
       '@ai-agent-study/llm-client':
         specifier: workspace:*
@@ -549,11 +537,36 @@ importers:
         specifier: ^1.2.0
         version: 1.6.1(@types/node@20.19.41)(@vitest/ui@2.1.9(vitest@2.1.9))
 
-  stages/stage9-evals:
+  stages/stage10-evals:
     dependencies:
       '@ai-agent-study/llm-client':
         specifier: workspace:*
         version: link:../../packages/llm-client
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.41
+      tsx:
+        specifier: ^4.7.0
+        version: 4.22.0
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.2.0
+        version: 1.6.1(@types/node@20.19.41)(@vitest/ui@2.1.9(vitest@2.1.9))
+
+  stages/stage11-production:
+    dependencies:
+      '@ai-agent-study/llm-client':
+        specifier: workspace:*
+        version: link:../../packages/llm-client
+      pino:
+        specifier: ^8.17.0
+        version: 8.21.0
+      pino-pretty:
+        specifier: ^10.3.0
+        version: 10.3.1
     devDependencies:
       '@types/node':
         specifier: ^20.11.0

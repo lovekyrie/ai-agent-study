@@ -1,0 +1,28 @@
+{
+  "name": "stage08-mcp",
+  "version": "0.1.0",
+  "description": "Stage 08: MCP — Model Context Protocol 集成（本地工具 ↔ 远端工具桥接）",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "node --import tsx/esm example.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-agent-study/config": "workspace:*",
+    "@ai-agent-study/llm-client": "workspace:*",
+    "@ai-agent-study/logger": "workspace:*",
+    "@ai-agent-study/memory": "workspace:*",
+    "@ai-agent-study/prompt": "workspace:*",
+    "@ai-agent-study/tools": "workspace:*",
+    "@ai-agent-study/vectorstore": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

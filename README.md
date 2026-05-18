@@ -13,38 +13,38 @@
 
 ## 学习周期
 
-16-24 周，分为 12 个阶段 + 2 个简历项目。
+16-24 周，分为 12 个阶段 + 2 个综合项目。
 
 ## 项目结构
 
 ```
 ai-agent-study/
-├── packages/                   # 共享包
-│   ├── llm-client/            # LLM 客户端
-│   ├── tools/                 # 工具库
-│   ├── memory/                # 记忆管理
-│   ├── vectorstore/           # 向量数据库
-│   ├── prompt/                # Prompt 模板
-│   ├── mcp/                   # MCP 客户端
-│   ├── logger/                # 日志系统
-│   └── config/                # 配置管理
-├── stages/                     # 学习阶段
-│   ├── stage0-engineering/    # 工程基础
-│   ├── stage1-llm-api/        # LLM API 基础
-│   ├── stage2-prompt-context/ # Prompt + 上下文
-│   ├── stage3-tool-calling/   # 工具调用
-│   ├── stage4-agent-runtime/  # Agent Runtime
-│   ├── stage5-advanced-rag/   # 高级 RAG
-│   ├── stage6-agentic-rag/    # Agentic RAG
-│   ├── stage7-mcp/            # MCP 集成
-│   ├── stage8-workflow/       # 多 Agent 工作流
-│   ├── stage9-evals/          # 评估体系
-│   ├── stage10-production/    # 生产工程化
-│   └── stage11-security/      # 安全与权限
-├── projects/                   # 简历项目
-│   ├── codebase-agent/        # AI Codebase Agent
-│   └── enterprise-agent/      # Enterprise Workflow Agent
-└── docs/                       # 文档
+├── packages/                       # 共享包（阶段产物的沉淀地）
+│   ├── config/                    # 配置管理
+│   ├── logger/                    # 结构化日志
+│   ├── llm-client/                # LLM 客户端
+│   ├── prompt/                    # Prompt 模板
+│   ├── tools/                     # 工具库
+│   ├── memory/                    # 记忆管理
+│   ├── vectorstore/               # 向量存储
+│   └── mcp/                       # MCP 客户端
+├── stages/                         # 学习阶段（按序学习）
+│   ├── stage00-engineering/       # 工程基础
+│   ├── stage01-llm-api/           # LLM API 基础
+│   ├── stage02-prompt-context/    # Prompt + 基础上下文
+│   ├── stage03-tool-calling/      # 工具调用（含工具安全）
+│   ├── stage04-agent-runtime/     # Agent Runtime — ReAct Loop
+│   ├── stage05-memory-context/    # Memory & Context Engineering 🆕
+│   ├── stage06-rag-foundations/   # RAG 基础 + 基础评估
+│   ├── stage07-agentic-rag/       # Agentic RAG
+│   ├── stage08-mcp/               # MCP 集成
+│   ├── stage09-workflow/          # 多 Agent 工作流
+│   ├── stage10-evals/             # 评估体系（系统化）
+│   └── stage11-production/        # 生产工程化 + 安全（融合）
+├── projects/                       # 综合项目
+│   ├── codebase-agent/            # AI Codebase Agent（基于 stage00–07）
+│   └── enterprise-agent/          # Enterprise Workflow Agent（基于 stage00–11）
+└── docs/                           # 文档
 ```
 
 ## 快速开始
@@ -82,133 +82,121 @@ pnpm build
 
 ## 学习路径
 
-### 阶段 0: 工程基础 (1-2 周)
+> **设计原则**：
+>
+> - **评估贯穿**：从 stage06 起每个阶段必须产出该阶段的评估输出（不是只在 stage10 才学评估）
+> - **安全融入**：安全考虑分布在 stage03（工具防护）、stage05（上下文注入防护）、stage11（生产防护），不再有独立的「安全阶段」
+> - **真实存储递进**：stage06 接 Chroma、stage09 接 Postgres、stage11 接 Redis + OTel
+> - **沉淀到 packages**：每个阶段的产出最终归位到 `packages/*`，禁止重复造轮子
+
+### Stage 00: 工程基础 (1-2 周)
 建立规范的工程化基础，配置开发环境。
 
-**学习内容**:
-- Monorepo 架构 (pnpm workspace)
-- TypeScript 严格模式
-- ESLint + Prettier
-- Vitest 测试框架
-- 结构化日志
+- Monorepo (pnpm workspace) / TypeScript 严格模式
+- ESLint + Prettier + Vitest
+- 结构化日志 (pino) / 配置管理
 
-### 阶段 1: LLM API 基础 (1-2 周)
-掌握模型调用的底层机制。
+### Stage 01: LLM API 基础 (1-2 周)
+掌握模型调用的底层机制，不只是复制 SDK 示例。
 
-**学习内容**:
-- Chat / Responses API
-- Streaming 流式输出
-- JSON 结构化输出
-- Retry、Timeout、Rate Limit
+- Chat / Responses API、message 数组管理
+- Streaming 流式输出（SSE）
+- JSON 结构化输出、Schema 校验
+- Retry / Timeout / Rate Limit
 - 多模型适配层
 
-### 阶段 2: Prompt + 上下文 (1 周)
-设计可维护的提示词。
+### Stage 02: Prompt + 基础上下文 (1 周)
+设计可维护的提示词；把模板系统沉淀到 `packages/prompt`。
 
-**学习内容**:
-- Prompt 模板系统
-- Few-shot examples
-- 上下文裁剪、摘要
-- Prompt injection 防护
+- 模板插值 + Few-shot examples
+- 输出格式约束
+- **基础上下文管理**（深度版在 stage05）
+- 初步的 prompt injection 意识
 
-### 阶段 3: 工具调用 (2 周)
-Agent 的核心能力 - 调用工具完成任务。
+### Stage 03: 工具调用（含工具安全）(2 周)
+Agent 的核心能力，工具安全在此阶段就引入。
 
-**学习内容**:
-- Tool schema 设计
-- 参数校验 (Zod)
-- Tool Registry
-- 权限控制
-- 失败重试、并行调用
+- Tool schema 设计 / Zod 参数校验
+- Tool Registry / 类别管理
+- **工具安全**：白名单、`requiresApproval` 审批流、并行执行隔离
+- 失败重试、错误聚合
 
-### 阶段 4: Agent Runtime (2 周)
-从"单轮工具调用"升级到"多步任务执行"。
+### Stage 04: Agent Runtime (2 周)
+从「单轮工具调用」升级到「多步任务执行」。
 
-**学习内容**:
-- ReAct 思路
-- Plan-Act-Observe 循环
-- 任务分解
-- Self-reflection
-- 人工确认
+- ReAct 循环（Reasoning / Action / Observation）
+- Plan-Act-Observe 状态机
+- 最大迭代控制 / abort 信号
+- onStep 回调与执行 trace
 
-### 阶段 5: 高级 RAG (2-3 周)
-从"能检索"升级到"检索准确、可评估"。
+### Stage 05: Memory & Context Engineering 🆕 (2 周)
+让 Agent「记得住」：跨步骤、跨会话保留必要信息，又不被 token 撑爆。
 
-**学习内容**:
-- Chunking 策略
-- Embedding 模型选择
-- Hybrid search、Rerank
-- Metadata filter
-- Query rewrite
-- Citation
+- 短期记忆（滑窗 + importance 混合裁剪）
+- 长期记忆抽象 + 实现（in-memory → vectorstore）
+- Token 预算估算与上下文压缩
+- LLM 摘要压缩 / Session 容器
+- **上下文注入防护**（与 stage02/03 安全主题呼应）
 
-### 阶段 6: Agentic RAG (2 周)
-让 Agent 自己决定检索策略。
+### Stage 06: RAG 基础 + 基础评估 (2-3 周)
+从「能检索」升级到「检索准确、可评估」。
 
-**学习内容**:
+- Chunking 策略（按段落 / 按行 / 按符号）
+- Embedding 模型选择（含 OpenAI 真实接入选项）
+- Hybrid search / Rerank
+- Query rewrite / Citation
+- **基础评估指标**：命中率、Precision@k、Recall@k（评估在此阶段首次产出）
+
+### Stage 07: Agentic RAG (2 周)
+让 Agent 自己决定检索策略。**复用 stage04 的 Agent，禁止重新造**。
+
 - RAG as Tool
 - 多知识库路由
 - SQL + Vector 混合
-- Research agent
-- Report generation
+- Research agent → 自动生成报告
 
-### 阶段 7: MCP (1-2 周)
-掌握工具生态协议。
+### Stage 08: MCP (1-2 周)
+掌握工具生态协议；建立「本地工具 ↔ 远端工具」的桥接。
 
-**学习内容**:
-- MCP 架构
-- MCP Server / Client
+- MCP 架构 / Server / Client
 - Tools / Resources / Prompts
-- 权限、安全
+- stdio / HTTP transport
+- 与 stage03 工具抽象对齐的桥接示例
 
-### 阶段 8: 多 Agent 工作流 (2 周)
-确定性流程 + LLM 决策。
+### Stage 09: 多 Agent 工作流 (2 周)
+确定性流程 + LLM 决策；状态可持久化。
 
-**学习内容**:
-- Workflow graph
-- Supervisor agent
-- Specialist agents
-- Handoff
-- Durable execution
+- Workflow graph / Supervisor + Specialist
+- Handoff 机制
+- Checkpoint 与从断点恢复
+- 真实持久化（Postgres，可选 in-memory fallback）
+- 人工审批节点
 
-### 阶段 9: 评估体系 (2 周)
-数据驱动的质量保证。
+### Stage 10: 评估体系（系统化）(2 周)
+把前面阶段已经用过的「轻量评估」整理升级。
 
-**学习内容**:
-- Golden dataset
-- LLM-as-judge
-- RAG metrics
-- Tool calling eval
-- 成本、延迟统计
+- Golden dataset 管理
+- LLM-as-judge / RAG metrics（Faithfulness 等）
+- Tool calling eval（Precision / Recall / F1）
+- 回归检测 / 成本与延迟统计
 
-### 阶段 10: 生产工程化 (2-3 周)
-让项目像真实公司服务。
+### Stage 11: 生产工程化 + 安全（融合）(2-3 周)
+让项目像真实公司服务。**原 stage11-security 已融入本阶段的安全章节**。
 
-**学习内容**:
-- API 鉴权
-- 用户会话
-- PostgreSQL + Redis
-- 队列 (BullMQ)
-- OpenTelemetry tracing
-- Docker 部署
+- 真 JWT 鉴权 / 会话管理
+- Postgres + Redis 真实接入
+- BullMQ 任务队列
+- OpenTelemetry tracing / metrics
+- **安全模块**：输入净化、prompt/tool injection 检测、Sandbox、Allowlist/Denylist、敏感信息检测、审计日志
+- Docker Compose 一键启动
 
-### 阶段 11: 安全与权限 (1-2 周)
-生产级安全边界。
+## 综合项目
 
-**学习内容**:
-- Prompt injection 防护
-- Tool injection 防护
-- Sandbox 机制
-- Allowlist / Denylist
-- 审计日志
+### Project A: AI Codebase Agent
+建议在完成 **stage00–07** 后启动。智能代码库问答助手，复用 stage06 RAG + stage07 Agentic RAG + stage04 Agent。
 
-## 简历项目
-
-### 项目 A: AI Codebase Agent
-智能代码库问答助手，支持代码导入、RAG 问答、代码定位、GitHub MCP 集成。
-
-### 项目 B: Enterprise Workflow Agent
-企业级工作流自动化，支持多 Agent 协作、人工审批、评估报告。
+### Project B: Enterprise Workflow Agent
+建议在完成 **stage00–11** 后启动。企业级工作流自动化，复用 stage09 Workflow + stage11 生产能力 + 安全模块。
 
 ## 技术栈
 

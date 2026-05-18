@@ -46,7 +46,7 @@ pnpm --filter @ai-agent-study/llm-client add axios
 pnpm -r test
 
 # 在特定包中运行命令
-pnpm --filter stage1-llm-api dev
+pnpm --filter stage01-llm-api dev
 ```
 
 ## 环境变量

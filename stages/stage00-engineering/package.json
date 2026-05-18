@@ -1,0 +1,21 @@
+{
+  "name": "stage00-engineering",
+  "version": "0.1.0",
+  "description": "Stage 00: 工程基础 — Monorepo / TS / Vitest / 日志 / 配置",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/example.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-agent-study/config": "workspace:*",
+    "@ai-agent-study/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

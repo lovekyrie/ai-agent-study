@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "pnpm -r run build",
-    "dev": "pnpm --filter stage1-llm-api dev",
+    "dev": "pnpm --filter stage01-llm-api dev",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
