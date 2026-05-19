@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "node --import tsx/esm example.ts",
+    "dev": "tsx src/example.ts",
     "test": "vitest"
   },
   "dependencies": {

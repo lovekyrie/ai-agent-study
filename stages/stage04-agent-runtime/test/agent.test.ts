@@ -254,4 +254,97 @@ describe('Agent: ReAct loop', () => {
     // trace 互相独立
     expect(r1.trace.steps).not.toBe(r2.trace.steps)
   })
+
+  /**
+   * 集成测试：多工具混合编排
+   *
+   * 模拟一个常见场景：
+   *   1. 用户问"123 加 456 等于多少？再帮我搜一下 Vue 是什么"
+   *   2. Agent 调用 calculator 算出 579
+   *   3. Agent 调用 search 拿到 Vue 的描述
+   *   4. Agent 综合两个结果给出最终答案
+   *
+   * 这是 stage04 的"压轴"——证明 Agent 能在不同工具之间正确编排，
+   * 而且每个工具的结果都正确路由回 LLM。
+   */
+  it('integration: multi-tool sequence with calculator + search and final synthesis', async () => {
+    const calcTool: ToolDefinition = {
+      name: 'calculator',
+      description: 'evaluate arithmetic',
+      parameters: z.object({ expr: z.string() }),
+      execute: async (params) => {
+        const expr = (params as { expr: string }).expr
+        // 极简实现：只支持 a+b
+        const match = /^(\d+)\s*\+\s*(\d+)$/.exec(expr)
+        if (!match) return { content: '', error: 'unsupported expr' }
+        return { content: String(Number(match[1]) + Number(match[2])) }
+      },
+    }
+    const searchTool: ToolDefinition = {
+      name: 'search',
+      description: 'search the web',
+      parameters: z.object({ query: z.string() }),
+      execute: async (params) => ({
+        content: `[search result for "${(params as { query: string }).query}"]: A progressive JS framework.`,
+      }),
+    }
+
+    const { client, calls } = makeMockClient([
+      // 第 1 轮：模型同时请求两个工具
+      {
+        content: '',
+        finishReason: 'tool_calls',
+        toolCalls: [
+          {
+            id: 't_calc',
+            type: 'function',
+            function: { name: 'calculator', arguments: '{"expr":"123 + 456"}' },
+          },
+          {
+            id: 't_search',
+            type: 'function',
+            function: { name: 'search', arguments: '{"query":"Vue.js"}' },
+          },
+        ],
+      },
+      // 第 2 轮：模型综合两个工具结果给出答案
+      {
+        content: '123 + 456 = 579；Vue 是一个渐进式 JS 框架。',
+        finishReason: 'stop',
+      },
+    ])
+
+    const observed: number[] = []
+    const agent = new Agent({
+      llmClient: client,
+      tools: [calcTool, searchTool],
+      onStep: (s) => observed.push(s.stepNumber),
+    })
+
+    const response = await agent.run('123 加 456 等于多少？再帮我搜一下 Vue 是什么')
+
+    // 1) 整体收敛
+    expect(response.status).toBe('done')
+    expect(response.trace.iterations).toBe(2)
+    expect(response.message).toContain('579')
+    expect(response.message).toContain('Vue')
+
+    // 2) 第一步：两个工具都被调用，且参数路由正确
+    const step1 = response.trace.steps[0]
+    expect(step1.toolCalls.map((c) => c.name).sort()).toEqual(['calculator', 'search'])
+    expect(step1.toolResults).toHaveLength(2)
+    const calcResult = step1.toolResults.find(
+      (_, i) => step1.toolCalls[i].name === 'calculator'
+    )
+    expect(calcResult?.content).toBe('579')
+
+    // 3) 第二轮 chat 应能"看到"两条 role:'tool' 消息（协议契约）
+    const round2 = calls[1].messages
+    const toolMsgs = round2.filter((m) => m.role === 'tool')
+    expect(toolMsgs).toHaveLength(2)
+    expect(toolMsgs.map((m) => m.tool_call_id).sort()).toEqual(['t_calc', 't_search'])
+
+    // 4) onStep 回调按 step 顺序触发
+    expect(observed).toEqual([1, 2])
+  })
 })

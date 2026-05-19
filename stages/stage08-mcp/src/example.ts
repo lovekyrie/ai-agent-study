@@ -4,7 +4,7 @@ import {
   createMCPTool,
   createMCPResource,
   createMCPPrompt,
-} from './src/index.js'
+} from './index.js'
 
 // Example MCP Server with file system tools
 function createFileServer(): MCPServer {
@@ -26,8 +26,14 @@ function createFileServer(): MCPServer {
         content: { type: 'string', description: 'Content to write' },
       },
       async ({ path, content }) => {
-        // Simulated file write
-        return { success: true, path, bytesWritten: (content as string).length }
+        // Simulated file write. createMCPTool 把 inputSchema 当作 T 推断出 params 类型，
+        // 这里 content 在 schema 里是描述对象（{type, description}），运行时是 string，
+        // 所以需要 as unknown as string 跨越这个不一致。
+        return {
+          success: true,
+          path,
+          bytesWritten: (content as unknown as string).length,
+        }
       }
     ),
     createMCPTool(

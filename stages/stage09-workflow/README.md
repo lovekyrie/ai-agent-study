@@ -1,114 +1,129 @@
-# Stage 8: Multi-Agent Workflow
+# Stage 09 — Multi-Agent Workflow
 
-多 Agent 工作流引擎，支持 Supervisor + Specialist 模式的工作流编排。
+> **目标**：构建 Supervisor + Specialist 多 Agent 工作流引擎，掌握图状执行、Handoff 机制、Checkpoint 恢复与人工审批。
 
-## 核心功能
+---
 
-- **WorkflowEngine**: 工作流执行引擎，管理节点和边的执行
-- **Supervisor Agent**: 负责任务分解和委派
-- **Specialist Agent**: 执行特定领域的任务
-- **Handoff 机制**: Agent 之间传递控制权
-- **Checkpoint**: 工作流状态快照和恢复
-- **人工审批**: 审批节点支持人工介入
+## 核心概念
+
+```
+Supervisor ──→ Specialist A ──→ Supervisor ──→ Approval ──→ End
+     ↑                                │
+     └──────── Specialist B ←─────────┘
+```
+
+| 节点类型 | 作用 |
+|----------|------|
+| **supervisor** | LLM 驱动的"决策者"，通过 handoff 指令分派任务 |
+| **specialist** | 执行特定领域任务，完成后 handoff 回 supervisor |
+| **approval** | 暂停工作流，等待人工审批 |
+| **end** | 终止节点，标记工作流完成 |
+
+### 工作流状态机
+
+`pending` → `running` → `waiting_approval` → `running` → `completed` / `failed` / `cancelled`
+
+---
 
 ## 目录结构
 
 ```
 src/
-├── index.ts  # WorkflowEngine, SupervisorAgent, SpecialistAgent, WorkflowBuilder
+├── types.ts       # WorkflowState / Node / Edge / Context / Checkpoint 等接口
+├── agents.ts      # SupervisorAgent / SpecialistAgent（LLM 驱动）
+├── engine.ts      # WorkflowEngine — 图遍历 + 条件边 + checkpoint
+├── builder.ts     # WorkflowBuilder (fluent API) + createCodeReviewWorkflow 工厂
+├── index.ts       # barrel re-export
+└── example.ts     # 完整示例
+test/
+├── engine.test.ts # 10 tests — 节点遍历 / 审批 / checkpoint / 异常
+└── agents.test.ts #  6 tests — handoff 解析 / LLM 错误降级
 ```
 
-## 核心概念
+---
 
-### Workflow Graph
-```
-Supervisor ──→ Specialist1 ──→ Supervisor
-     ↑                              │
-     └──←── Specialist2 ←──────────┘
-              ↓
-           Approval ──→ End
-```
+## 快速上手
 
-### 工作流状态
-- `pending`: 等待开始
-- `running`: 执行中
-- `waiting_approval`: 等待人工审批
-- `completed`: 已完成
-- `failed`: 失败
-- `cancelled`: 已取消
+### 1. 使用 Builder 构建工作流
 
-## 使用示例
-
-### 构建工作流
 ```typescript
-const workflow = new WorkflowBuilder()
-  .addSupervisor('supervisor', 'Supervisor', 'Role', 'Instructions')
-  .addSpecialist('worker', 'Worker', 'Role', 'Instructions')
-  .addApproval('approval', 'Approval', 'Description')
-  .addEnd('end', 'Complete')
-  .addEdge('supervisor', 'worker')
-  .addEdge('worker', 'supervisor')
-  .addEdge('supervisor', 'approval')
-  .addEdge('approval', 'end')
+import { WorkflowBuilder } from './builder.js'
+
+const engine = new WorkflowBuilder()
+  .addSupervisor('sup', 'Supervisor', 'Manager', 'Delegate to specialists')
+  .addSpecialist('security', 'Security', 'Security Expert', 'Review for vulns')
+  .addApproval('approve', 'Manager Approval', 'Human review required')
+  .addEnd('end', 'Done')
+  .addEdge('sup', 'security', (ctx) => !ctx.data['securityDone'])
+  .addEdge('security', 'sup')
+  .addEdge('sup', 'approve', (ctx) => ctx.data['securityDone'] === true)
+  .addEdge('approve', 'end')
   .build()
 ```
 
-### 执行工作流
+### 2. 执行工作流
+
 ```typescript
-const result = await workflow.execute('workflow-id', { initialData: 'value' })
-console.log(result.state)
-console.log(result.history)
+const result = await engine.execute('wf-001', { prTitle: 'feat: add login' })
+console.log(result.state)    // 'waiting_approval' | 'completed' | 'failed'
+console.log(result.history)  // 每步 nodeId + action + timestamp
 ```
 
-### 代码审查工作流
-```typescript
-const workflow = createCodeReviewWorkflow()
-const result = await workflow.execute('pr-review-1', {
-  prTitle: 'Add login feature',
-  files: ['src/auth/login.ts'],
-})
-```
+### 3. 人工审批
 
-### Checkpoint 和恢复
-```typescript
-const checkpoint = workflow.createCheckpoint(context, nodeId)
-await workflow.restoreFromCheckpoint(context, nodeId)
-```
-
-### 人工审批
 ```typescript
 if (result.state === 'waiting_approval') {
-  await workflow.approve(result)
+  const final = await engine.approve(result)
+  // final.state === 'completed'
 }
 ```
 
-## 与 Agent 集成
+### 4. Checkpoint 与恢复
 
-Supervisor Agent 使用 LLM 做决策：
 ```typescript
-const decision = await supervisorAgent.execute(context)
-// decision.handoff contains the next specialist to delegate to
+engine.createCheckpoint(context, 'security')
+// … 后续失败时
+await engine.restoreFromCheckpoint(context, 'security')
 ```
 
-Specialist Agent 执行具体任务后可以 handoff 回 Supervisor：
-```typescript
-// In specialist response:
-"handoff:supervisor" // Returns control to supervisor
+---
+
+## Handoff 机制
+
+Supervisor LLM 响应中包含 `handoff: <nodeId>` 时，Engine 将控制权交给对应节点：
+
+```
+LLM output: "handoff: security\nreason: code touches auth module"
+→ engine routes to node 'security'
 ```
 
-## 设计模式
+Specialist 完成后返回 `handoff:supervisor`，流程回到 Supervisor 做下一轮决策。
 
-### Supervisor-Specialist 模式
-- Supervisor 做高层决策，决定委派给哪个 Specialist
-- Specialist 执行具体任务，完成后返回结果
-- 支持条件边，根据执行结果决定下一步
+---
 
-### Checkpoint 模式
-- 在关键节点保存状态快照
-- 失败时可从 checkpoint 恢复
-- 支持长时运行任务的断点执行
+## 预置工作流
 
-### Durable Execution
-- 工作流状态持久化（需要外部存储）
-- 进程重启后可恢复执行
-- 关键决策点记录完整历史
+```typescript
+import { createCodeReviewWorkflow } from './builder.js'
+
+const workflow = createCodeReviewWorkflow()
+// supervisor → security → performance → style → approval → end
+```
+
+---
+
+## 运行
+
+```bash
+pnpm --filter stage09-workflow dev      # 运行 example
+pnpm --filter stage09-workflow test     # 16 tests
+```
+
+## 验收标准
+
+- [ ] WorkflowEngine 支持图遍历 + 条件边 + 最大迭代保护
+- [ ] Supervisor/Specialist Agent 解析 handoff 指令并路由
+- [ ] 审批节点暂停/恢复工作流
+- [ ] Checkpoint 创建和恢复正确快照数据
+- [ ] LLM 异常时 Agent 优雅降级（success=false）
+- [ ] 所有 16 个测试通过

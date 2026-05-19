@@ -335,6 +335,9 @@ importers:
       vitest:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
 
   stages/stage04-agent-runtime:
     dependencies:
