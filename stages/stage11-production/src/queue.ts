@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 
 // Job states
 export type JobState = 'pending' | 'active' | 'completed' | 'failed' | 'delayed'
@@ -25,7 +25,7 @@ export interface QueueOptions {
   concurrency?: number
   defaultJobOptions?: {
     attempts?: number
-    backoff?: { type: 'exponential' | 'fixed'; delay: number }
+    backoff?: { type: 'exponential' | 'fixed', delay: number }
   }
 }
 
@@ -43,7 +43,7 @@ export class JobQueue<T = unknown> extends EventEmitter {
   private delayed: Map<string, number>
   private concurrency: number
   private maxAttempts: number
-  private defaultBackoff?: { type: 'exponential' | 'fixed'; delay: number }
+  private defaultBackoff?: { type: 'exponential' | 'fixed', delay: number }
   private processor?: (job: Job<T>) => Promise<unknown>
   private processInterval?: NodeJS.Timeout
 
@@ -59,7 +59,7 @@ export class JobQueue<T = unknown> extends EventEmitter {
     this.startProcessing()
   }
 
-  async add(name: string, data: T, opts?: { delay?: number; attempts?: number }): Promise<Job<T>> {
+  async add(name: string, data: T, opts?: { delay?: number, attempts?: number }): Promise<Job<T>> {
     const id = `job-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
     const job: Job<T> = {
       id,
@@ -77,7 +77,8 @@ export class JobQueue<T = unknown> extends EventEmitter {
     if (opts?.delay && opts.delay > 0) {
       job.state = 'delayed'
       this.delayed.set(id, Date.now() + opts.delay)
-    } else {
+    }
+    else {
       this.pending.push(id)
     }
 
@@ -91,7 +92,8 @@ export class JobQueue<T = unknown> extends EventEmitter {
 
   private async processJob(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId)
-    if (!job || job.state === 'active') return
+    if (!job || job.state === 'active')
+      return
 
     job.state = 'active'
     job.processedAt = new Date()
@@ -115,7 +117,8 @@ export class JobQueue<T = unknown> extends EventEmitter {
       this.active = this.active.filter(id => id !== jobId)
 
       this.emit('completed', job, result)
-    } catch (error) {
+    }
+    catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       job.error = errorMessage
 
@@ -127,7 +130,8 @@ export class JobQueue<T = unknown> extends EventEmitter {
         this.active = this.active.filter(id => id !== jobId)
 
         this.emit('delayed', job, delay)
-      } else {
+      }
+      else {
         job.state = 'failed'
         job.failedAt = new Date()
         this.failed.push(jobId)
@@ -140,7 +144,7 @@ export class JobQueue<T = unknown> extends EventEmitter {
 
   private calculateBackoff(attempt: number): number {
     if (!this.defaultBackoff) {
-      return Math.min(1000 * Math.pow(2, attempt), 30000) // exponential, max 30s
+      return Math.min(1000 * 2 ** attempt, 30000) // exponential, max 30s
     }
 
     if (this.defaultBackoff.type === 'fixed') {
@@ -149,8 +153,8 @@ export class JobQueue<T = unknown> extends EventEmitter {
 
     // exponential
     return Math.min(
-      this.defaultBackoff.delay * Math.pow(2, attempt - 1),
-      30000
+      this.defaultBackoff.delay * 2 ** (attempt - 1),
+      30000,
     )
   }
 
@@ -172,8 +176,9 @@ export class JobQueue<T = unknown> extends EventEmitter {
 
     while (this.active.length < this.concurrency && this.pending.length > 0) {
       const jobId = this.pending.shift()
-      if (!jobId) return
-      void this.processJob(jobId).catch(error => {
+      if (!jobId)
+        return
+      void this.processJob(jobId).catch((error) => {
         const job = this.jobs.get(jobId)
         if (job) {
           job.state = 'failed'
@@ -220,7 +225,8 @@ export class JobQueue<T = unknown> extends EventEmitter {
 
   async remove(jobId: string): Promise<boolean> {
     const job = this.jobs.get(jobId)
-    if (!job) return false
+    if (!job)
+      return false
 
     this.pending = this.pending.filter(id => id !== jobId)
     this.active = this.active.filter(id => id !== jobId)

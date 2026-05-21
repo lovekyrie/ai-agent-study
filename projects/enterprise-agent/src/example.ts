@@ -1,4 +1,4 @@
-import { WorkflowOrchestrator, WORKFLOW_TEMPLATES } from './index.js'
+import { WORKFLOW_TEMPLATES, WorkflowOrchestrator } from './index.js'
 
 async function main() {
   console.log('=== Enterprise Workflow Agent Demo ===\n')

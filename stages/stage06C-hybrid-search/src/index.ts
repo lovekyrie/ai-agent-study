@@ -1,8 +1,9 @@
+import type { DocumentChunk, RetrievalCandidate } from '@ai-agent-study/retrieval'
 import {
+
   HybridRetriever,
   InMemoryLexicalIndex,
-  type DocumentChunk,
-  type RetrievalCandidate,
+
 } from '@ai-agent-study/retrieval'
 
 export function createHybridRetriever(chunks: DocumentChunk[], vectorResults: RetrievalCandidate[]) {

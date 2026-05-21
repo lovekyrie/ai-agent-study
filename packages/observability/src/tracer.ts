@@ -101,7 +101,7 @@ export class InMemoryTracer {
         acc.estimatedCost += span.usage?.estimatedCost ?? 0
         return acc
       },
-      { inputTokens: 0, outputTokens: 0, totalTokens: 0, estimatedCost: 0 }
+      { inputTokens: 0, outputTokens: 0, totalTokens: 0, estimatedCost: 0 },
     )
 
     return {
@@ -109,15 +109,15 @@ export class InMemoryTracer {
       status: run.status,
       durationMs: run.durationMs ?? 0,
       spans: run.spans.length,
-      errors: run.spans.filter((span) => span.status === 'error').length + (run.status === 'error' ? 1 : 0),
+      errors: run.spans.filter(span => span.status === 'error').length + (run.status === 'error' ? 1 : 0),
       usage,
     }
   }
 
   toEvalCases(category = 'trace'): EvalCase[] {
     return this.listRuns()
-      .filter((run) => run.input !== undefined && run.output !== undefined)
-      .map((run) => ({
+      .filter(run => run.input !== undefined && run.output !== undefined)
+      .map(run => ({
         id: `eval-${run.id}`,
         name: run.name,
         category,
@@ -133,13 +133,15 @@ export class InMemoryTracer {
 
   private requireRun(runId: string): AgentRun {
     const run = this.runs.get(runId)
-    if (!run) throw new Error(`Run ${runId} not found`)
+    if (!run)
+      throw new Error(`Run ${runId} not found`)
     return run
   }
 
   private requireSpan(spanId: string): TraceSpan {
     const span = this.spans.get(spanId)
-    if (!span) throw new Error(`Span ${spanId} not found`)
+    if (!span)
+      throw new Error(`Span ${spanId} not found`)
     return span
   }
 }

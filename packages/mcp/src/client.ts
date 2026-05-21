@@ -1,11 +1,11 @@
 import type {
-  MCPTool,
+  MCPPrompt,
   MCPResource,
   MCPResourceContent,
-  MCPPrompt,
+  MCPServerInfo,
+  MCPTool,
   MCPToolCallRequest,
   MCPToolCallResult,
-  MCPServerInfo,
 } from './types.js'
 
 export type TransportType = 'stdio' | 'http'
@@ -36,7 +36,8 @@ export class MCPClient {
       const headers = this.config.headers || {}
       try {
         const response = await fetch(`${url}/mcp/info`, { headers })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        if (!response.ok)
+          throw new Error(`HTTP ${response.status}`)
         const info = (await response.json()) as MCPServerInfo
 
         // Fetch tools
@@ -52,9 +53,10 @@ export class MCPClient {
         }
 
         return info
-      } catch (error) {
+      }
+      catch (error) {
         throw new Error(
-          `MCP connection failed: ${error instanceof Error ? error.message : String(error)}`
+          `MCP connection failed: ${error instanceof Error ? error.message : String(error)}`,
         )
       }
     }
@@ -76,7 +78,7 @@ export class MCPClient {
   }
 
   getTool(name: string): MCPTool | undefined {
-    return this.tools.find((t) => t.name === name)
+    return this.tools.find(t => t.name === name)
   }
 
   getResources(): MCPResource[] {
@@ -84,7 +86,7 @@ export class MCPClient {
   }
 
   getResource(uri: string): MCPResource | undefined {
-    return this.resources.find((r) => r.uri === uri)
+    return this.resources.find(r => r.uri === uri)
   }
 
   getPrompts(): MCPPrompt[] {
@@ -145,9 +147,9 @@ export class MCPClient {
 
   toLLMFormat(): Array<{
     type: 'function'
-    function: { name: string; description: string; parameters: MCPTool['inputSchema'] }
+    function: { name: string, description: string, parameters: MCPTool['inputSchema'] }
   }> {
-    return this.tools.map((tool) => ({
+    return this.tools.map(tool => ({
       type: 'function' as const,
       function: {
         name: tool.name,

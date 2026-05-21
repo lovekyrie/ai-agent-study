@@ -1,3 +1,18 @@
+import type {
+  ChatMessage,
+  ChatResponse,
+  LLMClient,
+} from '@ai-agent-study/llm-client'
+import type { ToolCallRequest, ToolDefinition } from '@ai-agent-study/tools'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import {
+  builtinTools,
+  readFileTool,
+
+  ToolRegistry,
+} from '@ai-agent-study/tools'
 /**
  * Stage 03 教程级测试。
  *
@@ -9,21 +24,6 @@
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
-import { mkdtemp, writeFile, rm } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import {
-  ToolRegistry,
-  builtinTools,
-  readFileTool,
-  type ToolCallRequest,
-  type ToolDefinition,
-} from '@ai-agent-study/tools'
-import type {
-  ChatMessage,
-  ChatResponse,
-  LLMClient,
-} from '@ai-agent-study/llm-client'
 
 // ============================================================================
 // 工具循环（教程模式 1）：协议契约
@@ -34,9 +34,10 @@ function fakeLLMClient(responses: ChatResponse[]) {
   const sentMessages: ChatMessage[][] = []
   const client = {
     chat: vi.fn(async (messages: ChatMessage[]) => {
-      sentMessages.push(messages.map((m) => ({ ...m })))
+      sentMessages.push(messages.map(m => ({ ...m })))
       const r = responses[i++]
-      if (!r) throw new Error('mock ran out of chat responses')
+      if (!r)
+        throw new Error('mock ran out of chat responses')
       return r
     }),
     stream: vi.fn(),
@@ -50,7 +51,7 @@ async function runToolLoop(
   client: LLMClient,
   registry: ToolRegistry,
   initialMessage: string,
-  maxIter = 5
+  maxIter = 5,
 ): Promise<ChatMessage[]> {
   const history: ChatMessage[] = [{ role: 'user', content: initialMessage }]
   const llmTools = registry.toLLMFormat()
@@ -70,7 +71,7 @@ async function runToolLoop(
       tool_calls: response.toolCalls,
     })
 
-    const requests: ToolCallRequest[] = response.toolCalls.map((tc) => ({
+    const requests: ToolCallRequest[] = response.toolCalls.map(tc => ({
       id: tc.id,
       name: tc.function.name,
       arguments: JSON.parse(tc.function.arguments || '{}'),
@@ -89,14 +90,14 @@ async function runToolLoop(
   return history
 }
 
-describe('Stage 03 教程模式 1: 多轮工具循环遵守 OpenAI 协议契约', () => {
+describe('stage 03 教程模式 1: 多轮工具循环遵守 OpenAI 协议契约', () => {
   it('assistant 消息保留 tool_calls，每个 call 都对应一条 role:tool 消息', async () => {
     const registry = new ToolRegistry()
     registry.register({
       name: 'echo',
       description: 'echo input',
       parameters: z.object({ text: z.string() }),
-      execute: (params) => ({ content: `echo:${(params as { text: string }).text}` }),
+      execute: params => ({ content: `echo:${(params as { text: string }).text}` }),
     })
 
     const { client } = fakeLLMClient([
@@ -115,15 +116,15 @@ describe('Stage 03 教程模式 1: 多轮工具循环遵守 OpenAI 协议契约'
 
     // 协议契约 1: 应有一条 assistant 消息携带 tool_calls
     const assistantWithCalls = history.find(
-      (m) => m.role === 'assistant' && (m.tool_calls?.length ?? 0) === 2
+      m => m.role === 'assistant' && (m.tool_calls?.length ?? 0) === 2,
     )
     expect(assistantWithCalls).toBeDefined()
 
     // 协议契约 2: 每个 call 都对应一条 role:'tool'，按 id 关联
-    const toolMessages = history.filter((m) => m.role === 'tool')
+    const toolMessages = history.filter(m => m.role === 'tool')
     expect(toolMessages).toHaveLength(2)
-    expect(toolMessages.map((m) => m.tool_call_id).sort()).toEqual(['c1', 'c2'])
-    expect(toolMessages.find((m) => m.tool_call_id === 'c1')?.content).toBe('echo:a')
+    expect(toolMessages.map(m => m.tool_call_id).sort()).toEqual(['c1', 'c2'])
+    expect(toolMessages.find(m => m.tool_call_id === 'c1')?.content).toBe('echo:a')
   })
 
   it('模型不再请求工具 → 循环立即结束', async () => {
@@ -132,8 +133,8 @@ describe('Stage 03 教程模式 1: 多轮工具循环遵守 OpenAI 协议契约'
     const history = await runToolLoop(client, registry, 'hi')
 
     // 只调用一次 chat，没有 role:'tool' 消息
-    expect(history.filter((m) => m.role === 'tool')).toHaveLength(0)
-    expect(history[history.length - 1]).toEqual({ role: 'assistant', content: '直接答' })
+    expect(history.filter(m => m.role === 'tool')).toHaveLength(0)
+    expect(history.at(-1)).toEqual({ role: 'assistant', content: '直接答' })
   })
 })
 
@@ -141,7 +142,7 @@ describe('Stage 03 教程模式 1: 多轮工具循环遵守 OpenAI 协议契约'
 // 三道防线（教程模式 2）
 // ============================================================================
 
-describe('Stage 03 教程模式 2: 防线 1 - zod 参数校验', () => {
+describe('stage 03 教程模式 2: 防线 1 - zod 参数校验', () => {
   it('错误的参数类型直接被 registry 截胡，不进入 tool.execute', async () => {
     const executor = vi.fn()
     const registry = new ToolRegistry()
@@ -172,7 +173,7 @@ describe('Stage 03 教程模式 2: 防线 1 - zod 参数校验', () => {
   })
 })
 
-describe('Stage 03 教程模式 2: 防线 2 - requiresApproval 审批门', () => {
+describe('stage 03 教程模式 2: 防线 2 - requiresApproval 审批门', () => {
   function makeDangerousTool(executor: () => unknown): ToolDefinition {
     return {
       name: 'danger',
@@ -224,7 +225,7 @@ describe('Stage 03 教程模式 2: 防线 2 - requiresApproval 审批门', () =>
   })
 })
 
-describe('Stage 03 教程模式 2: 防线 3 - 业务级防护（路径遍历）', () => {
+describe('stage 03 教程模式 2: 防线 3 - 业务级防护（路径遍历）', () => {
   let tempDir: string
   let outsideFile: string
 
@@ -278,7 +279,7 @@ describe('Stage 03 教程模式 2: 防线 3 - 业务级防护（路径遍历）'
 // LLM 协议序列化（教程模式 3）
 // ============================================================================
 
-describe('Stage 03 教程模式 3: 内置工具能转出合法的 OpenAI tools schema', () => {
+describe('stage 03 教程模式 3: 内置工具能转出合法的 OpenAI tools schema', () => {
   it('每个内置工具都有 type / function.name / function.parameters', () => {
     const registry = new ToolRegistry({ permissions: ['approve'] })
     registry.registerAll(builtinTools)
@@ -298,9 +299,8 @@ describe('Stage 03 教程模式 3: 内置工具能转出合法的 OpenAI tools s
     registry.registerAll(builtinTools)
     const readFileSchema = registry
       .toLLMFormat()
-      .find((s) => s.function.name === 'read_file')
+      .find(s => s.function.name === 'read_file')
 
     expect(readFileSchema?.function.description).toMatch(/requires approval/)
   })
 })
-

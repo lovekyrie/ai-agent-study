@@ -1,3 +1,11 @@
+import type { ChatMessage, ChatResponse, LLMClient, StreamChunk } from '@ai-agent-study/llm-client'
+import {
+
+  createLLMClient,
+
+  LLMError,
+
+} from '@ai-agent-study/llm-client'
 /**
  * Stage 01 教程级测试。
  *
@@ -8,14 +16,6 @@
  * 设计选择：用 duck-typed mock 替代 axios mock，这样 stage 不需要直接依赖 axios。
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import {
-  createLLMClient,
-  LLMError,
-  type ChatMessage,
-  type ChatResponse,
-  type LLMClient,
-  type StreamChunk,
-} from '@ai-agent-study/llm-client'
 
 /** 构造一个最小可用的 LLMClient mock，按预设脚本逐轮返回。 */
 function fakeClient(opts: {
@@ -33,7 +33,8 @@ function fakeClient(opts: {
       calls.push([...messages])
       sentOptions.push(options)
       const r = opts.chatResponses?.[chatI++]
-      if (!r) throw new Error('mock ran out of chat responses')
+      if (!r)
+        throw new Error('mock ran out of chat responses')
       return r
     }),
     stream: vi.fn(async function* () {
@@ -41,7 +42,8 @@ function fakeClient(opts: {
     }),
     jsonStructured: vi.fn(async () => {
       const r = opts.jsonResponses?.[jsonI++]
-      if (r === undefined) throw new Error('mock ran out of json responses')
+      if (r === undefined)
+        throw new Error('mock ran out of json responses')
       return r
     }),
   } as unknown as LLMClient
@@ -49,7 +51,7 @@ function fakeClient(opts: {
   return { client, calls, sentOptions }
 }
 
-describe('Stage 01 教程模式 1: 非流式 chat()', () => {
+describe('stage 01 教程模式 1: 非流式 chat()', () => {
   it('返回的字段与 README 中的示例一致（usage 是 camelCase）', async () => {
     const { client } = fakeClient({
       chatResponses: [
@@ -80,7 +82,7 @@ describe('Stage 01 教程模式 1: 非流式 chat()', () => {
   })
 })
 
-describe('Stage 01 教程模式 2: 流式 stream()', () => {
+describe('stage 01 教程模式 2: 流式 stream()', () => {
   it('async iterator 累加得到完整文本，最后会拿到 done=true', async () => {
     const { client } = fakeClient({
       streamChunks: [
@@ -93,7 +95,8 @@ describe('Stage 01 教程模式 2: 流式 stream()', () => {
     let collected = ''
     let sawDone = false
     for await (const chunk of client.stream([{ role: 'user', content: 'x' }])) {
-      if (chunk.done) sawDone = true
+      if (chunk.done)
+        sawDone = true
       else collected += chunk.delta
     }
     expect(collected).toBe('你好')
@@ -101,7 +104,7 @@ describe('Stage 01 教程模式 2: 流式 stream()', () => {
   })
 })
 
-describe('Stage 01 教程模式 3: jsonStructured()', () => {
+describe('stage 01 教程模式 3: jsonStructured()', () => {
   it('返回的对象会被断言到泛型，调用方拿到的就是结构化数据', async () => {
     const { client } = fakeClient({
       jsonResponses: [{ language: 'ts', features: ['types'] }],
@@ -117,7 +120,7 @@ describe('Stage 01 教程模式 3: jsonStructured()', () => {
   })
 })
 
-describe('Stage 01 工厂 createLLMClient', () => {
+describe('stage 01 工厂 createLLMClient', () => {
   const ORIGINAL_ENV = { ...process.env }
   afterEach(() => {
     process.env = { ...ORIGINAL_ENV }
@@ -134,7 +137,7 @@ describe('Stage 01 工厂 createLLMClient', () => {
   })
 })
 
-describe('Stage 01 错误模型: LLMError', () => {
+describe('stage 01 错误模型: LLMError', () => {
   it('保留 status 让上层做差异化处理（教程中强调 401 不重试）', () => {
     const error = new LLMError('unauthorized', 401)
     expect(error.name).toBe('LLMError')

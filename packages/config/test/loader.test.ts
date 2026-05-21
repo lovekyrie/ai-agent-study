@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { loadConfig, getConfig, resetConfigCache } from '../src/loader.js'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { getConfig, loadConfig, resetConfigCache } from '../src/loader.js'
 import { applyTestEnv, clearTestEnv } from '../src/testing.js'
 
-describe('Config Loader', () => {
+describe('config Loader', () => {
   beforeEach(() => {
     resetConfigCache()
     applyTestEnv()

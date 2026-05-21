@@ -1,16 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { ChatMessage } from '../src/types.js'
 import { Readable } from 'node:stream'
 import axios from 'axios'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LLMClient } from '../src/client.js'
 import { LLMError, toReadableError } from '../src/errors.js'
-import type { ChatMessage } from '../src/types.js'
 
 vi.mock('axios')
 const mockedAxios = vi.mocked(axios)
 
 function createClientWithPostMock(
   postMock: ReturnType<typeof vi.fn>,
-  overrides?: Partial<{ maxRetries: number }>
+  overrides?: Partial<{ maxRetries: number }>,
 ) {
   mockedAxios.create.mockReturnValue({
     post: postMock,
@@ -25,7 +25,7 @@ function createClientWithPostMock(
   })
 }
 
-describe('LLMClient.chat', () => {
+describe('lLMClient.chat', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // axios.isAxiosError 在测试里需要单独 mock
@@ -76,11 +76,11 @@ describe('LLMClient.chat', () => {
     const client = createClientWithPostMock(postMock, { maxRetries: 2 })
 
     // 替换 sleep 避免真实等待
-    vi.spyOn(global, 'setTimeout').mockImplementation(
+    vi.spyOn(globalThis, 'setTimeout').mockImplementation(
       ((cb: () => void) => {
         cb()
         return 0 as unknown as NodeJS.Timeout
-      }) as never
+      }) as never,
     )
 
     const response = await client.chat([{ role: 'user', content: 'x' }])
@@ -115,7 +115,7 @@ describe('LLMClient.chat', () => {
   })
 })
 
-describe('LLMClient.stream', () => {
+describe('lLMClient.stream', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockedAxios.isAxiosError = ((err: unknown) =>
@@ -135,7 +135,8 @@ describe('LLMClient.stream', () => {
 
     const chunks: string[] = []
     for await (const c of client.stream([{ role: 'user', content: 'hi' }])) {
-      if (!c.done) chunks.push(c.delta)
+      if (!c.done)
+        chunks.push(c.delta)
     }
     expect(chunks.join('')).toBe('Hello')
   })
@@ -150,18 +151,21 @@ describe('LLMClient.stream', () => {
     const client = createClientWithPostMock(postMock)
 
     let out = ''
-    for await (const c of client.stream([])) if (!c.done) out += c.delta
+    for await (const c of client.stream([])) {
+      if (!c.done)
+        out += c.delta
+    }
     expect(out).toBe('x')
   })
 })
 
-describe('SSE static parser', () => {
+describe('sSE static parser', () => {
   it('parses [DONE]', () => {
     expect(LLMClient.parseSSE('data: [DONE]')).toEqual({ delta: '', done: true })
   })
   it('parses content delta', () => {
     expect(
-      LLMClient.parseSSE('data: {"choices":[{"delta":{"content":"hello"}}]}')
+      LLMClient.parseSSE('data: {"choices":[{"delta":{"content":"hello"}}]}'),
     ).toEqual({ delta: 'hello', done: false })
   })
   it('returns null for invalid line', () => {
@@ -169,12 +173,12 @@ describe('SSE static parser', () => {
   })
   it('tolerates "data:" without space', () => {
     expect(
-      LLMClient.parseSSE('data:{"choices":[{"delta":{"content":"a"}}]}')
+      LLMClient.parseSSE('data:{"choices":[{"delta":{"content":"a"}}]}'),
     ).toEqual({ delta: 'a', done: false })
   })
 })
 
-describe('LLMError / toReadableError', () => {
+describe('lLMError / toReadableError', () => {
   it('preserves status and name', () => {
     const error = new LLMError('Test error', 500)
     expect(error.name).toBe('LLMError')

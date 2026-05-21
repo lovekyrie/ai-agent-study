@@ -1,4 +1,4 @@
-import { InMemoryVectorStore, CodeRetriever } from './retrieval.js'
+import { CodeRetriever, InMemoryVectorStore } from './retrieval.js'
 
 async function main() {
   console.log('=== Codebase Agent Demo ===\n')

@@ -1,16 +1,18 @@
-import {
-  createLLMClient,
-  type LLMClient,
-  type ChatMessage,
-} from '@ai-agent-study/llm-client'
-import { ToolRegistry, type ToolDefinition, type ToolCallRequest } from '@ai-agent-study/tools'
+import type { ChatMessage, LLMClient } from '@ai-agent-study/llm-client'
+import type { ToolCallRequest, ToolDefinition } from '@ai-agent-study/tools'
 import type {
   AgentConfig,
-  AgentStep,
   AgentResponse,
-  ExecutionTrace,
   AgentStatus,
+  AgentStep,
+  ExecutionTrace,
 } from './types.js'
+import {
+
+  createLLMClient,
+
+} from '@ai-agent-study/llm-client'
+import { ToolRegistry } from '@ai-agent-study/tools'
 
 const DEFAULT_SYSTEM_PROMPT = `你是一个智能助手，可以通过工具调用来完成多步任务。
 
@@ -36,6 +38,7 @@ export class Agent {
     systemPrompt: string
     permissions: string[]
   }
+
   private readonly providedClient: LLMClient | undefined
   private cachedClient: LLMClient | undefined
   private readonly onStep?: (step: AgentStep) => void
@@ -60,8 +63,10 @@ export class Agent {
 
   /** 惰性获取 LLM 客户端，避免 import Agent 即触发 env 读取 */
   private getClient(): LLMClient {
-    if (this.providedClient) return this.providedClient
-    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    if (this.providedClient)
+      return this.providedClient
+    if (!this.cachedClient)
+      this.cachedClient = createLLMClient()
     return this.cachedClient
   }
 
@@ -123,7 +128,7 @@ export class Agent {
         })
 
         // 2) 并行执行所有 tool_calls
-        const requests: ToolCallRequest[] = response.toolCalls.map((tc) => ({
+        const requests: ToolCallRequest[] = response.toolCalls.map(tc => ({
           id: tc.id,
           name: tc.function.name,
           arguments: safeParseJson(tc.function.arguments),
@@ -152,10 +157,12 @@ export class Agent {
         status = 'max_iterations'
         finalMessage = `任务在 ${iterations} 轮后仍未完成。`
       }
-    } catch (error) {
-      const lastStep = steps[steps.length - 1]
+    }
+    catch (error) {
+      const lastStep = steps.at(-1)
       const errMsg = error instanceof Error ? error.message : String(error)
-      if (lastStep) lastStep.error = errMsg
+      if (lastStep)
+        lastStep.error = errMsg
       status = 'error'
       finalMessage = `执行出错: ${errMsg}`
     }
@@ -173,10 +180,12 @@ export class Agent {
 }
 
 function safeParseJson(raw: string): Record<string, unknown> {
-  if (!raw || raw.trim() === '') return {}
+  if (!raw || raw.trim() === '')
+    return {}
   try {
     return JSON.parse(raw) as Record<string, unknown>
-  } catch {
+  }
+  catch {
     return { __raw: raw }
   }
 }

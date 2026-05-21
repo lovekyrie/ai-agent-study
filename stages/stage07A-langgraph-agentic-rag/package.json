@@ -1,8 +1,8 @@
 {
   "name": "stage07a-langgraph-agentic-rag",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 07A: LangGraph-style Agentic RAG state graph",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

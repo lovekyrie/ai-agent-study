@@ -1,14 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { Logger, type LogContext } from '@ai-agent-study/logger'
+import type { LogContext } from '@ai-agent-study/logger'
 import {
-  loadConfig,
-  getConfig,
-  resetConfigCache,
   applyTestEnv,
   clearTestEnv,
+  getConfig,
+  loadConfig,
+  resetConfigCache,
 } from '@ai-agent-study/config'
+import { Logger } from '@ai-agent-study/logger'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-describe('Stage 0: Engineering Foundation', () => {
+describe('stage 0: Engineering Foundation', () => {
   beforeEach(() => {
     resetConfigCache()
     applyTestEnv()
@@ -19,7 +20,7 @@ describe('Stage 0: Engineering Foundation', () => {
     clearTestEnv()
   })
 
-  describe('Config Integration', () => {
+  describe('config Integration', () => {
     it('should load config and access all sections', () => {
       const config = getConfig()
 
@@ -47,7 +48,7 @@ describe('Stage 0: Engineering Foundation', () => {
     })
   })
 
-  describe('Logger Integration', () => {
+  describe('logger Integration', () => {
     it('should create logger with config log level', () => {
       const config = getConfig()
       const logger = new Logger({

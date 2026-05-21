@@ -1,4 +1,4 @@
-import { MemoryDocumentLoader, ingestDocuments } from '@ai-agent-study/retrieval'
+import { ingestDocuments, MemoryDocumentLoader } from '@ai-agent-study/retrieval'
 import { compareHybridStrategies } from './index.js'
 
 const docs = await new MemoryDocumentLoader([

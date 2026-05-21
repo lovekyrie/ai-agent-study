@@ -1,10 +1,10 @@
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 import { createLLMClient } from '@ai-agent-study/llm-client'
 
 // Types
 export type WorkflowStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed' | 'skipped'
-export type TaskResult = {
+export interface TaskResult {
   success: boolean
   output?: unknown
   error?: string
@@ -46,7 +46,7 @@ export interface WorkflowNode {
   name: string
   config: Record<string, unknown>
   next?: string
-  branches?: { condition: string; next: string }[]
+  branches?: { condition: string, next: string }[]
 }
 
 export interface WorkflowEdge {
@@ -162,7 +162,7 @@ export class WorkflowOrchestrator extends EventEmitter {
     this.emit('workflow-started', instance)
 
     // Start execution asynchronously
-    this.executeWorkflow(instanceId).catch(error => {
+    this.executeWorkflow(instanceId).catch((error) => {
       this.emit('workflow-error', { instanceId, error: error.message })
     })
 
@@ -171,7 +171,8 @@ export class WorkflowOrchestrator extends EventEmitter {
 
   private async executeWorkflow(instanceId: string): Promise<void> {
     const instance = this.instances.get(instanceId)
-    if (!instance) return
+    if (!instance)
+      return
 
     const workflow = this.workflows.get(instance.definitionId)
     if (!workflow) {
@@ -211,20 +212,23 @@ export class WorkflowOrchestrator extends EventEmitter {
             this.emit('workflow-completed', instance)
             break
           }
-        } else {
+        }
+        else {
           // No next node, check if it's the end
           if (node.type === 'end') {
             instance.status = 'completed'
             instance.completedAt = new Date()
             this.emit('workflow-completed', instance)
-          } else {
+          }
+          else {
             instance.status = 'failed'
             instance.error = 'Workflow ended without end node'
           }
           break
         }
       }
-    } catch (error) {
+    }
+    catch (error) {
       instance.status = 'failed'
       instance.error = error instanceof Error ? error.message : String(error)
       this.emit('workflow-error', { instanceId, error: instance.error })
@@ -233,7 +237,7 @@ export class WorkflowOrchestrator extends EventEmitter {
     this.emit('workflow-ended', instance)
   }
 
-  private async executeNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean; nextNodeId?: string; error?: string }> {
+  private async executeNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean, nextNodeId?: string, error?: string }> {
     this.emit('node-execution-start', { instanceId: instance.id, nodeId: node.id })
 
     try {
@@ -262,12 +266,13 @@ export class WorkflowOrchestrator extends EventEmitter {
         default:
           return { success: false, error: `Unknown node type: ${node.type}` }
       }
-    } catch (error) {
+    }
+    catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }
   }
 
-  private async executeTaskNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean; nextNodeId?: string; error?: string }> {
+  private async executeTaskNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean, nextNodeId?: string, error?: string }> {
     const handler = this.taskHandlers.get(node.config.taskType as string)
     if (!handler) {
       return { success: false, error: `No handler for task type: ${node.config.taskType}` }
@@ -307,7 +312,7 @@ export class WorkflowOrchestrator extends EventEmitter {
     return { success: result.success, nextNodeId: node.next }
   }
 
-  private async executeApprovalNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean; nextNodeId?: string; error?: string }> {
+  private async executeApprovalNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean, nextNodeId?: string, error?: string }> {
     const task: Task = {
       id: `task-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       name: node.name,
@@ -340,7 +345,7 @@ export class WorkflowOrchestrator extends EventEmitter {
     return { success: true, nextNodeId: node.next }
   }
 
-  private async executeConditionNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean; nextNodeId?: string; error?: string }> {
+  private async executeConditionNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean, nextNodeId?: string, error?: string }> {
     const condition = node.config.condition as string
 
     // Use LLM to evaluate the condition in context
@@ -363,20 +368,23 @@ Respond with JSON: { "result": true/false, "reasoning": "..." }`
 
       this.emit('condition-evaluated', { instanceId: instance.id, nodeId: node.id, result: parsed.result })
       return { success: true, nextNodeId }
-    } catch {
+    }
+    catch {
       return { success: false, error: 'Failed to evaluate condition' }
     }
   }
 
-  private async executeParallelNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean; nextNodeId?: string; error?: string }> {
+  private async executeParallelNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean, nextNodeId?: string, error?: string }> {
     // Execute multiple branches in parallel
-    const branchPromises = (node.branches || []).map(async branch => {
+    const branchPromises = (node.branches || []).map(async (branch) => {
       const branchNodeId = branch.next
-      if (!branchNodeId) return { success: false, error: 'No next node for branch' }
+      if (!branchNodeId)
+        return { success: false, error: 'No next node for branch' }
 
       const workflow = this.workflows.get(instance.definitionId)
       const branchNode = workflow?.nodes.find(n => n.id === branchNodeId)
-      if (!branchNode) return { success: false, error: 'Branch node not found' }
+      if (!branchNode)
+        return { success: false, error: 'Branch node not found' }
 
       return this.executeNode(branchNode, instance)
     })
@@ -387,7 +395,7 @@ Respond with JSON: { "result": true/false, "reasoning": "..." }`
     return { success: allSuccess, nextNodeId: node.next }
   }
 
-  private async executeAgentNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean; nextNodeId?: string; error?: string }> {
+  private async executeAgentNode(node: WorkflowNode, instance: WorkflowInstance): Promise<{ success: boolean, nextNodeId?: string, error?: string }> {
     const agentId = node.config.agentId as string
     const task = node.config.task as string
     const agent = this.agents.get(agentId)
@@ -427,7 +435,8 @@ Provide your response as JSON:
 
       this.emit('agent-task-complete', { instanceId: instance.id, agentId, success: parsed.success })
       return { success: parsed.success, nextNodeId: node.next }
-    } catch (error) {
+    }
+    catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }
   }
@@ -440,10 +449,12 @@ Provide your response as JSON:
   // Approval actions
   async approveTask(instanceId: string, taskId: string, approver: string, comment?: string): Promise<boolean> {
     const instance = this.instances.get(instanceId)
-    if (!instance) return false
+    if (!instance)
+      return false
 
     const task = instance.tasks.find(t => t.id === taskId)
-    if (!task || task.type !== 'approval') return false
+    if (!task || task.type !== 'approval')
+      return false
 
     task.status = 'completed'
     task.approvedBy = approver
@@ -457,10 +468,12 @@ Provide your response as JSON:
 
   async rejectTask(instanceId: string, taskId: string, rejector: string, reason: string): Promise<boolean> {
     const instance = this.instances.get(instanceId)
-    if (!instance) return false
+    if (!instance)
+      return false
 
     const task = instance.tasks.find(t => t.id === taskId)
-    if (!task || task.type !== 'approval') return false
+    if (!task || task.type !== 'approval')
+      return false
 
     task.status = 'failed'
     task.approvedBy = rejector
@@ -490,7 +503,8 @@ Provide your response as JSON:
 
   async cancelInstance(id: string): Promise<boolean> {
     const instance = this.instances.get(id)
-    if (!instance) return false
+    if (!instance)
+      return false
 
     instance.status = 'cancelled'
     instance.completedAt = new Date()
@@ -501,7 +515,8 @@ Provide your response as JSON:
   // Context management
   updateContext(instanceId: string, updates: Record<string, unknown>): boolean {
     const instance = this.instances.get(instanceId)
-    if (!instance) return false
+    if (!instance)
+      return false
 
     instance.context = { ...instance.context, ...updates }
     instance.updatedAt = new Date()

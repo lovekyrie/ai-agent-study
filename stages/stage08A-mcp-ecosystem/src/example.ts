@@ -16,7 +16,7 @@ const tool = mcpToolToDefinition(
       return { content: [{ type: 'text', text: `read:${args.path}` }] }
     },
   },
-  { requiresApproval: true }
+  { requiresApproval: true },
 )
 
 const registry = new ToolRegistry({ permissions: ['approve'] }).register(tool)

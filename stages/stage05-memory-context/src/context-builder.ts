@@ -1,11 +1,11 @@
 import type { ChatMessage } from '@ai-agent-study/llm-client'
-import type { LongTermStore, MemoryEntry } from '@ai-agent-study/memory'
-import { ShortTermMemory } from '@ai-agent-study/memory'
+import type { LongTermStore, MemoryEntry, ShortTermMemory } from '@ai-agent-study/memory'
+import type { BudgetOptions } from './token-budget.js'
 import {
+
   defaultEstimator,
   enforceBudget,
   estimateMessages,
-  type BudgetOptions,
 } from './token-budget.js'
 
 export interface BuildContextOptions {
@@ -79,15 +79,15 @@ export async function buildContext(options: BuildContextOptions): Promise<BuildC
   if (options.longTermStore && options.retrievalQuery) {
     const retrieved = await options.longTermStore.search(
       options.retrievalQuery,
-      options.longTermTopK ?? 3
+      options.longTermTopK ?? 3,
     )
     retrievedCount = retrieved.length
     if (retrieved.length > 0) {
       messages.push({
         role: 'system',
         content:
-          '[相关历史片段]\n' +
-          retrieved.map((e, i) => `${i + 1}. ${e.content}`).join('\n'),
+          `[相关历史片段]\n${
+            retrieved.map((e, i) => `${i + 1}. ${e.content}`).join('\n')}`,
       })
     }
   }

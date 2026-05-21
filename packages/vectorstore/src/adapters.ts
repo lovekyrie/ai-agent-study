@@ -1,10 +1,11 @@
-import { ChromaClient, type Collection, type IEmbeddingFunction, IncludeEnum } from 'chromadb'
-import { InMemoryCollection } from './memory.js'
+import type { Collection, IEmbeddingFunction } from 'chromadb'
 import type { CollectionStats, ICollection, SearchOptions, SearchResult, VectorDocument } from './types.js'
+import { ChromaClient, IncludeEnum } from 'chromadb'
+import { InMemoryCollection } from './memory.js'
 
 export interface VectorStoreAdapter extends ICollection {
-  upsert(documents: VectorDocument[]): Promise<void>
-  deleteByFilter(filter: Record<string, string | number | boolean>): Promise<void>
+  upsert: (documents: VectorDocument[]) => Promise<void>
+  deleteByFilter: (filter: Record<string, string | number | boolean>) => Promise<void>
 }
 
 export class InMemoryVectorStoreAdapter implements VectorStoreAdapter {
@@ -28,7 +29,7 @@ export class InMemoryVectorStoreAdapter implements VectorStoreAdapter {
 
   async deleteByFilter(filter: Record<string, string | number | boolean>): Promise<void> {
     const results = await this.collection.search('', { topK: Number.MAX_SAFE_INTEGER, filter, minScore: 0 })
-    await this.collection.delete(results.map((result) => result.document.id))
+    await this.collection.delete(results.map(result => result.document.id))
   }
 
   async update(id: string, document: Partial<VectorDocument>): Promise<void> {
@@ -65,13 +66,14 @@ export class ChromaVectorStore implements VectorStoreAdapter {
   }
 
   async upsert(documents: VectorDocument[]): Promise<void> {
-    if (documents.length === 0) return
+    if (documents.length === 0)
+      return
     const collection = await this.getCollection()
     await collection.upsert({
-      ids: documents.map((doc) => doc.id),
-      documents: documents.map((doc) => doc.content),
-      embeddings: documents.every((doc) => doc.embedding) ? documents.map((doc) => doc.embedding as number[]) : undefined,
-      metadatas: documents.map((doc) => doc.metadata ?? {}),
+      ids: documents.map(doc => doc.id),
+      documents: documents.map(doc => doc.content),
+      embeddings: documents.every(doc => doc.embedding) ? documents.map(doc => doc.embedding as number[]) : undefined,
+      metadatas: documents.map(doc => doc.metadata ?? {}),
     })
   }
 
@@ -100,11 +102,12 @@ export class ChromaVectorStore implements VectorStoreAdapter {
           score: 1 / (1 + Math.max(0, distance)),
         }
       })
-      .filter((result) => result.score >= (options?.minScore ?? 0))
+      .filter(result => result.score >= (options?.minScore ?? 0))
   }
 
   async delete(ids: string[]): Promise<void> {
-    if (ids.length === 0) return
+    if (ids.length === 0)
+      return
     const collection = await this.getCollection()
     await collection.delete({ ids })
   }

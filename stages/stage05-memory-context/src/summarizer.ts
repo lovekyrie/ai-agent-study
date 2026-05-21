@@ -45,7 +45,7 @@ const SUMMARY_PREFIX = '[历史摘要] '
 export async function summarizeHistory(
   messages: ChatMessage[],
   client: LLMClient,
-  options: SummarizeOptions = {}
+  options: SummarizeOptions = {},
 ): Promise<SummarizeResult> {
   const {
     keepRecent = 4,
@@ -75,7 +75,7 @@ export async function summarizeHistory(
   const recent = rest.slice(rest.length - keepRecent)
 
   const corpus = toSummarize
-    .map((m) => `[${m.role}] ${m.content}`)
+    .map(m => `[${m.role}] ${m.content}`)
     .join('\n')
 
   const userContent = previousSummary
@@ -87,7 +87,7 @@ export async function summarizeHistory(
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userContent },
     ],
-    { maxTokens }
+    { maxTokens },
   )
 
   const summary = response.content.trim()

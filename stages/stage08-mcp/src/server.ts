@@ -1,7 +1,7 @@
+import type { MCPPrompt, MCPResource, MCPServerConfig, MCPTool } from './types.js'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
-import type { MCPPrompt, MCPResource, MCPServerConfig, MCPTool } from './types.js'
 
 /**
  * 业务面的 MCP Server。
@@ -30,18 +30,18 @@ export class MCPServer {
     return {
       name: this.config.name,
       version: this.config.version,
-      tools: this.config.tools.map((t) => ({
+      tools: this.config.tools.map(t => ({
         name: t.name,
         description: t.description,
         inputSchema: t.inputSchema,
       })),
-      resources: this.config.resources.map((r) => ({
+      resources: this.config.resources.map(r => ({
         uri: r.uri,
         name: r.name,
         description: r.description,
         mimeType: r.mimeType,
       })),
-      prompts: this.config.prompts.map((p) => ({
+      prompts: this.config.prompts.map(p => ({
         name: p.name,
         description: p.description,
         arguments: p.arguments,
@@ -51,7 +51,8 @@ export class MCPServer {
 
   async handleToolCall(name: string, params: Record<string, unknown>): Promise<unknown> {
     const tool = this.tools.get(name)
-    if (!tool) throw new Error(`Tool not found: ${name}`)
+    if (!tool)
+      throw new Error(`Tool not found: ${name}`)
     return tool.handler(params)
   }
 
@@ -105,7 +106,8 @@ export class MCPServer {
                   ? (result as Record<string, unknown>)
                   : { value: result },
             }
-          } catch (error) {
+          }
+          catch (error) {
             return {
               isError: true,
               content: [
@@ -116,7 +118,7 @@ export class MCPServer {
               ],
             }
           }
-        }
+        },
       )
     }
 
@@ -136,7 +138,7 @@ export class MCPServer {
               text: resource.content,
             },
           ],
-        })
+        }),
       )
     }
 
@@ -152,7 +154,7 @@ export class MCPServer {
           description: prompt.description,
           argsSchema,
         },
-        async (args) => ({
+        async args => ({
           messages: [
             {
               role: 'user' as const,
@@ -162,7 +164,7 @@ export class MCPServer {
               },
             },
           ],
-        })
+        }),
       )
     }
 
@@ -180,7 +182,7 @@ export function createMCPTool<T extends Record<string, unknown>>(
   name: string,
   description: string,
   inputSchema: T,
-  handler: (params: T) => Promise<unknown>
+  handler: (params: T) => Promise<unknown>,
 ): MCPTool {
   return {
     name,
@@ -195,7 +197,7 @@ export function createMCPResource(
   name: string,
   description: string,
   mimeType: string,
-  content: string
+  content: string,
 ): MCPResource {
   return { uri, name, description, mimeType, content }
 }
@@ -204,7 +206,7 @@ export function createMCPPrompt(
   name: string,
   description: string,
   template: string,
-  arguments_?: MCPPrompt['arguments']
+  arguments_?: MCPPrompt['arguments'],
 ): MCPPrompt {
   return { name, description, arguments: arguments_, template }
 }

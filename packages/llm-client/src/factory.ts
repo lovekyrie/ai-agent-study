@@ -1,17 +1,21 @@
-import { LLMClient } from './client.js'
 import type { LLMConfig } from './types.js'
+import { LLMClient } from './client.js'
 
 function parseFloatSafe(value: string | undefined, fallback: number, key: string): number {
-  if (value === undefined || value === '') return fallback
+  if (value === undefined || value === '')
+    return fallback
   const n = Number.parseFloat(value)
-  if (!Number.isFinite(n)) throw new Error(`${key} must be a valid number, got: ${value}`)
+  if (!Number.isFinite(n))
+    throw new Error(`${key} must be a valid number, got: ${value}`)
   return n
 }
 
 function parseIntSafe(value: string | undefined, fallback: number, key: string): number {
-  if (value === undefined || value === '') return fallback
+  if (value === undefined || value === '')
+    return fallback
   const n = Number.parseInt(value, 10)
-  if (!Number.isFinite(n)) throw new Error(`${key} must be a valid integer, got: ${value}`)
+  if (!Number.isFinite(n))
+    throw new Error(`${key} must be a valid integer, got: ${value}`)
   return n
 }
 
@@ -53,7 +57,7 @@ export function createLLMClientFromConfig(
     temperature?: number
     maxTokens?: number
   },
-  overrides?: Partial<LLMConfig>
+  overrides?: Partial<LLMConfig>,
 ): LLMClient {
   return new LLMClient({
     apiKey: overrides?.apiKey ?? llmConfig.apiKey,

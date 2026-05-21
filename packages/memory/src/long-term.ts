@@ -1,10 +1,10 @@
 import type { MemoryEntry } from './types.js'
 
 export interface LongTermStore {
-  add(entry: MemoryEntry): Promise<void>
-  search(query: string, topK?: number): Promise<MemoryEntry[]>
-  delete(id: string): Promise<boolean>
-  clear(): Promise<void>
+  add: (entry: MemoryEntry) => Promise<void>
+  search: (query: string, topK?: number) => Promise<MemoryEntry[]>
+  delete: (id: string) => Promise<boolean>
+  clear: () => Promise<void>
 }
 
 /**
@@ -16,7 +16,7 @@ export class InMemoryLongTerm implements LongTermStore {
 
   async add(entry: MemoryEntry): Promise<void> {
     // Avoid duplicates
-    const exists = this.entries.find((e) => e.id === entry.id)
+    const exists = this.entries.find(e => e.id === entry.id)
     if (!exists) {
       this.entries.push(entry)
     }
@@ -29,10 +29,12 @@ export class InMemoryLongTerm implements LongTermStore {
       let score = 0
       if (content.includes(q)) {
         score = 1.0
-      } else {
+      }
+      else {
         const words = q.split(/\s+/)
         for (const word of words) {
-          if (content.includes(word)) score += 0.3
+          if (content.includes(word))
+            score += 0.3
         }
       }
       score += (entry.importance ?? 0) * 0.5
@@ -40,15 +42,16 @@ export class InMemoryLongTerm implements LongTermStore {
     })
 
     return scored
-      .filter((s) => s.score > 0)
+      .filter(s => s.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, topK)
-      .map((s) => s.entry)
+      .map(s => s.entry)
   }
 
   async delete(id: string): Promise<boolean> {
-    const index = this.entries.findIndex((e) => e.id === id)
-    if (index === -1) return false
+    const index = this.entries.findIndex(e => e.id === id)
+    if (index === -1)
+      return false
     this.entries.splice(index, 1)
     return true
   }

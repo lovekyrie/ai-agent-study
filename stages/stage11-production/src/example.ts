@@ -1,11 +1,11 @@
 import {
   AppServer,
-  logger,
-  TracingService,
-  MetricsCollector,
   JobQueue,
-  SessionManager,
+  logger,
+  MetricsCollector,
   RateLimiter,
+  SessionManager,
+  TracingService,
 } from './index.js'
 
 async function appServerDemo() {
@@ -30,7 +30,7 @@ async function appServerDemo() {
   }))
 
   // User info endpoint (protected)
-  server.get('/me', async (req) => ({
+  server.get('/me', async req => ({
     statusCode: 200,
     headers: {},
     body: { userId: req.context?.userId },
@@ -56,7 +56,7 @@ async function tracingDemo() {
       console.log('Processing with span:', span.id)
       // Simulate work
       return { result: 'success', output: 'Hello!' }
-    }
+    },
   )
 
   console.log('Span result:', result)
@@ -174,7 +174,8 @@ async function main() {
     await rateLimiterDemo()
     await queueDemo()
     console.log('\n=== Demo Complete ===')
-  } catch (error) {
+  }
+  catch (error) {
     logger.error('Demo failed', error as Error)
   }
 }

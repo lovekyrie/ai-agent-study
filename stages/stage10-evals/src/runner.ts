@@ -1,5 +1,4 @@
-import { GoldenDataset } from './dataset.js'
-import { LLMJudge, RuleBasedEvaluator, ToolCallingEvaluator } from './evaluators.js'
+import type { GoldenDataset } from './dataset.js'
 import type {
   EvalCase,
   EvalOutput,
@@ -8,6 +7,7 @@ import type {
   LLMJudgeConfig,
   RunOptions,
 } from './types.js'
+import { LLMJudge, RuleBasedEvaluator, ToolCallingEvaluator } from './evaluators.js'
 
 export class EvalRunner {
   private goldenDataset: GoldenDataset
@@ -54,7 +54,8 @@ export class EvalRunner {
         output.content = result.content
         output.metadata = result.metadata
         output.toolCalls = result.toolCalls
-      } catch (error) {
+      }
+      catch (error) {
         output.content = `Error: ${error instanceof Error ? error.message : String(error)}`
       }
     }
@@ -72,7 +73,8 @@ export class EvalRunner {
       passed = toolResult.f1 >= 0.8
       score = toolResult.f1
       details = `Tool F1: ${toolResult.f1.toFixed(2)}, Missed: ${toolResult.missedTools.join(', ') || 'none'}`
-    } else {
+    }
+    else {
       const ruleResult = this.ruleEvaluator.evaluate(output, testCase.expected)
       passed = ruleResult.passed
       score = ruleResult.score
@@ -99,26 +101,27 @@ export class EvalRunner {
 
   private buildSuite(results: EvalResult[]): EvalSuite {
     const total = results.length
-    const passed = results.filter((r) => r.passed).length
+    const passed = results.filter(r => r.passed).length
     const failed = total - passed
     const totalLatency = results.reduce((sum, r) => sum + r.latencyMs, 0)
     const totalCost = results.reduce((sum, r) => sum + r.cost, 0)
 
-    const categoryBreakdown: Record<string, { total: number; passed: number; passRate: number }> = {}
+    const categoryBreakdown: Record<string, { total: number, passed: number, passRate: number }> = {}
 
     const byCategory = new Map<string, EvalResult[]>()
     for (const result of results) {
       const testCase = this.goldenDataset.get(result.caseId)
       if (testCase) {
         const cat = testCase.category
-        if (!byCategory.has(cat)) byCategory.set(cat, [])
+        if (!byCategory.has(cat))
+          byCategory.set(cat, [])
         byCategory.get(cat)!.push(result)
       }
     }
 
     for (const [cat, catResults] of byCategory) {
       const catTotal = catResults.length
-      const catPassed = catResults.filter((r) => r.passed).length
+      const catPassed = catResults.filter(r => r.passed).length
       categoryBreakdown[cat] = {
         total: catTotal,
         passed: catPassed,

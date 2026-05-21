@@ -1,16 +1,16 @@
 {
   "name": "@ai-agent-study/memory",
+  "type": "module",
   "version": "0.1.0",
   "description": "记忆管理，支持短期记忆和长期记忆",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

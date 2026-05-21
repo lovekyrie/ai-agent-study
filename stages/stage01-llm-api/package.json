@@ -1,8 +1,8 @@
 {
   "name": "stage01-llm-api",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 01: LLM API 基础 — 多模型封装 + 流式响应 + 结构化输出",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

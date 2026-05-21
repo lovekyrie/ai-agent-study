@@ -16,7 +16,7 @@ export class GoldenDataset {
   }
 
   listByCategory(category: EvalCase['category']): EvalCase[] {
-    return this.list().filter((c) => c.category === category)
+    return this.list().filter(c => c.category === category)
   }
 
   size(): number {

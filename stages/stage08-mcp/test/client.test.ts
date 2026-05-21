@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MCPClient, MCPHTTPClient } from '../src/client.js'
 
 /* ─────────────────── MCPClient (SDK-backed) ─────────────────── */
-describe('MCPClient', () => {
+describe('mCPClient', () => {
   it('throws when calling listTools before connect', async () => {
     const client = new MCPClient({ serverName: 'test', transport: 'stdio', command: 'echo' })
     await expect(client.listTools()).rejects.toThrow('Not connected')
@@ -25,7 +25,7 @@ describe('MCPClient', () => {
 })
 
 /* ─────────────────── MCPHTTPClient (fetch-based) ─────────────────── */
-describe('MCPHTTPClient', () => {
+describe('mCPHTTPClient', () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {

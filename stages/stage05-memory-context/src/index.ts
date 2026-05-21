@@ -7,35 +7,6 @@
 //   - context-builder: 把所有上下文源拼成最终的 ChatMessage[]
 //   - session: 高层容器，串起以上所有能力
 
-// —— 重新导出 packages/memory 的原语 ——
-export {
-  ShortTermMemory,
-  InMemoryLongTerm,
-  type LongTermStore,
-  type MemoryEntry,
-  type MemoryConfig,
-} from '@ai-agent-study/memory'
-
-// —— Token 预算与估算 ——
-export {
-  defaultEstimator,
-  cjkEstimator,
-  estimateMessage,
-  estimateMessages,
-  enforceBudget,
-  type TokenEstimator,
-  type BudgetOptions,
-  type BudgetResult,
-} from './token-budget.js'
-
-// —— LLM 摘要压缩 ——
-export {
-  summarizeHistory,
-  isSummaryMessage,
-  type SummarizeOptions,
-  type SummarizeResult,
-} from './summarizer.js'
-
 // —— 上下文拼装 ——
 export {
   buildContext,
@@ -45,8 +16,37 @@ export {
 
 // —— Session 容器 ——
 export {
-  Session,
-  type SessionConfig,
   type CompressResult,
   type GetMessagesOptions,
+  Session,
+  type SessionConfig,
 } from './session.js'
+
+// —— LLM 摘要压缩 ——
+export {
+  isSummaryMessage,
+  summarizeHistory,
+  type SummarizeOptions,
+  type SummarizeResult,
+} from './summarizer.js'
+
+// —— Token 预算与估算 ——
+export {
+  type BudgetOptions,
+  type BudgetResult,
+  cjkEstimator,
+  defaultEstimator,
+  enforceBudget,
+  estimateMessage,
+  estimateMessages,
+  type TokenEstimator,
+} from './token-budget.js'
+
+// —— 重新导出 packages/memory 的原语 ——
+export {
+  InMemoryLongTerm,
+  type LongTermStore,
+  type MemoryConfig,
+  type MemoryEntry,
+  ShortTermMemory,
+} from '@ai-agent-study/memory'

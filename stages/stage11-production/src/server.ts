@@ -1,5 +1,5 @@
-import http from 'http'
-import { URL } from 'url'
+import http from 'node:http'
+import { URL } from 'node:url'
 
 // HTTP Request/Response interfaces
 export interface HttpRequest {
@@ -27,7 +27,7 @@ export interface RequestContext {
 // Route handler type
 export type RouteHandler = (
   req: HttpRequest,
-  res: HttpResponse
+  res: HttpResponse,
 ) => Promise<HttpResponse> | HttpResponse
 
 // Route definition
@@ -41,7 +41,7 @@ export interface Route {
 export type Middleware = (
   req: HttpRequest,
   res: HttpResponse,
-  next: () => Promise<void>
+  next: () => Promise<void>,
 ) => Promise<void>
 
 // Simple HTTP server
@@ -155,7 +155,8 @@ export class HttpServer {
       }
 
       this.sendResponse(res, httpRes)
-    } catch (error) {
+    }
+    catch (error) {
       httpRes.statusCode = 500
       httpRes.body = {
         error: 'Internal server error',
@@ -169,7 +170,7 @@ export class HttpServer {
     return new Promise((resolve, reject) => {
       let body = ''
       let bytes = 0
-      req.on('data', chunk => {
+      req.on('data', (chunk) => {
         bytes += chunk.length
         if (bytes > this.maxBodyBytes) {
           reject(new Error(`Request body too large. Limit is ${this.maxBodyBytes} bytes`))
@@ -185,7 +186,8 @@ export class HttpServer {
         }
         try {
           resolve(JSON.parse(body))
-        } catch {
+        }
+        catch {
           resolve(body)
         }
       })
@@ -194,8 +196,9 @@ export class HttpServer {
   }
 
   private findRoute(method: string, url: string): Route | undefined {
-    return this.routes.find(route => {
-      if (route.method !== method) return false
+    return this.routes.find((route) => {
+      if (route.method !== method)
+        return false
       const pattern = this.pathToRegex(route.path)
       return pattern.test(url)
     })
@@ -233,14 +236,14 @@ export class HttpServer {
 
   async listen(port: number, hostname?: string): Promise<void> {
     this.server = http.createServer((req, res) => this.handleRequest(req, res))
-    await new Promise<void>(resolve => {
+    await new Promise<void>((resolve) => {
       this.server!.listen(port, hostname, () => resolve())
     })
   }
 
   async close(): Promise<void> {
     if (this.server) {
-      await new Promise<void>(resolve => {
+      await new Promise<void>((resolve) => {
         this.server!.close(() => resolve())
       })
     }
@@ -248,7 +251,7 @@ export class HttpServer {
 }
 
 // Common middlewares
-export function withAuth(authService: { verifyToken: (token: string) => { userId: string; valid: boolean } }) {
+export function withAuth(authService: { verifyToken: (token: string) => { userId: string, valid: boolean } }) {
   return async (req: HttpRequest, res: HttpResponse, next: () => Promise<void>) => {
     const authHeader = req.headers.authorization
     if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
@@ -286,7 +289,8 @@ export function withJsonBody() {
     if (contentType?.includes('application/json') && typeof req.body === 'string') {
       try {
         req.body = JSON.parse(req.body)
-      } catch {
+      }
+      catch {
         // Keep as string if parse fails
       }
     }

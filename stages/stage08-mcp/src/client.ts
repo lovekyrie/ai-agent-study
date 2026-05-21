@@ -1,8 +1,8 @@
+import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
+import type { MCPClientConfig } from './types.js'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
-import type { MCPClientConfig } from './types.js'
 
 /**
  * 业务面的 MCP Client。
@@ -19,14 +19,15 @@ export class MCPClient {
   private readonly client = new Client({ name: 'stage08-mcp-client', version: '1.0.0' })
   private connected = false
   private transport?: Transport
-  private tools: Array<{ name: string; description?: string; inputSchema?: unknown }> = []
+  private tools: Array<{ name: string, description?: string, inputSchema?: unknown }> = []
   private resources: Array<{
     uri: string
     name: string
     description?: string
     mimeType?: string
   }> = []
-  private prompts: Array<{ name: string; description?: string; arguments?: unknown[] }> = []
+
+  private prompts: Array<{ name: string, description?: string, arguments?: unknown[] }> = []
 
   constructor(config: MCPClientConfig) {
     this.config = config
@@ -39,11 +40,13 @@ export class MCPClient {
         args: this.config.args,
         stderr: 'pipe',
       })
-    } else if (this.config.transport === 'http' && this.config.url) {
+    }
+    else if (this.config.transport === 'http' && this.config.url) {
       this.transport = new StreamableHTTPClientTransport(new URL(this.config.url), {
         requestInit: { headers: this.config.headers },
       })
-    } else {
+    }
+    else {
       throw new Error(`Invalid MCP ${this.config.transport} transport configuration`)
     }
     await this.client.connect(this.transport)
@@ -68,11 +71,11 @@ export class MCPClient {
     this.ensureConnected()
     const result = await this.client.listTools()
     this.tools = result.tools
-    return result.tools.map((tool) => tool.name)
+    return result.tools.map(tool => tool.name)
   }
 
   async listToolDefinitions(): Promise<
-    Array<{ name: string; description?: string; inputSchema?: unknown }>
+    Array<{ name: string, description?: string, inputSchema?: unknown }>
   > {
     this.ensureConnected()
     const result = await this.client.listTools()
@@ -89,7 +92,7 @@ export class MCPClient {
     this.ensureConnected()
     const result = await this.client.listResources()
     this.resources = result.resources
-    return result.resources.map((resource) => resource.uri)
+    return result.resources.map(resource => resource.uri)
   }
 
   async readResource(uri: string): Promise<string> {
@@ -97,8 +100,10 @@ export class MCPClient {
     const result = await this.client.readResource({ uri })
     return result.contents
       .map((content) => {
-        if ('text' in content) return content.text
-        if ('blob' in content) return content.blob
+        if ('text' in content)
+          return content.text
+        if ('blob' in content)
+          return content.blob
         return ''
       })
       .join('\n')
@@ -108,7 +113,7 @@ export class MCPClient {
     this.ensureConnected()
     const result = await this.client.listPrompts()
     this.prompts = result.prompts
-    return result.prompts.map((prompt) => prompt.name)
+    return result.prompts.map(prompt => prompt.name)
   }
 
   async getPrompt(name: string, args?: Record<string, string>): Promise<unknown> {
@@ -128,9 +133,12 @@ export class MCPClient {
       this.client.listResources(),
       this.client.listPrompts(),
     ])
-    if (tools.status === 'fulfilled') this.tools = tools.value.tools
-    if (resources.status === 'fulfilled') this.resources = resources.value.resources
-    if (prompts.status === 'fulfilled') this.prompts = prompts.value.prompts
+    if (tools.status === 'fulfilled')
+      this.tools = tools.value.tools
+    if (resources.status === 'fulfilled')
+      this.resources = resources.value.resources
+    if (prompts.status === 'fulfilled')
+      this.prompts = prompts.value.prompts
   }
 }
 
@@ -151,11 +159,12 @@ export class MCPHTTPClient {
     this.headers = headers
   }
 
-  async listTools(): Promise<{ name: string; description: string; inputSchema: unknown }[]> {
+  async listTools(): Promise<{ name: string, description: string, inputSchema: unknown }[]> {
     const response = await fetch(`${this.baseUrl}/tools`, { headers: this.headers })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (!response.ok)
+      throw new Error(`HTTP ${response.status}`)
     return response.json() as Promise<
-      { name: string; description: string; inputSchema: unknown }[]
+      { name: string, description: string, inputSchema: unknown }[]
     >
   }
 
@@ -165,41 +174,46 @@ export class MCPHTTPClient {
       headers: { 'Content-Type': 'application/json', ...this.headers },
       body: JSON.stringify({ name, params }),
     })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (!response.ok)
+      throw new Error(`HTTP ${response.status}`)
     return response.json()
   }
 
-  async listResources(): Promise<{ uri: string; name: string; description: string }[]> {
+  async listResources(): Promise<{ uri: string, name: string, description: string }[]> {
     const response = await fetch(`${this.baseUrl}/resources`, { headers: this.headers })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    return response.json() as Promise<{ uri: string; name: string; description: string }[]>
+    if (!response.ok)
+      throw new Error(`HTTP ${response.status}`)
+    return response.json() as Promise<{ uri: string, name: string, description: string }[]>
   }
 
-  async readResource(uri: string): Promise<{ content: string; mimeType: string }> {
+  async readResource(uri: string): Promise<{ content: string, mimeType: string }> {
     const response = await fetch(
       `${this.baseUrl}/resources/read?uri=${encodeURIComponent(uri)}`,
-      { headers: this.headers }
+      { headers: this.headers },
     )
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    return response.json() as Promise<{ content: string; mimeType: string }>
+    if (!response.ok)
+      throw new Error(`HTTP ${response.status}`)
+    return response.json() as Promise<{ content: string, mimeType: string }>
   }
 
-  async listPrompts(): Promise<{ name: string; description: string }[]> {
+  async listPrompts(): Promise<{ name: string, description: string }[]> {
     const response = await fetch(`${this.baseUrl}/prompts`, { headers: this.headers })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    return response.json() as Promise<{ name: string; description: string }[]>
+    if (!response.ok)
+      throw new Error(`HTTP ${response.status}`)
+    return response.json() as Promise<{ name: string, description: string }[]>
   }
 
   async getPrompt(
     name: string,
-    args?: Record<string, string>
-  ): Promise<{ messages: { role: string; content: string }[] }> {
+    args?: Record<string, string>,
+  ): Promise<{ messages: { role: string, content: string }[] }> {
     const response = await fetch(`${this.baseUrl}/prompts/get`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...this.headers },
       body: JSON.stringify({ name, args }),
     })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    return response.json() as Promise<{ messages: { role: string; content: string }[] }>
+    if (!response.ok)
+      throw new Error(`HTTP ${response.status}`)
+    return response.json() as Promise<{ messages: { role: string, content: string }[] }>
   }
 }

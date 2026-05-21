@@ -6,9 +6,9 @@
 //   - HybridSearchEngine: 向量 + 关键词融合搜索（无 LLM 参与，纯算法）
 
 export { AgenticRAG, type AgenticRAGOptions } from './agentic-rag.js'
-export { MultiKnowledgeRouter, type RouteResult, type RouterOptions } from './router.js'
 export {
   HybridSearchEngine,
   type HybridSearchOptions,
 } from './hybrid-search.js'
-export type { KnowledgeBase, RetrievalPlan, ResearchResponse } from './types.js'
+export { MultiKnowledgeRouter, type RouteResult, type RouterOptions } from './router.js'
+export type { KnowledgeBase, ResearchResponse, RetrievalPlan } from './types.js'

@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { ShortTermMemory, InMemoryLongTerm } from '../src/index.js'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { InMemoryLongTerm, ShortTermMemory } from '../src/index.js'
 
-describe('ShortTermMemory', () => {
+describe('shortTermMemory', () => {
   let memory: ShortTermMemory
 
   beforeEach(() => {
@@ -66,7 +66,7 @@ describe('ShortTermMemory', () => {
   })
 })
 
-describe('InMemoryLongTerm', () => {
+describe('inMemoryLongTerm', () => {
   let store: InMemoryLongTerm
 
   beforeEach(() => {

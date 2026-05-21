@@ -1,7 +1,9 @@
+import type { ChatMessage } from '@ai-agent-study/llm-client'
+import type { ToolCallRequest } from '@ai-agent-study/tools'
 import { getConfig } from '@ai-agent-study/config'
-import { createLLMClient, type ChatMessage } from '@ai-agent-study/llm-client'
+import { createLLMClient } from '@ai-agent-study/llm-client'
 import { Logger } from '@ai-agent-study/logger'
-import { ToolRegistry, builtinTools, type ToolCallRequest } from '@ai-agent-study/tools'
+import { builtinTools, ToolRegistry } from '@ai-agent-study/tools'
 
 const MAX_TOOL_ITERATIONS = 5
 
@@ -15,7 +17,7 @@ async function main() {
   registry.registerAll(builtinTools)
 
   logger.info('Stage 3: Tool Calling', {
-    tools: registry.list().map((t) => t.name),
+    tools: registry.list().map(t => t.name),
     categories: registry.listCategories(),
   })
 
@@ -59,14 +61,14 @@ async function main() {
       })
 
       // 并行执行所有工具调用
-      const requests: ToolCallRequest[] = response.toolCalls.map((tc) => ({
+      const requests: ToolCallRequest[] = response.toolCalls.map(tc => ({
         id: tc.id,
         name: tc.function.name,
         arguments: JSON.parse(tc.function.arguments || '{}'),
       }))
 
       logger.info('Executing tools', {
-        calls: requests.map((r) => ({ id: r.id, name: r.name, args: r.arguments })),
+        calls: requests.map(r => ({ id: r.id, name: r.name, args: r.arguments })),
       })
 
       const results = await registry.executeBatch(requests)

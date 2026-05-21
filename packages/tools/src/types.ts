@@ -2,11 +2,11 @@ import type { z } from 'zod'
 
 // 用 any 作为泛型默认值，避免函数参数逆变导致的"具体化工具无法装进通用 registry"。
 // parameters 用 ZodType<Out, Def, In> 三参形式，允许 .default() 这种 input/output 不一致的 schema。
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export interface ToolDefinition<TParams = any> {
   name: string
   description: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   parameters: z.ZodType<TParams, any, any>
   execute: (params: TParams, ctx?: ToolExecutionContext) => Promise<ToolResult> | ToolResult
   category?: string

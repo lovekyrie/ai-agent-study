@@ -9,7 +9,7 @@ export interface EvalCase {
 
 export interface EvalInput {
   query?: string
-  messages?: { role: string; content: string }[]
+  messages?: { role: string, content: string }[]
   context?: Record<string, unknown>
 }
 
@@ -61,7 +61,7 @@ export interface EvalSummary {
   passRate: number
   avgLatencyMs: number
   totalCost: number
-  categoryBreakdown: Record<string, { total: number; passed: number; passRate: number }>
+  categoryBreakdown: Record<string, { total: number, passed: number, passRate: number }>
 }
 
 export interface ToolCallingEvalResult {
@@ -100,6 +100,6 @@ export interface RegressionReport {
 
 export interface RunOptions {
   category?: EvalCase['category']
-  runFn?: (testCase: EvalCase) => Promise<{ content: string; metadata?: Record<string, unknown>; toolCalls?: ToolCall[] }>
+  runFn?: (testCase: EvalCase) => Promise<{ content: string, metadata?: Record<string, unknown>, toolCalls?: ToolCall[] }>
   useLLMJudge?: boolean
 }

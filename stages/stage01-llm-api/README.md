@@ -31,7 +31,8 @@ const r = await client.chat([{ role: 'user', content: 'hi' }])
 
 // 流式（async iterator）
 for await (const chunk of client.stream(messages)) {
-  if (!chunk.done) process.stdout.write(chunk.delta)
+  if (!chunk.done)
+    process.stdout.write(chunk.delta)
 }
 
 // 结构化 JSON

@@ -1,6 +1,6 @@
-import { EventEmitter } from 'events'
-import path from 'path'
-import fs from 'fs/promises'
+import { EventEmitter } from 'node:events'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { glob } from 'glob'
 
 // Types
@@ -156,7 +156,8 @@ export class CodeIndexer extends EventEmitter {
         if (stat.size <= this.config.maxFileSize) {
           filtered.push(file)
         }
-      } catch {
+      }
+      catch {
         // Skip files we can't stat
       }
     }
@@ -182,7 +183,8 @@ export class CodeIndexer extends EventEmitter {
         },
         language: lang,
       }))
-    } catch {
+    }
+    catch {
       return []
     }
   }
@@ -226,10 +228,8 @@ function parseTypeScript(content: string, file: string): CodeChunk[] {
 
   // Simple regex-based parsing (in production, use a proper parser)
   const functionRegex = /(?:export\s+)?(?:async\s+)?function\s+(\w+)|(\w+)\s*[=:]\s*(?:async\s+)?(?:\([^)]*\)\s*=>|\([^)]*\)\s*:|function)/g
-  const classRegex = /(?:export\s+)?(?:abstract\s+)?class\s+(\w+)(?:\s+extends\s+\w+)?(?:\s+implements\s+[\w,\s]+)?/g
+  const classRegex = /(?:export\s+)?(?:abstract\s+)?class\s+(\w+)(?:\s+extends\s+\w+)?(?:\s+implements\s[\w,\s]+)?/g
   const interfaceRegex = /(?:export\s+)?interface\s+(\w+)/g
-  const typeRegex = /(?:export\s+)?type\s+(\w+)\s*=/g
-  const constRegex = /(?:export\s+)?const\s+(\w+)\s*=/g
 
   let match
   const processedRanges: [number, number][] = []
@@ -261,7 +261,8 @@ function parseTypeScript(content: string, file: string): CodeChunk[] {
   functionRegex.lastIndex = 0
   while ((match = functionRegex.exec(content)) !== null) {
     const funcName = match[1] || match[2]
-    if (!funcName || funcName === 'function') continue
+    if (!funcName || funcName === 'function')
+      continue
 
     const startLine = content.slice(0, match.index).split('\n').length
     const range = findBlockRange(content, match.index, '{', '}')
@@ -337,10 +338,8 @@ function parsePython(content: string, file: string): CodeChunk[] {
 
   // Find classes and functions
   const classRegex = /^class\s+(\w+)(?:\([^)]*\))?:/gm
-  const funcRegex = /^((?:async\s+)?def\s+\w+)/gm
 
   let match
-  let lastEnd = 0
 
   while ((match = classRegex.exec(content)) !== null) {
     const startLine = content.slice(0, match.index).split('\n').length
@@ -424,15 +423,17 @@ function findBlockRange(content: string, start: number, open: string, close: str
       continue
     }
 
-    if (char === '"' || char === "'" || char === '`') {
+    if (char === '"' || char === '\'' || char === '`') {
       inString = char
       continue
     }
 
     if (char === open) {
       depth++
-      if (depth === 1) continue
-    } else if (char === close) {
+      if (depth === 1)
+        continue
+    }
+    else if (char === close) {
       depth--
       if (depth === 0) {
         return [content.slice(start, i + 1).split('\n').length, i + 1]
@@ -444,7 +445,7 @@ function findBlockRange(content: string, start: number, open: string, close: str
 }
 
 // Helper to find line end for Python-style blocks
-function findLineEnd(content: string, start: number, open: string, close: string): number | null {
+function findLineEnd(content: string, start: number, _open: string, _close: string): number | null {
   for (let i = start; i < content.length; i++) {
     if (content[i] === '\n') {
       return i
@@ -462,7 +463,8 @@ function findPythonBlockEnd(content: string, start: number): number {
     if (content[i] === '\n') {
       const line = content.slice(lineStart, i).trim()
       if (line.startsWith('class ') || line.startsWith('def ') || line.startsWith('async def ')) {
-        if (depth === 0) depth = 1
+        if (depth === 0)
+          depth = 1
       }
       lineStart = i + 1
     }
@@ -476,13 +478,13 @@ function findPythonBlockEnd(content: string, start: number): number {
         if (nextLine.startsWith('    ') || nextLine.startsWith('\t')) {
           // This is a block start
           // Continue until we find a line at the same or less indentation
-          const blockStart = nextLineStart
           let blockEnd = nextNewline
           const baseIndent = nextLine.match(/^(\s*)/)?.[1].length || 0
 
           for (let j = nextNewline + 1; j < content.length; j++) {
             const lineEnd = content.indexOf('\n', j)
-            if (lineEnd === -1) break
+            if (lineEnd === -1)
+              break
 
             const line = content.slice(j, lineEnd)
             const indent = line.match(/^(\s*)/)?.[1].length || 0

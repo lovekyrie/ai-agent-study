@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import type { ChatMessage } from '@ai-agent-study/llm-client'
+import { describe, expect, it } from 'vitest'
 import {
   cjkEstimator,
   defaultEstimator,
@@ -8,7 +8,7 @@ import {
   estimateMessages,
 } from '../src/index.js'
 
-describe('TokenEstimator', () => {
+describe('tokenEstimator', () => {
   it('defaultEstimator: chars/4 向上取整', () => {
     expect(defaultEstimator.estimate('')).toBe(0)
     expect(defaultEstimator.estimate('abcd')).toBe(1)
@@ -56,7 +56,7 @@ describe('enforceBudget', () => {
     const result = enforceBudget(messages, { maxTokens: 80 })
 
     expect(result.messages[0].role).toBe('system')
-    expect(result.messages[result.messages.length - 1].content).toBe('最近一条')
+    expect(result.messages.at(-1).content).toBe('最近一条')
     expect(result.trimmedCount).toBeGreaterThan(0)
     expect(result.tokensUsed).toBeLessThanOrEqual(80)
   })
@@ -79,7 +79,7 @@ describe('enforceBudget', () => {
     ]
     const out = enforceBudget(messages, { maxTokens: 50, preserveSystem: false })
     // 应该只剩最近的 user
-    expect(out.messages.every((m) => m.role !== 'system')).toBe(true)
+    expect(out.messages.every(m => m.role !== 'system')).toBe(true)
   })
 
   it('budget 极小也至少保留 1 条非 system 消息（避免上下文全丢）', () => {

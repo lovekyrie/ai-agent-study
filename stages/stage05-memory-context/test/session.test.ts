@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
 import type { ChatMessage, LLMClient } from '@ai-agent-study/llm-client'
+import { describe, expect, it, vi } from 'vitest'
 import { Session } from '../src/index.js'
 
 function fakeClient(response: string): LLMClient {
@@ -10,7 +10,7 @@ function fakeClient(response: string): LLMClient {
   } as unknown as LLMClient
 }
 
-describe('Session basic API', () => {
+describe('session basic API', () => {
   it('生成稳定的 id 或使用调用方提供的 id', () => {
     const s1 = new Session({ systemPrompt: 'sys' })
     expect(s1.id).toMatch(/^sess_/)
@@ -50,7 +50,7 @@ describe('Session basic API', () => {
   })
 })
 
-describe('Session.promoteToLongTerm', () => {
+describe('session.promoteToLongTerm', () => {
   it('未配置 longTermStore 时返回 false', async () => {
     const session = new Session({ systemPrompt: 'sys' })
     const e = session.addUserMessage('fact')
@@ -68,7 +68,7 @@ describe('Session.promoteToLongTerm', () => {
     })
     expect(ctx.retrievedCount).toBe(1)
     const block = ctx.messages.find(
-      (m: ChatMessage) => m.role === 'system' && m.content.includes('[相关历史片段]')
+      (m: ChatMessage) => m.role === 'system' && m.content.includes('[相关历史片段]'),
     )
     expect(block?.content).toContain('TypeScript')
   })
@@ -79,7 +79,7 @@ describe('Session.promoteToLongTerm', () => {
   })
 })
 
-describe('Session.compress', () => {
+describe('session.compress', () => {
   it('没有 llmClient → 返回 null', async () => {
     const session = new Session({ systemPrompt: 'sys' })
     for (let i = 0; i < 8; i++) session.addUserMessage(`m${i}`)
@@ -107,7 +107,7 @@ describe('Session.compress', () => {
     expect(session.getSummary()).toBe('用户陆续说了 5 件事')
 
     // 保留下来的应该是最近 3 条
-    expect(session.shortTerm.getAll().map((e) => e.content)).toEqual(['m7', 'm8', 'm9'])
+    expect(session.shortTerm.getAll().map(e => e.content)).toEqual(['m7', 'm8', 'm9'])
   })
 
   it('压缩后再次 compress 触发增量摘要', async () => {
@@ -140,7 +140,7 @@ describe('Session.compress', () => {
   })
 })
 
-describe('Session.getMessagesForLLM (integration)', () => {
+describe('session.getMessagesForLLM (integration)', () => {
   it('综合 system + summary + 长期检索 + 短期 + budget', async () => {
     const session = Session.withInMemoryLongTerm({
       systemPrompt: '你是助手',
@@ -163,11 +163,11 @@ describe('Session.getMessagesForLLM (integration)', () => {
       budget: { maxTokens: 2000 },
     })
 
-    const systemMessages = ctx.messages.filter((m) => m.role === 'system')
+    const systemMessages = ctx.messages.filter(m => m.role === 'system')
     expect(systemMessages.length).toBeGreaterThanOrEqual(3) // main + summary + retrieval
 
     expect(ctx.messages[0].content).toBe('你是助手')
-    expect(systemMessages.some((m) => m.content.includes('[历史摘要]'))).toBe(true)
-    expect(systemMessages.some((m) => m.content.includes('[相关历史片段]'))).toBe(true)
+    expect(systemMessages.some(m => m.content.includes('[历史摘要]'))).toBe(true)
+    expect(systemMessages.some(m => m.content.includes('[相关历史片段]'))).toBe(true)
   })
 })

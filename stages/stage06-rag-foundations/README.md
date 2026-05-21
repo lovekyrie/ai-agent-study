@@ -37,7 +37,7 @@ const auto = chunkByFile(content, 'unknown.txt', 'txt')
 
 ```ts
 // 有 API key → 真 OpenAI text-embedding-3-small
-const real = new Embedder()  // 自动检测 OPENAI_API_KEY
+const real = new Embedder() // 自动检测 OPENAI_API_KEY
 
 // 没 API key → 哈希伪向量（仅做 pipeline 形状测试，无语义）
 const stub = new Embedder({ provider: 'stub', dimensions: 64 })
@@ -81,8 +81,8 @@ const rag = new AdvancedRAG({
 await rag.index(chunks)
 
 const result = await rag.retrieve('user query', {
-  useRewrite: true,    // 多 query 召回 + 分数融合
-  useRerank: true,     // LLM 重排
+  useRewrite: true, // 多 query 召回 + 分数融合
+  useRerank: true, // LLM 重排
 })
 ```
 
@@ -94,10 +94,10 @@ const result = await rag.retrieve('user query', {
 
 ```ts
 function evaluateRetrieval(retrieved, goldenCases, k): {
-  hitRate: number       // 至少命中一个的 query 比例
-  precisionAtK: number  // 检索结果里相关文档的比例
-  recallAtK: number     // 相关文档被召回的比例
-  mrr: number           // 第一个相关文档排名的倒数
+  hitRate: number // 至少命中一个的 query 比例
+  precisionAtK: number // 检索结果里相关文档的比例
+  recallAtK: number // 相关文档被召回的比例
+  mrr: number // 第一个相关文档排名的倒数
 }
 ```
 

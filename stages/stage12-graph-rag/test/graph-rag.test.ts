@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { KnowledgeGraph, buildGraphContext } from '../src/index.js'
+import { buildGraphContext, KnowledgeGraph } from '../src/index.js'
 
 describe('stage12 GraphRAG', () => {
   it('finds relationship paths for graph context', () => {
@@ -10,7 +10,7 @@ describe('stage12 GraphRAG', () => {
     graph.upsertRelation({ from: 'a', to: 'b', type: 'owns' })
     graph.upsertRelation({ from: 'b', to: 'c', type: 'uses' })
 
-    expect(graph.neighbors('b').map((entity) => entity.name).sort()).toEqual(['Alice', 'Neo4j'])
+    expect(graph.neighbors('b').map(entity => entity.name).sort()).toEqual(['Alice', 'Neo4j'])
     expect(buildGraphContext(graph, 'a', 'c')).toContain('Alice -[owns]-> RAG Platform')
   })
 })

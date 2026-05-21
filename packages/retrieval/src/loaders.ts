@@ -1,13 +1,13 @@
+import type { Loader, SourceDocument } from './types.js'
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { extname, join, relative } from 'node:path'
-import type { Loader, SourceDocument } from './types.js'
 import { normalizeWhitespace, stableHash } from './utils.js'
 
 export class MemoryDocumentLoader implements Loader {
   constructor(private readonly documents: SourceDocument[]) {}
 
   async load(): Promise<SourceDocument[]> {
-    return this.documents.map((doc) => ({
+    return this.documents.map(doc => ({
       ...doc,
       id: doc.id ?? stableHash(`${doc.source}:${doc.content}`),
       content: normalizeWhitespace(doc.content),
@@ -53,12 +53,14 @@ export class FileSystemDocumentLoader implements Loader {
     const files: string[] = []
 
     for (const entry of entries) {
-      if (this.excludeDirs.has(entry)) continue
+      if (this.excludeDirs.has(entry))
+        continue
       const path = join(dir, entry)
       const info = await stat(path)
       if (info.isDirectory()) {
         files.push(...await this.walk(path))
-      } else if (this.extensions.has(extname(entry))) {
+      }
+      else if (this.extensions.has(extname(entry))) {
         files.push(path)
       }
     }

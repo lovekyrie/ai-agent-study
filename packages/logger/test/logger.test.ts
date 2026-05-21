@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import type { LogContext } from '../src/index.js'
 import { Writable } from 'node:stream'
 import pino from 'pino'
-import { Logger, getDefaultLogger, type LogContext } from '../src/index.js'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { getDefaultLogger, Logger } from '../src/index.js'
 
 // 用 pino 子 logger 直写到内存 stream，便于断言实际输出
 function captureLogs(level: pino.Level = 'trace') {
@@ -9,7 +10,8 @@ function captureLogs(level: pino.Level = 'trace') {
   const stream = new Writable({
     write(chunk, _enc, cb) {
       const text = chunk.toString().trim()
-      if (text) lines.push(JSON.parse(text))
+      if (text)
+        lines.push(JSON.parse(text))
       cb()
     },
   })
@@ -17,7 +19,7 @@ function captureLogs(level: pino.Level = 'trace') {
   return { logger: new Logger(pinoLogger), lines }
 }
 
-describe('Logger', () => {
+describe('logger', () => {
   let logger: Logger
 
   beforeEach(() => {
@@ -85,7 +87,7 @@ describe('Logger', () => {
   it('serializes Error into structured fields', () => {
     const { logger: l, lines } = captureLogs()
     l.error('boom', new Error('oops'))
-    const entry = lines[0] as { msg: string; error: { message: string; name: string } }
+    const entry = lines[0] as { msg: string, error: { message: string, name: string } }
     expect(entry.msg).toBe('boom')
     expect(entry.error.message).toBe('oops')
     expect(entry.error.name).toBe('Error')

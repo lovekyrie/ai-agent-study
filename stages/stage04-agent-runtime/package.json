@@ -1,8 +1,8 @@
 {
   "name": "stage04-agent-runtime",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 04: Agent Runtime — ReAct Loop + Task Planning",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

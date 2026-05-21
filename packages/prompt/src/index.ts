@@ -5,7 +5,7 @@
 export interface PromptTemplate {
   system?: string
   user: string
-  examples?: Array<{ input: string; output: string }>
+  examples?: Array<{ input: string, output: string }>
 }
 
 export interface PromptContext {
@@ -34,12 +34,12 @@ export interface RenderOptions {
 // ============================================================================
 
 // 支持空格 `{{ name }}` 与中文/Unicode 变量名（Mustache 风格）
-const PLACEHOLDER_PATTERN = /\{\{\s*([\p{L}\p{N}_][\p{L}\p{N}_]*)\s*\}\}/gu
+const PLACEHOLDER_PATTERN = /\{\{\s*([\p{L}\p{N}_]+)\s*\}\}/gu
 
 export function render(
   template: string,
   context: PromptContext,
-  options: RenderOptions = {}
+  options: RenderOptions = {},
 ): string {
   const onMissing = options.onMissing ?? 'keep'
 
@@ -53,7 +53,8 @@ export function render(
       return onMissing === 'empty' ? '' : `{{${key}}}`
     }
 
-    if (Array.isArray(value)) return value.join(', ')
+    if (Array.isArray(value))
+      return value.join(', ')
     return String(value)
   })
 }
@@ -65,7 +66,7 @@ export function render(
 export function buildMessages(
   template: PromptTemplate,
   context: PromptContext,
-  options: RenderOptions = {}
+  options: RenderOptions = {},
 ): PromptMessage[] {
   const messages: PromptMessage[] = []
 
@@ -91,8 +92,8 @@ export function buildMessages(
 // ============================================================================
 
 // 角色注入常见模式：用户输入里假装是 system / assistant
-const ROLE_INJECTION_PATTERN =
-  /(?:^|\n)\s*(system|assistant|user)\s*[:：]/gi
+const ROLE_INJECTION_PATTERN
+  = /(?:^|\n)\s*(system|assistant|user)\s*[:：]/gi
 
 // 常见 jailbreak 关键词（中英文）
 const SUSPICIOUS_PHRASES = [
@@ -100,8 +101,8 @@ const SUSPICIOUS_PHRASES = [
   /disregard (?:all |the )?(?:previous|above)/i,
   /forget (?:everything|all) (?:above|prior|previous)/i,
   /you are now/i,
-  /忽略(?:上面|之前|以上)(?:的)?(?:指令|规则|提示)/,
-  /忘记(?:上面|之前|以上)(?:的)?(?:一切|内容)/,
+  /忽略(?:上面|之前|以上)的?(?:指令|规则|提示)/,
+  /忘记(?:上面|之前|以上)的?(?:一切|内容)/,
 ]
 
 export interface SanitizeOptions {
@@ -121,7 +122,7 @@ export interface SanitizeResult {
 
 export function sanitizeUserInput(
   input: string,
-  options: SanitizeOptions = {}
+  options: SanitizeOptions = {},
 ): SanitizeResult {
   const { stripControlChars = true, throwOnSuspicious = false, maxLength = 10_000 } = options
   const warnings: string[] = []
@@ -131,7 +132,7 @@ export function sanitizeUserInput(
   if (stripControlChars) {
     // 移除除 \t \n \r 之外的控制字符（含零宽字符常见的 prompt injection 载体）
     // eslint-disable-next-line no-control-regex
-    text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\u200B-\u200F\u202A-\u202E]/g, '')
+    text = text.replace(/[\x00-\x08\v\f\x0E-\x1F\x7F\u200B-\u200F\u202A-\u202E]/g, '')
   }
 
   if (ROLE_INJECTION_PATTERN.test(text)) {
@@ -153,7 +154,7 @@ export function sanitizeUserInput(
     warnings.push(`Input truncated to ${maxLength} characters`)
   }
 
-  if (throwOnSuspicious && warnings.some((w) => w.startsWith('Detected'))) {
+  if (throwOnSuspicious && warnings.some(w => w.startsWith('Detected'))) {
     throw new Error(`Suspicious user input: ${warnings.join('; ')}`)
   }
 
@@ -177,13 +178,14 @@ export interface TruncateOptions {
  */
 export function truncateMessages(
   messages: PromptMessage[],
-  options: TruncateOptions
+  options: TruncateOptions,
 ): PromptMessage[] {
   const { maxChars, preserveSystem = true } = options
-  if (messages.length === 0) return messages
+  if (messages.length === 0)
+    return messages
 
-  const systemHead =
-    preserveSystem && messages[0]?.role === 'system' ? [messages[0]] : []
+  const systemHead
+    = preserveSystem && messages[0]?.role === 'system' ? [messages[0]] : []
   const rest = messages.slice(systemHead.length)
 
   const charsOf = (m: PromptMessage) => m.content.length
@@ -194,7 +196,8 @@ export function truncateMessages(
   // 从最新消息往前收集，保证最近上下文优先保留
   for (let i = rest.length - 1; i >= 0; i--) {
     const len = charsOf(rest[i])
-    if (total + len > maxChars && kept.length > 0) break
+    if (total + len > maxChars && kept.length > 0)
+      break
     kept.unshift(rest[i])
     total += len
   }

@@ -48,7 +48,7 @@ server.registerSessionRoutes()
 server.registerMetricsRoutes()
 
 // 自定义路由
-server.get('/custom', async (req) => ({
+server.get('/custom', async req => ({
   statusCode: 200,
   headers: {},
   body: { message: 'Hello' },

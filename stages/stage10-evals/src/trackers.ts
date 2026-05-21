@@ -12,7 +12,7 @@ export class RegressionTracker {
   }
 
   getLatest(): EvalSuite | undefined {
-    return this.history[this.history.length - 1]
+    return this.history.at(-1)
   }
 
   compare(baseline: EvalSuite, current: EvalSuite): RegressionReport {
@@ -23,8 +23,10 @@ export class RegressionTracker {
     }
 
     const regressions: string[] = []
-    if (delta.passRate < -0.1) regressions.push('Pass rate dropped significantly')
-    if (delta.avgLatency > 1000) regressions.push('Latency increased by >1s')
+    if (delta.passRate < -0.1)
+      regressions.push('Pass rate dropped significantly')
+    if (delta.avgLatency > 1000)
+      regressions.push('Latency increased by >1s')
 
     return {
       baseline: baseline.timestamp,
@@ -37,13 +39,13 @@ export class RegressionTracker {
 }
 
 export class CostTracker {
-  private requests: { timestamp: Date; inputTokens: number; outputTokens: number; model: string }[] = []
+  private requests: { timestamp: Date, inputTokens: number, outputTokens: number, model: string }[] = []
 
   record(inputTokens: number, outputTokens: number, model: string): void {
     this.requests.push({ timestamp: new Date(), inputTokens, outputTokens, model })
   }
 
-  getTotal(): { inputTokens: number; outputTokens: number; estimatedCost: number } {
+  getTotal(): { inputTokens: number, outputTokens: number, estimatedCost: number } {
     const totals = this.requests.reduce(
       (acc, r) => ({
         inputTokens: acc.inputTokens + r.inputTokens,
@@ -58,8 +60,8 @@ export class CostTracker {
     }
   }
 
-  getByModel(): Record<string, { requests: number; inputTokens: number; outputTokens: number; cost: number }> {
-    const byModel: Record<string, { requests: number; inputTokens: number; outputTokens: number; cost: number }> = {}
+  getByModel(): Record<string, { requests: number, inputTokens: number, outputTokens: number, cost: number }> {
+    const byModel: Record<string, { requests: number, inputTokens: number, outputTokens: number, cost: number }> = {}
 
     for (const req of this.requests) {
       if (!byModel[req.model]) {

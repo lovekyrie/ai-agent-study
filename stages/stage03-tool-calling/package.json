@@ -1,8 +1,8 @@
 {
   "name": "stage03-tool-calling",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 03: Function Calling / Tool Calling（含工具安全：白名单、Zod 校验、审批流）",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

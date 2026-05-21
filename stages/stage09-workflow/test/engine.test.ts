@@ -1,6 +1,6 @@
+import type { WorkflowContext, WorkflowEdge, WorkflowNode } from '../src/index.js'
 import { describe, expect, it, vi } from 'vitest'
 import { WorkflowBuilder, WorkflowEngine } from '../src/index.js'
-import type { WorkflowContext, WorkflowEdge, WorkflowNode } from '../src/index.js'
 
 // Mock llm-client so agents don't hit real APIs
 vi.mock('@ai-agent-study/llm-client', () => ({
@@ -23,7 +23,7 @@ function makeContext(engine: WorkflowEngine, overrides: Partial<WorkflowContext>
   }
 }
 
-describe('WorkflowEngine', () => {
+describe('workflowEngine', () => {
   it('completes immediately for end node', async () => {
     const nodes: WorkflowNode[] = [
       { id: 'end', type: 'end', name: 'End', description: 'done' },
@@ -91,16 +91,16 @@ describe('WorkflowEngine', () => {
     const ctx = makeContext(engine, { data: { key: 'value' }, currentNode: 'n1' })
     const cp = engine.createCheckpoint(ctx, 'n1')
     expect(cp.nodeId).toBe('n1')
-    expect(cp.data['key']).toBe('value')
+    expect(cp.data.key).toBe('value')
 
     // Modify context
-    ctx.data['key'] = 'changed'
+    ctx.data.key = 'changed'
     ctx.currentNode = 'n2'
 
     // Restore
     const restored = await engine.restoreFromCheckpoint(ctx, 'n1')
     expect(restored).toBe(true)
-    expect(ctx.data['key']).toBe('value')
+    expect(ctx.data.key).toBe('value')
     expect(ctx.currentNode).toBe('n1')
   })
 
@@ -112,7 +112,7 @@ describe('WorkflowEngine', () => {
   })
 })
 
-describe('WorkflowBuilder', () => {
+describe('workflowBuilder', () => {
   it('builds a workflow engine with all node types', () => {
     const engine = new WorkflowBuilder()
       .addSupervisor('sup', 'Supervisor', 'Manager', 'instructions')
@@ -136,7 +136,7 @@ describe('WorkflowBuilder', () => {
       .addSupervisor('sup', 'Sup', 'Sup', 'noop')
       .addSpecialist('a', 'A', 'A', 'noop')
       .addEnd('end', 'End')
-      .addEdge('sup', 'a', (ctx) => ctx.data['goA'] === true)
+      .addEdge('sup', 'a', ctx => ctx.data.goA === true)
       .addEdge('sup', 'end')
       .build()
 

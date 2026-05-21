@@ -1,12 +1,13 @@
+import type { Chunk } from '../src/index.js'
 import { describe, expect, it } from 'vitest'
 import {
   AdvancedRAG,
+
+  chunkText,
   Embedder,
   InMemoryVectorStore,
   QueryRewriter,
   Reranker,
-  chunkText,
-  type Chunk,
 } from '../src/index.js'
 
 /**
@@ -37,7 +38,7 @@ interface RetrievalMetrics {
 function evaluateRetrieval(
   retrieved: { id: string }[][],
   goldenCases: GoldenCase[],
-  k: number
+  k: number,
 ): RetrievalMetrics {
   if (retrieved.length !== goldenCases.length) {
     throw new Error('retrieved and goldenCases must align 1:1')
@@ -54,14 +55,15 @@ function evaluateRetrieval(
   for (let i = 0; i < goldenCases.length; i++) {
     const relevant = new Set(goldenCases[i].relevantIds)
     const top = retrieved[i].slice(0, k)
-    const hitsInTop = top.filter((r) => relevant.has(r.id)).length
+    const hitsInTop = top.filter(r => relevant.has(r.id)).length
 
-    if (hitsInTop > 0) hits += 1
+    if (hitsInTop > 0)
+      hits += 1
     precisionSum += top.length > 0 ? hitsInTop / top.length : 0
     recallSum += relevant.size > 0 ? hitsInTop / relevant.size : 0
 
     // 第一个相关文档的 1-indexed rank
-    const firstHitIdx = top.findIndex((r) => relevant.has(r.id))
+    const firstHitIdx = top.findIndex(r => relevant.has(r.id))
     rrSum += firstHitIdx >= 0 ? 1 / (firstHitIdx + 1) : 0
   }
 
@@ -125,7 +127,7 @@ describe('retrieval evaluation primitives', () => {
   })
 })
 
-describe('AdvancedRAG end-to-end retrieval (stub embedder)', () => {
+describe('advancedRAG end-to-end retrieval (stub embedder)', () => {
   // 即使是 stub embedder（哈希向量，无真实语义），同一段文本的 embedding 是
   // 完全相同的 → 自检索一定能命中自己。
   // 这就是 stage06 在没有 API key 时也能做"形状检查"的原因。
@@ -166,8 +168,8 @@ describe('AdvancedRAG end-to-end retrieval (stub embedder)', () => {
     const chunks = chunkText(text, 'src.txt', { chunkSize: 50, chunkOverlap: 10 })
 
     expect(chunks.length).toBeGreaterThan(0)
-    expect(chunks.every((c) => c.id.length > 0)).toBe(true)
-    expect(chunks.every((c) => c.metadata.source === 'src.txt')).toBe(true)
+    expect(chunks.every(c => c.id.length > 0)).toBe(true)
+    expect(chunks.every(c => c.metadata.source === 'src.txt')).toBe(true)
   })
 
   it('measures hit rate / MRR on a tiny golden set', async () => {
@@ -183,15 +185,15 @@ describe('AdvancedRAG end-to-end retrieval (stub embedder)', () => {
       { id: 'py-1', content: 'Python is dynamically typed.' },
     ]
     await rag.index(
-      corpus.map((c) => ({
+      corpus.map(c => ({
         id: c.id,
         content: c.content,
         metadata: { source: c.id, startLine: 0, endLine: 0 },
-      }))
+      })),
     )
 
     // 用文档自身作为 query 是 stub embedder 下"必中"的 sanity check
-    const golden: GoldenCase[] = corpus.map((c) => ({
+    const golden: GoldenCase[] = corpus.map(c => ({
       query: c.content,
       relevantIds: [c.id],
     }))
@@ -200,7 +202,7 @@ describe('AdvancedRAG end-to-end retrieval (stub embedder)', () => {
       golden.map(async (g) => {
         const r = await rag.retrieve(g.query, { useRewrite: false, useRerank: false })
         return r.chunks
-      })
+      }),
     )
 
     const m = evaluateRetrieval(retrieved, golden, 3)

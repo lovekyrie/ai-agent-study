@@ -1,8 +1,8 @@
 {
   "name": "stage02-prompt-context",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 02: Prompt Engineering + 基础上下文管理",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

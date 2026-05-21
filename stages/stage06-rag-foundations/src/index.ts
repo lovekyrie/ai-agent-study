@@ -1,14 +1,15 @@
-import { Embedder, cosineSimilarity } from './embeddings.js'
-import { QueryRewriter } from './query-rewriter.js'
-import { Reranker, type RerankResult } from './reranker.js'
 import type { SearchResult } from '@ai-agent-study/vectorstore'
 import type { Chunk } from './chunking.js'
+import type { RerankResult } from './reranker.js'
+import { cosineSimilarity, Embedder } from './embeddings.js'
+import { QueryRewriter } from './query-rewriter.js'
+import { Reranker } from './reranker.js'
 
 export type { Chunk } from './chunking.js'
-export { Embedder, cosineSimilarity, pseudoVector } from './embeddings.js'
-export { Reranker } from './reranker.js'
+export { chunkByFile, chunkCode, chunkText } from './chunking.js'
+export { cosineSimilarity, Embedder, pseudoVector } from './embeddings.js'
 export { QueryRewriter } from './query-rewriter.js'
-export { chunkText, chunkCode, chunkByFile } from './chunking.js'
+export { Reranker } from './reranker.js'
 
 export interface VectorEntry {
   id: string
@@ -18,12 +19,12 @@ export interface VectorEntry {
 }
 
 export interface VectorStoreAdapter {
-  add(vectors: VectorEntry[]): Promise<void>
-  search(
+  add: (vectors: VectorEntry[]) => Promise<void>
+  search: (
     query: number[],
     topK: number,
-    filter?: Record<string, unknown>
-  ): Promise<SearchResult[]>
+    filter?: Record<string, unknown>,
+  ) => Promise<SearchResult[]>
 }
 
 export interface AdvancedRAGOptions {
@@ -59,12 +60,13 @@ export class AdvancedRAG {
   }
 
   async index(chunks: Chunk[]): Promise<void> {
-    if (chunks.length === 0) return
-    const texts = chunks.map((c) => c.content)
+    if (chunks.length === 0)
+      return
+    const texts = chunks.map(c => c.content)
     const results = await this.embedder.embed(texts)
     if (results.length !== chunks.length) {
       throw new Error(
-        `Embedder returned ${results.length} embeddings for ${chunks.length} chunks`
+        `Embedder returned ${results.length} embeddings for ${chunks.length} chunks`,
       )
     }
 
@@ -81,14 +83,14 @@ export class AdvancedRAG {
   /** 检索；可选查询改写 + LLM rerank。 */
   async retrieve(
     query: string,
-    options: { useRerank?: boolean; useRewrite?: boolean } = {}
+    options: { useRerank?: boolean, useRewrite?: boolean } = {},
   ): Promise<RetrievalResult> {
     const { useRerank = true, useRewrite = true } = options
 
     const queries = useRewrite ? await this.queryRewriter.expand(query) : [query]
 
     // 每个文档：累计分数 + 命中查询数，最后取均值（只除命中数，避免压低单查询命中的文档）
-    const merged = new Map<string, { chunk: Chunk; scoreSum: number; hits: number }>()
+    const merged = new Map<string, { chunk: Chunk, scoreSum: number, hits: number }>()
 
     for (const q of queries) {
       const qEmbedding = await this.embedQuery(q)
@@ -98,7 +100,8 @@ export class AdvancedRAG {
         if (existing) {
           existing.scoreSum += r.score
           existing.hits += 1
-        } else {
+        }
+        else {
           merged.set(r.document.id, {
             chunk: {
               id: r.document.id,
@@ -112,18 +115,18 @@ export class AdvancedRAG {
       }
     }
 
-    const entries = Array.from(merged.values()).map((v) => ({
+    const entries = Array.from(merged.values()).map(v => ({
       chunk: v.chunk,
       score: v.scoreSum / v.hits,
     }))
 
     entries.sort((a, b) => b.score - a.score)
     const topEntries = entries.slice(0, this.defaultTopK)
-    const topChunks = topEntries.map((e) => e.chunk)
-    const topScores = topEntries.map((e) => e.score)
+    const topChunks = topEntries.map(e => e.chunk)
+    const topScores = topEntries.map(e => e.score)
 
     if (useRerank && topChunks.length > 1) {
-      const searchResults: SearchResult[] = topEntries.map((e) => ({
+      const searchResults: SearchResult[] = topEntries.map(e => ({
         score: e.score,
         document: {
           id: e.chunk.id,
@@ -135,12 +138,12 @@ export class AdvancedRAG {
       }))
       const reranked = await this.reranker.rerank(query, searchResults, this.rerankTopK)
       return {
-        chunks: reranked.map((r) => ({
+        chunks: reranked.map(r => ({
           id: r.document.id,
           content: r.document.content,
           metadata: r.document.metadata as Chunk['metadata'],
         })),
-        scores: reranked.map((r) => r.score),
+        scores: reranked.map(r => r.score),
         reranked,
       }
     }
@@ -155,13 +158,14 @@ export class AdvancedRAG {
 
   private async embedQuery(query: string): Promise<number[]> {
     const [result] = await this.embedder.embed([query])
-    if (!result) throw new Error('Embedder returned empty result for query')
+    if (!result)
+      throw new Error('Embedder returned empty result for query')
     return result.embedding
   }
 }
 
 function pickPrimitiveMetadata(
-  meta: Record<string, unknown>
+  meta: Record<string, unknown>,
 ): Record<string, string | number | boolean> {
   const out: Record<string, string | number | boolean> = {}
   for (const [k, v] of Object.entries(meta)) {
@@ -186,14 +190,14 @@ export class InMemoryVectorStore implements VectorStoreAdapter {
   async search(
     query: number[],
     topK: number,
-    filter?: Record<string, unknown>
+    filter?: Record<string, unknown>,
   ): Promise<SearchResult[]> {
     const candidates = filter
-      ? this.vectors.filter((v) => matchesFilter(v.metadata, filter))
+      ? this.vectors.filter(v => matchesFilter(v.metadata, filter))
       : this.vectors
 
     return candidates
-      .map((v) => ({
+      .map(v => ({
         score: cosineSimilarity(query, v.embedding),
         document: {
           id: v.id,
@@ -216,10 +220,11 @@ export class InMemoryVectorStore implements VectorStoreAdapter {
 
 function matchesFilter(
   meta: Record<string, unknown>,
-  filter: Record<string, unknown>
+  filter: Record<string, unknown>,
 ): boolean {
   for (const [k, v] of Object.entries(filter)) {
-    if (meta[k] !== v) return false
+    if (meta[k] !== v)
+      return false
   }
   return true
 }

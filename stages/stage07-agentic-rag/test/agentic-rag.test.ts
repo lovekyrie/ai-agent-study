@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest'
 import type { LLMClient } from '@ai-agent-study/llm-client'
 import type { SearchResult } from '@ai-agent-study/vectorstore'
-import { AgenticRAG, type KnowledgeBase } from '../src/index.js'
+import type { KnowledgeBase } from '../src/index.js'
+import { describe, expect, it } from 'vitest'
+import { AgenticRAG } from '../src/index.js'
 
 function makeKB(name: string, docs: string[]): KnowledgeBase {
   return {
@@ -41,7 +42,7 @@ function mockClient(plan: object): LLMClient {
   } as unknown as LLMClient
 }
 
-describe('AgenticRAG.planRetrieval', () => {
+describe('agenticRAG.planRetrieval', () => {
   it('returns empty plan when no KB registered', async () => {
     const rag = new AgenticRAG({ llmClient: mockClient({}) })
     const plan = await rag.planRetrieval('any')
@@ -87,7 +88,7 @@ describe('AgenticRAG.planRetrieval', () => {
   })
 })
 
-describe('AgenticRAG.retrieve', () => {
+describe('agenticRAG.retrieve', () => {
   it('dedupes across KBs and slices to topK', async () => {
     const rag = new AgenticRAG({
       llmClient: mockClient({
@@ -103,7 +104,7 @@ describe('AgenticRAG.retrieve', () => {
         'TypeScript is a typed language',
         'TypeScript supports generics',
         'TypeScript compiles to JavaScript',
-      ])
+      ]),
     )
 
     const results = await rag.retrieve('typescript')

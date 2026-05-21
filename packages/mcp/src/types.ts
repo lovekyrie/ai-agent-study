@@ -42,7 +42,7 @@ export interface MCPToolCallRequest {
 }
 
 export interface MCPToolCallResult {
-  content: Array<{ type: 'text' | 'image' | 'resource'; text?: string; data?: string; mimeType?: string }>
+  content: Array<{ type: 'text' | 'image' | 'resource', text?: string, data?: string, mimeType?: string }>
   isError?: boolean
 }
 

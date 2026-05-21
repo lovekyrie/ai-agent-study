@@ -1,8 +1,8 @@
-import { EventEmitter } from 'events'
+import type { CodeChunk, Reference, SearchResult, Source } from './indexer.js'
+import type { CodeRetriever } from './retrieval.js'
+import { EventEmitter } from 'node:events'
 import { createLLMClient } from '@ai-agent-study/llm-client'
-import type { CodeChunk, SearchResult, AskResult, Source, Reference } from './indexer.js'
 import { CodeIndexer } from './indexer.js'
-import { CodeRetriever } from './retrieval.js'
 
 export interface AgentConfig {
   model?: string
@@ -45,7 +45,7 @@ export class CodebaseAgent extends EventEmitter {
 
   constructor(
     retriever: CodeRetriever,
-    config?: AgentConfig
+    config?: AgentConfig,
   ) {
     super()
     this.indexer = new CodeIndexer()
@@ -54,7 +54,7 @@ export class CodebaseAgent extends EventEmitter {
     this.config = { ...DEFAULT_CONFIG, ...config } as Required<AgentConfig>
   }
 
-  async indexProject(projectPath: string, name: string): Promise<{ projectId: string; stats: { filesIndexed: number; symbolsExtracted: number } }> {
+  async indexProject(projectPath: string, name: string): Promise<{ projectId: string, stats: { filesIndexed: number, symbolsExtracted: number } }> {
     const project = await this.indexer.indexProject(projectPath, name)
 
     // Store chunks for later use
@@ -79,10 +79,9 @@ export class CodebaseAgent extends EventEmitter {
     }
   }
 
-  private async getAllChunks(projectPath: string): Promise<CodeChunk[]> {
+  private async getAllChunks(_projectPath: string): Promise<CodeChunk[]> {
     // This is a simplified version - in production, the indexer would return chunks directly
     // For now, we'll create a basic retriever that can work with the stored chunks
-    const project = await this.indexer.indexProject(projectPath, 'temp')
     return [] // Chunks are stored in vector store directly by indexer
   }
 
@@ -158,7 +157,7 @@ export class CodebaseAgent extends EventEmitter {
       }
       context += '\n'
       context += `Relevance: ${(result.score * 100).toFixed(0)}%\n\n`
-      context += '```' + result.chunk.language + '\n'
+      context += `\`\`\`${result.chunk.language}\n`
       context += result.chunk.content.slice(0, 1500)
       if (result.chunk.content.length > 1500) {
         context += '\n// ... (content truncated)'
@@ -186,7 +185,8 @@ If the context doesn't contain enough information to fully answer the question, 
 
     for (const result of results) {
       const file = result.chunk.location.file
-      if (seen.has(file)) continue
+      if (seen.has(file))
+        continue
       seen.add(file)
 
       sources.push({
@@ -205,7 +205,8 @@ If the context doesn't contain enough information to fully answer the question, 
 
     for (const result of results) {
       const chunk = result.chunk
-      if (!chunk.symbol && !chunk.location.line) continue
+      if (!chunk.symbol && !chunk.location.line)
+        continue
 
       refs.push({
         file: chunk.location.file,
@@ -229,7 +230,7 @@ If the context doesn't contain enough information to fully answer the question, 
     this.emit('project-deleted', { projectId })
   }
 
-  async getStats(projectId: string): Promise<{ totalChunks: number; filesIndexed: number }> {
+  async getStats(projectId: string): Promise<{ totalChunks: number, filesIndexed: number }> {
     return this.retriever.getStats(projectId)
   }
 }
@@ -241,10 +242,10 @@ export class ProjectStore {
     name: string
     path: string
     createdAt: Date
-    stats: { filesIndexed: number; symbolsExtracted: number }
+    stats: { filesIndexed: number, symbolsExtracted: number }
   }>()
 
-  create(id: string, name: string, path: string, stats: { filesIndexed: number; symbolsExtracted: number }): void {
+  create(id: string, name: string, path: string, stats: { filesIndexed: number, symbolsExtracted: number }): void {
     this.projects.set(id, {
       id,
       name,

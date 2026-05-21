@@ -65,7 +65,7 @@ const suite = await runner.runAll({
   },
 })
 
-console.log(suite.summary.passRate)       // 0.85
+console.log(suite.summary.passRate) // 0.85
 console.log(suite.summary.categoryBreakdown)
 ```
 
@@ -101,7 +101,8 @@ const tracker = new RegressionTracker()
 tracker.add(baselineSuite)
 tracker.add(currentSuite)
 const report = tracker.compare(baselineSuite, currentSuite)
-if (report.hasRegression) console.warn(report.regressions)
+if (report.hasRegression)
+  console.warn(report.regressions)
 ```
 
 ### 6. 成本追踪

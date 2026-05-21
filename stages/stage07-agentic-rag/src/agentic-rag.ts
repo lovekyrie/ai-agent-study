@@ -1,6 +1,7 @@
-import { createLLMClient, type LLMClient } from '@ai-agent-study/llm-client'
+import type { LLMClient } from '@ai-agent-study/llm-client'
 import type { SearchResult } from '@ai-agent-study/vectorstore'
 import type { KnowledgeBase, ResearchResponse, RetrievalPlan } from './types.js'
+import { createLLMClient } from '@ai-agent-study/llm-client'
 
 export interface AgenticRAGOptions {
   /** 不传则惰性 createLLMClient() */
@@ -31,7 +32,8 @@ export class AgenticRAG {
   }
 
   private getClient(): LLMClient {
-    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    if (!this.cachedClient)
+      this.cachedClient = createLLMClient()
     return this.cachedClient
   }
 
@@ -58,7 +60,7 @@ export class AgenticRAG {
 3. How many results to retrieve
 
 Knowledge Bases:
-${kbList.map((kb) => `- ${kb.name}: ${kb.description}`).join('\n')}
+${kbList.map(kb => `- ${kb.name}: ${kb.description}`).join('\n')}
 
 Respond with JSON:
 {
@@ -75,18 +77,19 @@ Respond with JSON:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: query },
         ],
-        { jsonMode: true }
+        { jsonMode: true },
       )
 
       return this.normalizePlan(
         JSON.parse(response.content),
         query,
-        kbList.map((kb) => kb.name)
+        kbList.map(kb => kb.name),
       )
-    } catch {
+    }
+    catch {
       // LLM 失败时降级为"全部 KB / 默认 topK"
       return {
-        knowledgeBases: kbList.map((kb) => kb.name),
+        knowledgeBases: kbList.map(kb => kb.name),
         query,
         topK: 10,
         useHybrid: true,
@@ -107,7 +110,8 @@ Respond with JSON:
 
     for (const kbName of plan.knowledgeBases) {
       const kb = this.knowledgeBases.get(kbName)
-      if (!kb) continue
+      if (!kb)
+        continue
       const kbResults = await kb.search(plan.query, plan.topK)
       results.push(...kbResults)
     }
@@ -115,7 +119,8 @@ Respond with JSON:
     // 跨 KB 去重 + 按 score 取 topK
     const seen = new Set<string>()
     const deduped = results.filter((r) => {
-      if (seen.has(r.document.id)) return false
+      if (seen.has(r.document.id))
+        return false
       seen.add(r.document.id)
       return true
     })
@@ -125,7 +130,7 @@ Respond with JSON:
 
   /** 端到端的 research：规划 → 检索 → LLM 综合并附引用。 */
   async runResearch(query: string): Promise<ResearchResponse> {
-    const steps: { action: string; observation: string }[] = []
+    const steps: { action: string, observation: string }[] = []
     const plan = await this.planRetrieval(query)
     steps.push({
       action: 'plan_retrieval',
@@ -171,14 +176,14 @@ If the sources are insufficient, say what is missing. Cite sources with [1], [2]
 
 Available knowledge bases:
 ${Array.from(this.knowledgeBases.values())
-  .map((kb) => `- ${kb.name}: ${kb.description}`)
+  .map(kb => `- ${kb.name}: ${kb.description}`)
   .join('\n')}
 
 Retrieved sources:
 ${context}`,
         },
       ],
-      { temperature: 0.2, maxTokens: 1200 }
+      { temperature: 0.2, maxTokens: 1200 },
     )
 
     steps.push({
@@ -197,16 +202,16 @@ ${context}`,
   private normalizePlan(
     raw: unknown,
     originalQuery: string,
-    validKbNames: string[]
+    validKbNames: string[],
   ): RetrievalPlan {
     const obj = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {}
     const requestedKbs = Array.isArray(obj.knowledgeBases)
       ? obj.knowledgeBases.filter((name): name is string => typeof name === 'string')
       : []
     const validSet = new Set(validKbNames)
-    const selected = requestedKbs.filter((name) => validSet.has(name))
-    const topK =
-      typeof obj.topK === 'number' && Number.isFinite(obj.topK)
+    const selected = requestedKbs.filter(name => validSet.has(name))
+    const topK
+      = typeof obj.topK === 'number' && Number.isFinite(obj.topK)
         ? Math.max(1, Math.min(this.maxTopK, Math.floor(obj.topK)))
         : 10
 

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { Embedder, cosineSimilarity, pseudoVector } from '../src/embeddings.js'
+import { describe, expect, it } from 'vitest'
+import { cosineSimilarity, Embedder, pseudoVector } from '../src/embeddings.js'
 
 describe('cosineSimilarity', () => {
   it('returns 0 for empty / mismatched vectors', () => {
@@ -41,7 +41,7 @@ describe('pseudoVector', () => {
   })
 })
 
-describe('Embedder', () => {
+describe('embedder', () => {
   it('falls back to stub provider when no API key', () => {
     const e = new Embedder({ apiKey: '', dimensions: 8 })
     expect(e.getProvider()).toBe('stub')

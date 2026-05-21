@@ -1,4 +1,4 @@
-import { KnowledgeGraph, buildGraphContext } from './index.js'
+import { buildGraphContext, KnowledgeGraph } from './index.js'
 
 const graph = new KnowledgeGraph()
 graph.upsertEntity({ id: 'agent', type: 'concept', name: 'Agent' })

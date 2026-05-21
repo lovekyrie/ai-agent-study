@@ -1,14 +1,16 @@
-import { randomUUID } from 'node:crypto'
 import type { ChatMessage, LLMClient } from '@ai-agent-study/llm-client'
+import type { LongTermStore, MemoryEntry } from '@ai-agent-study/memory'
+import type { BuildContextResult } from './context-builder.js'
+import type { SummarizeOptions } from './summarizer.js'
+import type { BudgetOptions } from './token-budget.js'
+import { randomUUID } from 'node:crypto'
 import {
   InMemoryLongTerm,
+
   ShortTermMemory,
-  type LongTermStore,
-  type MemoryEntry,
 } from '@ai-agent-study/memory'
-import { buildContext, type BuildContextResult } from './context-builder.js'
-import { summarizeHistory, type SummarizeOptions } from './summarizer.js'
-import type { BudgetOptions } from './token-budget.js'
+import { buildContext } from './context-builder.js'
+import { summarizeHistory } from './summarizer.js'
 
 export interface SessionConfig {
   /** 会话 ID；不传则自动生成 */
@@ -74,7 +76,7 @@ export class Session {
 
   /** 工厂：快速创建一个带 in-memory 长期记忆的 session（用于 demo / 测试） */
   static withInMemoryLongTerm(
-    config: Omit<SessionConfig, 'longTermStore'>
+    config: Omit<SessionConfig, 'longTermStore'>,
   ): Session {
     return new Session({ ...config, longTermStore: new InMemoryLongTerm() })
   }
@@ -94,7 +96,8 @@ export class Session {
   /** 把短期记忆里的某一条"提升"到长期记忆（如果配置了 long-term store） */
   async promoteToLongTerm(entryId: string): Promise<boolean> {
     const entry = this.shortTerm.get(entryId)
-    if (!entry || !this.longTermStore) return false
+    if (!entry || !this.longTermStore)
+      return false
     await this.longTermStore.add(entry)
     return true
   }
@@ -137,11 +140,13 @@ export class Session {
    * 失败行为：summarizeHistory 抛错会向上传递，由调用方决定是否降级。
    */
   async compress(options: SummarizeOptions = {}): Promise<CompressResult | null> {
-    if (!this.llmClient) return null
+    if (!this.llmClient)
+      return null
 
     const keepRecent = options.keepRecent ?? 4
     const all = this.shortTerm.getAll()
-    if (all.length <= keepRecent) return null
+    if (all.length <= keepRecent)
+      return null
 
     // 把 short-term 内容拼成 messages 给 summarizer
     const messages: ChatMessage[] = [

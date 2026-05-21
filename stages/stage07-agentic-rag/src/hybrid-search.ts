@@ -40,7 +40,7 @@ export class HybridSearchEngine {
 
     const normalizedVector = normalizeScores(vectorResults)
     const normalizedKeyword = normalizeScores(keywordResults)
-    const scoreMap = new Map<string, { result: SearchResult; score: number }>()
+    const scoreMap = new Map<string, { result: SearchResult, score: number }>()
 
     for (const r of normalizedVector) {
       scoreMap.set(r.result.document.id, {
@@ -53,7 +53,8 @@ export class HybridSearchEngine {
       const existing = scoreMap.get(r.result.document.id)
       if (existing) {
         existing.score += r.score * this.keywordWeight
-      } else {
+      }
+      else {
         scoreMap.set(r.result.document.id, {
           result: r.result,
           score: r.score * this.keywordWeight,
@@ -69,16 +70,17 @@ export class HybridSearchEngine {
 }
 
 function normalizeScores(
-  results: SearchResult[]
-): { result: SearchResult; score: number }[] {
-  if (results.length === 0) return []
-  const scores = results.map((r) => r.score)
+  results: SearchResult[],
+): { result: SearchResult, score: number }[] {
+  if (results.length === 0)
+    return []
+  const scores = results.map(r => r.score)
   const min = Math.min(...scores)
   const max = Math.max(...scores)
   if (max === min) {
-    return results.map((result) => ({ result, score: 1 }))
+    return results.map(result => ({ result, score: 1 }))
   }
-  return results.map((result) => ({
+  return results.map(result => ({
     result,
     score: (result.score - min) / (max - min),
   }))

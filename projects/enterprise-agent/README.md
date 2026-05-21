@@ -70,7 +70,7 @@ WORKFLOW_TEMPLATES.ticketProcessing()
 ## 使用示例
 
 ```typescript
-import { WorkflowOrchestrator, WORKFLOW_TEMPLATES } from '@ai-agent-study/enterprise-agent'
+import { WORKFLOW_TEMPLATES, WorkflowOrchestrator } from '@ai-agent-study/enterprise-agent'
 
 async function main() {
   const orchestrator = new WorkflowOrchestrator()

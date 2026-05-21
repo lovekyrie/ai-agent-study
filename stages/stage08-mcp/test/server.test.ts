@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
-  MCPServer,
-  createMCPTool,
-  createMCPResource,
   createMCPPrompt,
+  createMCPResource,
+  createMCPTool,
+  MCPServer,
 } from '../src/index.js'
 
 function makeServer() {
@@ -27,7 +27,7 @@ function makeServer() {
   })
 }
 
-describe('MCPServer', () => {
+describe('mCPServer', () => {
   it('returns manifest with all registered capabilities', () => {
     const server = makeServer()
     const manifest = server.getManifest()

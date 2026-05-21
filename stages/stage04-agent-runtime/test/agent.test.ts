@@ -1,26 +1,27 @@
-import { describe, it, expect, vi } from 'vitest'
-import { z } from 'zod'
 import type {
-  LLMClient,
   ChatMessage,
-  ChatResponse,
   ChatOptions,
+  ChatResponse,
+  LLMClient,
 } from '@ai-agent-study/llm-client'
 import type { ToolDefinition } from '@ai-agent-study/tools'
+import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 import { Agent } from '../src/agent.js'
 
 /** 构造一个最小可用的 LLMClient mock，按预设脚本逐轮返回 */
 function makeMockClient(responses: ChatResponse[]): {
   client: LLMClient
-  calls: { messages: ChatMessage[]; options?: ChatOptions }[]
+  calls: { messages: ChatMessage[], options?: ChatOptions }[]
 } {
-  const calls: { messages: ChatMessage[]; options?: ChatOptions }[] = []
+  const calls: { messages: ChatMessage[], options?: ChatOptions }[] = []
   let i = 0
   const client = {
     chat: vi.fn(async (messages: ChatMessage[], options?: ChatOptions) => {
       calls.push({ messages: [...messages], options })
       const resp = responses[i++]
-      if (!resp) throw new Error(`Mock client ran out of responses (call #${i})`)
+      if (!resp)
+        throw new Error(`Mock client ran out of responses (call #${i})`)
       return resp
     }),
     stream: vi.fn(),
@@ -34,13 +35,13 @@ function makeEchoTool(name = 'echo'): ToolDefinition {
     name,
     description: 'returns its input verbatim',
     parameters: z.object({ text: z.string() }),
-    execute: async (params) => ({
+    execute: async params => ({
       content: `echo:${(params as { text: string }).text}`,
     }),
   }
 }
 
-describe('Agent: ReAct loop', () => {
+describe('agent: ReAct loop', () => {
   it('returns final answer when LLM does not request tools', async () => {
     const { client } = makeMockClient([
       {
@@ -87,17 +88,17 @@ describe('Agent: ReAct loop', () => {
     // 关键断言：assistant 消息保留了 tool_calls 字段
     const round2Messages = calls[1].messages
     const assistantWithCalls = round2Messages.find(
-      (m) => m.role === 'assistant' && (m.tool_calls?.length ?? 0) > 0
+      m => m.role === 'assistant' && (m.tool_calls?.length ?? 0) > 0,
     )
     expect(assistantWithCalls).toBeDefined()
     expect(assistantWithCalls?.tool_calls).toHaveLength(2)
 
     // 关键断言：两个 tool_call 都有对应 role:'tool' 消息
-    const toolMessages = round2Messages.filter((m) => m.role === 'tool')
+    const toolMessages = round2Messages.filter(m => m.role === 'tool')
     expect(toolMessages).toHaveLength(2)
-    expect(toolMessages.map((m) => m.tool_call_id).sort()).toEqual(['call_1', 'call_2'])
-    expect(toolMessages.find((m) => m.tool_call_id === 'call_1')?.content).toBe('echo:a')
-    expect(toolMessages.find((m) => m.tool_call_id === 'call_2')?.content).toBe('echo:b')
+    expect(toolMessages.map(m => m.tool_call_id).sort()).toEqual(['call_1', 'call_2'])
+    expect(toolMessages.find(m => m.tool_call_id === 'call_1')?.content).toBe('echo:a')
+    expect(toolMessages.find(m => m.tool_call_id === 'call_2')?.content).toBe('echo:b')
   })
 
   it('does NOT auto-finish after first successful tool call (lets LLM decide)', async () => {
@@ -166,11 +167,11 @@ describe('Agent: ReAct loop', () => {
     }
     // 模型永远请求工具，不给最终答案
     const { client } = makeMockClient(
-      Array(5).fill(null).map(() => ({
+      Array.from({ length: 5 }).fill(null).map(() => ({
         content: '',
         finishReason: 'tool_calls' as const,
         toolCalls: [toolCall],
-      }))
+      })),
     )
     const agent = new Agent({
       llmClient: client,
@@ -198,7 +199,7 @@ describe('Agent: ReAct loop', () => {
     const agent = new Agent({
       llmClient: client,
       tools: [makeEchoTool()],
-      onStep: (s) => observed.push(s.stepNumber),
+      onStep: s => observed.push(s.stepNumber),
     })
     await agent.run('go')
     expect(observed).toEqual([1, 2])
@@ -276,7 +277,8 @@ describe('Agent: ReAct loop', () => {
         const expr = (params as { expr: string }).expr
         // 极简实现：只支持 a+b
         const match = /^(\d+)\s*\+\s*(\d+)$/.exec(expr)
-        if (!match) return { content: '', error: 'unsupported expr' }
+        if (!match)
+          return { content: '', error: 'unsupported expr' }
         return { content: String(Number(match[1]) + Number(match[2])) }
       },
     }
@@ -284,7 +286,7 @@ describe('Agent: ReAct loop', () => {
       name: 'search',
       description: 'search the web',
       parameters: z.object({ query: z.string() }),
-      execute: async (params) => ({
+      execute: async params => ({
         content: `[search result for "${(params as { query: string }).query}"]: A progressive JS framework.`,
       }),
     }
@@ -318,7 +320,7 @@ describe('Agent: ReAct loop', () => {
     const agent = new Agent({
       llmClient: client,
       tools: [calcTool, searchTool],
-      onStep: (s) => observed.push(s.stepNumber),
+      onStep: s => observed.push(s.stepNumber),
     })
 
     const response = await agent.run('123 加 456 等于多少？再帮我搜一下 Vue 是什么')
@@ -331,18 +333,18 @@ describe('Agent: ReAct loop', () => {
 
     // 2) 第一步：两个工具都被调用，且参数路由正确
     const step1 = response.trace.steps[0]
-    expect(step1.toolCalls.map((c) => c.name).sort()).toEqual(['calculator', 'search'])
+    expect(step1.toolCalls.map(c => c.name).sort()).toEqual(['calculator', 'search'])
     expect(step1.toolResults).toHaveLength(2)
     const calcResult = step1.toolResults.find(
-      (_, i) => step1.toolCalls[i].name === 'calculator'
+      (_, i) => step1.toolCalls[i].name === 'calculator',
     )
     expect(calcResult?.content).toBe('579')
 
     // 3) 第二轮 chat 应能"看到"两条 role:'tool' 消息（协议契约）
     const round2 = calls[1].messages
-    const toolMsgs = round2.filter((m) => m.role === 'tool')
+    const toolMsgs = round2.filter(m => m.role === 'tool')
     expect(toolMsgs).toHaveLength(2)
-    expect(toolMsgs.map((m) => m.tool_call_id).sort()).toEqual(['t_calc', 't_search'])
+    expect(toolMsgs.map(m => m.tool_call_id).sort()).toEqual(['t_calc', 't_search'])
 
     // 4) onStep 回调按 step 顺序触发
     expect(observed).toEqual([1, 2])

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryTracer } from '../src/index.js'
 
-describe('InMemoryTracer', () => {
+describe('inMemoryTracer', () => {
   it('records runs, spans and usage summaries', () => {
     const tracer = new InMemoryTracer()
     const run = tracer.startRun('codebase-agent', { query: 'where is auth?' })

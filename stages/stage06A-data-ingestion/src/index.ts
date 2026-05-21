@@ -1,4 +1,5 @@
-import { MemoryDocumentLoader, ingestDocuments, type SourceDocument } from '@ai-agent-study/retrieval'
+import type { SourceDocument } from '@ai-agent-study/retrieval'
+import { ingestDocuments, MemoryDocumentLoader } from '@ai-agent-study/retrieval'
 
 export async function buildIngestionPreview(documents: SourceDocument[]) {
   const loader = new MemoryDocumentLoader(documents)

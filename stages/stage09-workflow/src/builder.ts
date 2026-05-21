@@ -1,5 +1,5 @@
-import { WorkflowEngine } from './engine.js'
 import type { WorkflowContext, WorkflowEdge, WorkflowNode } from './types.js'
+import { WorkflowEngine } from './engine.js'
 
 export class WorkflowBuilder {
   private nodes: WorkflowNode[] = []
@@ -111,17 +111,16 @@ Provide a detailed style assessment with suggestions for improvement.`,
     )
     .addApproval('approval', 'Manager Approval', 'Requires manager approval for merged changes')
     .addEnd('end', 'Complete')
-    .addEdge('supervisor', 'security', (ctx) => ctx.data['securityCompleted'] !== true)
-    .addEdge('supervisor', 'performance', (ctx) => ctx.data['securityCompleted'] === true && ctx.data['performanceCompleted'] !== true)
-    .addEdge('supervisor', 'style', (ctx) => ctx.data['securityCompleted'] === true && ctx.data['performanceCompleted'] === true && ctx.data['styleCompleted'] !== true)
+    .addEdge('supervisor', 'security', ctx => ctx.data.securityCompleted !== true)
+    .addEdge('supervisor', 'performance', ctx => ctx.data.securityCompleted === true && ctx.data.performanceCompleted !== true)
+    .addEdge('supervisor', 'style', ctx => ctx.data.securityCompleted === true && ctx.data.performanceCompleted === true && ctx.data.styleCompleted !== true)
     .addEdge('security', 'supervisor')
     .addEdge('performance', 'supervisor')
     .addEdge('style', 'supervisor')
-    .addEdge('supervisor', 'approval', (ctx) =>
-      ctx.data['securityCompleted'] === true &&
-      ctx.data['performanceCompleted'] === true &&
-      ctx.data['styleCompleted'] === true,
-    )
+    .addEdge('supervisor', 'approval', ctx =>
+      ctx.data.securityCompleted === true
+      && ctx.data.performanceCompleted === true
+      && ctx.data.styleCompleted === true)
     .addEdge('approval', 'end')
     .build()
 }

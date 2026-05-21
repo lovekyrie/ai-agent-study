@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { QueryRewriter } from '../src/query-rewriter.js'
 
-describe('QueryRewriter.parseVariations', () => {
+describe('queryRewriter.parseVariations', () => {
   it('parses {"queries": [...]} format', () => {
     expect(
-      QueryRewriter.parseVariations('{"queries":["a","b","c"]}', 5)
+      QueryRewriter.parseVariations('{"queries":["a","b","c"]}', 5),
     ).toEqual(['a', 'b', 'c'])
   })
 
@@ -14,7 +14,7 @@ describe('QueryRewriter.parseVariations', () => {
 
   it('caps results to max', () => {
     expect(
-      QueryRewriter.parseVariations('["a","b","c","d"]', 2)
+      QueryRewriter.parseVariations('["a","b","c","d"]', 2),
     ).toEqual(['a', 'b'])
   })
 
@@ -48,12 +48,12 @@ describe('QueryRewriter.parseVariations', () => {
 
   it('filters non-string entries silently', () => {
     expect(
-      QueryRewriter.parseVariations('{"queries":["a",123,"b",null]}', 5)
+      QueryRewriter.parseVariations('{"queries":["a",123,"b",null]}', 5),
     ).toEqual(['a', 'b'])
   })
 })
 
-describe('QueryRewriter (with mock client)', () => {
+describe('queryRewriter (with mock client)', () => {
   it('expand always includes original query (deduped)', async () => {
     const r = new QueryRewriter({
       client: {

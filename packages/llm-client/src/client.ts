@@ -1,16 +1,17 @@
-import axios, { type AxiosInstance } from 'axios'
-import { toReadableError } from './errors.js'
+import type { AxiosInstance } from 'axios'
 import type {
-  LLMConfig,
   ChatMessage,
   ChatOptions,
   ChatResponse,
+  LLMConfig,
   StreamChunk,
   ToolCall,
 } from './types.js'
+import axios from 'axios'
+import { toReadableError } from './errors.js'
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 // 指数退避 + 抖动，避免雷暴
@@ -31,14 +32,14 @@ interface ResolvedOptions {
 export class LLMClient {
   private client: AxiosInstance
   private model: string
-  private defaults: { temperature: number; topP: number; maxTokens: number }
+  private defaults: { temperature: number, topP: number, maxTokens: number }
   private maxRetries: number
 
   constructor(config: LLMConfig) {
     this.client = axios.create({
       baseURL: config.baseURL,
       headers: {
-        Authorization: `Bearer ${config.apiKey}`,
+        'Authorization': `Bearer ${config.apiKey}`,
         'Content-Type': 'application/json',
       },
       timeout: config.timeout ?? 120_000,
@@ -69,7 +70,8 @@ export class LLMClient {
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       try {
         return await this.doChat(messages, opts)
-      } catch (error) {
+      }
+      catch (error) {
         if (attempt < this.maxRetries && this.isRetryable(error)) {
           await sleep(backoffDelay(attempt))
           continue
@@ -91,7 +93,8 @@ export class LLMClient {
       stream: false,
     }
 
-    if (opts.jsonMode) body.response_format = { type: 'json_object' }
+    if (opts.jsonMode)
+      body.response_format = { type: 'json_object' }
     if (opts.tools?.length) {
       body.tools = opts.tools
       body.tool_choice = 'auto'
@@ -122,9 +125,9 @@ export class LLMClient {
     }
   }
 
-  async *stream(
+  async* stream(
     messages: ChatMessage[],
-    options?: ChatOptions
+    options?: ChatOptions,
   ): AsyncGenerator<StreamChunk, void, undefined> {
     const opts = this.resolveOptions(options)
 
@@ -132,7 +135,8 @@ export class LLMClient {
       try {
         yield* this.doStream(messages, opts)
         return
-      } catch (error) {
+      }
+      catch (error) {
         if (attempt < this.maxRetries && this.isRetryable(error)) {
           await sleep(backoffDelay(attempt))
           continue
@@ -143,9 +147,9 @@ export class LLMClient {
     throw new Error('Max retries exceeded in stream')
   }
 
-  private async *doStream(
+  private async* doStream(
     messages: ChatMessage[],
-    opts: ResolvedOptions
+    opts: ResolvedOptions,
   ): AsyncGenerator<StreamChunk, void, undefined> {
     const body: Record<string, unknown> = {
       model: this.model,
@@ -155,7 +159,8 @@ export class LLMClient {
       max_tokens: opts.maxTokens,
       stream: true,
     }
-    if (opts.tools?.length) body.tools = opts.tools
+    if (opts.tools?.length)
+      body.tools = opts.tools
 
     const response = await this.client.post('/chat/completions', body, {
       responseType: 'stream',
@@ -174,12 +179,14 @@ export class LLMClient {
 
         for (const line of lines) {
           const parsed = LLMClient.parseSSE(line)
-          if (!parsed) continue
+          if (!parsed)
+            continue
           if (parsed.done) {
             yield parsed
             return
           }
-          if (parsed.delta) yield parsed
+          if (parsed.delta)
+            yield parsed
         }
       }
 
@@ -190,36 +197,42 @@ export class LLMClient {
           yield tail
           return
         }
-        if (tail.delta) yield tail
+        if (tail.delta)
+          yield tail
       }
 
       yield { delta: '', done: true }
-    } finally {
+    }
+    finally {
       stream.destroy?.()
     }
   }
 
   async jsonStructured<T = Record<string, unknown>>(
     messages: ChatMessage[],
-    options?: ChatOptions
+    options?: ChatOptions,
   ): Promise<T> {
     const response = await this.chat(messages, { ...options, jsonMode: true })
     try {
       return JSON.parse(response.content) as T
-    } catch {
+    }
+    catch {
       throw new Error('Failed to parse structured JSON response')
     }
   }
 
   /** 解析一行 SSE，容忍 "data:" 后是否带空格 */
   static parseSSE(line: string): StreamChunk | null {
-    if (!line || !line.startsWith('data:')) return null
+    if (!line || !line.startsWith('data:'))
+      return null
     const data = line.slice(5).trimStart()
-    if (data === '[DONE]') return { delta: '', done: true }
+    if (data === '[DONE]')
+      return { delta: '', done: true }
     try {
       const parsed = JSON.parse(data)
       return { delta: parsed.choices?.[0]?.delta?.content ?? '', done: false }
-    } catch {
+    }
+    catch {
       return null
     }
   }
@@ -234,9 +247,10 @@ export class LLMClient {
 }
 
 function parseToolCalls(rawToolCalls: unknown): ToolCall[] | undefined {
-  if (!Array.isArray(rawToolCalls)) return undefined
+  if (!Array.isArray(rawToolCalls))
+    return undefined
   return rawToolCalls.map((tc) => {
-    const t = tc as { id?: string; function?: { name?: string; arguments?: string } }
+    const t = tc as { id?: string, function?: { name?: string, arguments?: string } }
     return {
       id: t.id ?? '',
       type: 'function' as const,

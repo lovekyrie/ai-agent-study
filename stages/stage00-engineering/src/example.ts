@@ -26,9 +26,10 @@ async function main() {
 
   try {
     logger.info('Simulating some work...')
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000))
     logger.info('Work completed successfully')
-  } catch (error) {
+  }
+  catch (error) {
     logger.error('Work failed', error instanceof Error ? error : undefined)
   }
 

@@ -1,4 +1,5 @@
-import { createLLMClient, type LLMClient } from '@ai-agent-study/llm-client'
+import type { LLMClient } from '@ai-agent-study/llm-client'
+import { createLLMClient } from '@ai-agent-study/llm-client'
 
 export interface QueryRewriteResult {
   original: string
@@ -24,8 +25,10 @@ export class QueryRewriter {
   }
 
   private getClient(): LLMClient {
-    if (this.providedClient) return this.providedClient
-    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    if (this.providedClient)
+      return this.providedClient
+    if (!this.cachedClient)
+      this.cachedClient = createLLMClient()
     return this.cachedClient
   }
 
@@ -39,14 +42,16 @@ export class QueryRewriter {
             content: `原始问题：${query}\n请输出 ${numVariations} 个不同角度的检索查询。`,
           },
         ],
-        { jsonMode: true, maxTokens: 400, temperature: 0.4 }
+        { jsonMode: true, maxTokens: 400, temperature: 0.4 },
       )
 
       const variations = QueryRewriter.parseVariations(response.content, numVariations)
       // 至少返回原 query，避免空数组让上游失去检索能力
-      if (variations.length === 0) return { original: query, rewritten: [query] }
+      if (variations.length === 0)
+        return { original: query, rewritten: [query] }
       return { original: query, rewritten: variations }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('[QueryRewriter] failed, falling back to original query:', error)
       return { original: query, rewritten: [query] }
     }
@@ -60,7 +65,8 @@ export class QueryRewriter {
 
   async compress(context: string[], maxLength = 2000): Promise<string> {
     const combined = context.join('\n\n')
-    if (combined.length <= maxLength) return combined
+    if (combined.length <= maxLength)
+      return combined
 
     try {
       const response = await this.getClient().chat(
@@ -68,11 +74,12 @@ export class QueryRewriter {
           { role: 'system', content: COMPRESS_SYSTEM },
           { role: 'user', content: `请压缩至 ${maxLength} 字以内：\n\n${combined}` },
         ],
-        { maxTokens: 1000, temperature: 0 }
+        { maxTokens: 1000, temperature: 0 },
       )
-      return response.content || combined.slice(0, maxLength) + '...'
-    } catch {
-      return combined.slice(0, maxLength) + '...'
+      return response.content || `${combined.slice(0, maxLength)}...`
+    }
+    catch {
+      return `${combined.slice(0, maxLength)}...`
     }
   }
 
@@ -83,7 +90,8 @@ export class QueryRewriter {
    * 3) 编号列表 fallback（每行一个）
    */
   static parseVariations(content: string, max: number): string[] {
-    if (!content) return []
+    if (!content)
+      return []
     const trimmed = content.trim()
 
     // 优先尝试 JSON
@@ -94,9 +102,11 @@ export class QueryRewriter {
       }
       if (parsed && typeof parsed === 'object') {
         const arr = (parsed as Record<string, unknown>).queries
-        if (Array.isArray(arr)) return cleanStrings(arr).slice(0, max)
+        if (Array.isArray(arr))
+          return cleanStrings(arr).slice(0, max)
       }
-    } catch {
+    }
+    catch {
       // 不是 JSON，走 fallback
     }
 
@@ -105,14 +115,16 @@ export class QueryRewriter {
     const out: string[] = []
     for (const raw of lines) {
       const line = raw.trim()
-      if (!line) continue
+      if (!line)
+        continue
       // 移除前缀编号（1. / 1) / 1: / - / • / * 等）
       const stripped = line.replace(/^(?:[-•*]|\d+[.):、])\s*/, '').trim()
       // 移除可能的引号包裹
       const unquoted = stripped.replace(/^["'「『]|["'」』]$/g, '').trim()
       if (unquoted.length >= 2 && unquoted.length <= 200) {
         out.push(unquoted)
-        if (out.length >= max) break
+        if (out.length >= max)
+          break
       }
     }
     return out
@@ -122,6 +134,6 @@ export class QueryRewriter {
 function cleanStrings(arr: unknown[]): string[] {
   return arr
     .filter((s): s is string => typeof s === 'string')
-    .map((s) => s.trim())
-    .filter((s) => s.length >= 1)
+    .map(s => s.trim())
+    .filter(s => s.length >= 1)
 }

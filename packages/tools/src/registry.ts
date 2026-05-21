@@ -1,15 +1,15 @@
+import type {
+  LLMToolDefinition,
+  ToolCallRequest,
+  ToolDefinition,
+  ToolExecutionContext,
+  ToolResult,
+} from './types.js'
 import { ZodError } from 'zod'
 import { zodToJsonSchema } from 'zod-to-json-schema'
-import type {
-  ToolDefinition,
-  ToolCallRequest,
-  ToolResult,
-  ToolExecutionContext,
-  LLMToolDefinition,
-} from './types.js'
 
 function formatZodError(err: ZodError): string {
-  return err.issues.map((i) => `${i.path.join('.') || '<root>'}: ${i.message}`).join('; ')
+  return err.issues.map(i => `${i.path.join('.') || '<root>'}: ${i.message}`).join('; ')
 }
 
 export class ToolRegistry {
@@ -50,13 +50,14 @@ export class ToolRegistry {
   }
 
   listByCategory(category: string): ToolDefinition[] {
-    return this.list().filter((t) => t.category === category)
+    return this.list().filter(t => t.category === category)
   }
 
   listCategories(): string[] {
     const categories = new Set<string>()
     for (const tool of this.tools.values()) {
-      if (tool.category) categories.add(tool.category)
+      if (tool.category)
+        categories.add(tool.category)
     }
     return Array.from(categories)
   }
@@ -80,7 +81,7 @@ export class ToolRegistry {
       return {
         content: '',
         error: `Tool "${request.name}" not found. Available: ${this.list()
-          .map((t) => t.name)
+          .map(t => t.name)
           .join(', ')}`,
       }
     }
@@ -96,7 +97,8 @@ export class ToolRegistry {
     let params: unknown
     try {
       params = tool.parameters.parse(request.arguments)
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof ZodError) {
         return {
           content: '',
@@ -114,7 +116,8 @@ export class ToolRegistry {
     // 2) 实际执行（与校验错误分开，避免误报"参数校验失败"）
     try {
       return await tool.execute(params as Record<string, unknown>, this.context)
-    } catch (error) {
+    }
+    catch (error) {
       return {
         content: '',
         error: `Tool "${tool.name}" execution failed: ${
@@ -126,7 +129,7 @@ export class ToolRegistry {
 
   /** 并行执行；单个失败不影响其他（每个 reject 也被映射成 ToolResult.error） */
   async executeBatch(requests: ToolCallRequest[]): Promise<ToolResult[]> {
-    return Promise.all(requests.map((req) => this.execute(req)))
+    return Promise.all(requests.map(req => this.execute(req)))
   }
 
   /** 转成 OpenAI function calling 标准格式（真正的 JSON Schema） */
@@ -138,8 +141,8 @@ export class ToolRegistry {
       >
       // zod-to-json-schema 会包一层 { $schema, ...rest }，剥掉 $schema 让格式更干净
       const { $schema: _ignored, ...cleaned } = schema
-      const description =
-        tool.requiresApproval && !tool.description.includes('requires approval')
+      const description
+        = tool.requiresApproval && !tool.description.includes('requires approval')
           ? `${tool.description} (requires approval)`
           : tool.description
       return {

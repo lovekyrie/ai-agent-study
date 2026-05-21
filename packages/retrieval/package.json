@@ -1,16 +1,16 @@
 {
   "name": "@ai-agent-study/retrieval",
+  "type": "module",
   "version": "0.1.0",
   "description": "Document ingestion, chunking, lexical search and hybrid retrieval primitives",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

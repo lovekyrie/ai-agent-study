@@ -1,8 +1,8 @@
 {
   "name": "stage06b-vector-db",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 06B: Real vector database adapter layer",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

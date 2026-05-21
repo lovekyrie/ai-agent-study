@@ -39,7 +39,7 @@ test/
 ### 1. 创建 MCP Server
 
 ```typescript
-import { MCPServer, createMCPTool, createMCPResource, createMCPPrompt } from './server.js'
+import { createMCPPrompt, createMCPResource, createMCPTool, MCPServer } from './server.js'
 
 const server = new MCPServer({
   name: 'fs-server',
@@ -75,7 +75,7 @@ const server = new MCPServer({
 
 ```typescript
 const result = await server.callTool('file_read', { path: '/tmp/a.txt' })
-const manifest = server.getManifest()   // { tools, resources, prompts }
+const manifest = server.getManifest() // { tools, resources, prompts }
 const rendered = server.renderPrompt('summarize', { content: 'long text…' })
 ```
 
@@ -113,7 +113,7 @@ const res = await http.callTool('file_read', { path: '/tmp/a.txt' })
 ```typescript
 // 将 MCP tools 动态注册为 Agent 可用工具
 for (const name of await mcpClient.listTools()) {
-  agent.registerTool(name, (params) => mcpClient.callTool(name, params))
+  agent.registerTool(name, params => mcpClient.callTool(name, params))
 }
 ```
 

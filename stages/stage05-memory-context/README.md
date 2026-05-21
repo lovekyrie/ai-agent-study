@@ -20,11 +20,11 @@
 ### 1. Token 估算（`token-budget.ts`）
 
 ```ts
-import { defaultEstimator, cjkEstimator, estimateMessages } from './index'
+import { cjkEstimator, defaultEstimator, estimateMessages } from './index'
 
-defaultEstimator.estimate('hello world')   // 3  (chars/4, ceil)
-cjkEstimator.estimate('你好世界')          // 4  (每个 CJK ~1 token)
-estimateMessages(messages)                 // 含 3 token priming + 每条 4 token framing
+defaultEstimator.estimate('hello world') // 3  (chars/4, ceil)
+cjkEstimator.estimate('你好世界') // 4  (每个 CJK ~1 token)
+estimateMessages(messages) // 含 3 token priming + 每条 4 token framing
 ```
 
 **为什么不直接用 `tiktoken`？** 本阶段重点是 API 形状与裁剪策略；`tiktoken` 是 Wasm 包，会拖慢 stage 启动。生产环境再接入。
@@ -34,8 +34,8 @@ estimateMessages(messages)                 // 含 3 token priming + 每条 4 tok
 ```ts
 const result = enforceBudget(messages, {
   maxTokens: 4000,
-  reservedForResponse: 1000,   // 预留给 LLM 生成
-  preserveSystem: true,        // 首条 system 永远保留
+  reservedForResponse: 1000, // 预留给 LLM 生成
+  preserveSystem: true, // 首条 system 永远保留
 })
 // result: { messages, tokensUsed, tokensBudget, trimmedCount }
 ```
@@ -46,9 +46,9 @@ const result = enforceBudget(messages, {
 
 ```ts
 const result = await summarizeHistory(messages, llmClient, {
-  keepRecent: 4,                   // 最近 4 条不压缩
-  previousSummary: prev,           // 增量摘要：合并旧摘要 + 新对话
-  maxTokens: 500,                  // 给摘要本身的预算
+  keepRecent: 4, // 最近 4 条不压缩
+  previousSummary: prev, // 增量摘要：合并旧摘要 + 新对话
+  maxTokens: 500, // 给摘要本身的预算
 })
 // result.messages: [system, [历史摘要] xxx, m17, m18, m19, m20]
 ```
@@ -60,10 +60,10 @@ const result = await summarizeHistory(messages, llmClient, {
 ```ts
 const result = await buildContext({
   systemPrompt: '你是助手',
-  summary: '过去 30 轮总结：...',     // 可选
+  summary: '过去 30 轮总结：...', // 可选
   shortTerm: stm,
-  longTermStore: vectorStore,        // 可选
-  retrievalQuery: '用户在问什么',     // 触发长期检索
+  longTermStore: vectorStore, // 可选
+  retrievalQuery: '用户在问什么', // 触发长期检索
   budget: { maxTokens: 4000 },
 })
 ```
@@ -76,7 +76,7 @@ const result = await buildContext({
 const session = Session.withInMemoryLongTerm({
   systemPrompt: '你是助手',
   maxShortTerm: 50,
-  llmClient: createLLMClient(),   // 调 compress() 时才需要
+  llmClient: createLLMClient(), // 调 compress() 时才需要
 })
 
 session.addUserMessage('hi')

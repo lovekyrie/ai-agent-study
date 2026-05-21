@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 // Simple in-memory session store (use Redis in production)
 const sessions = new Map<string, Session>()
@@ -36,7 +36,7 @@ export class AuthService {
     return authToken
   }
 
-  verifyToken(token: string): { userId: string; valid: boolean } {
+  verifyToken(token: string): { userId: string, valid: boolean } {
     const authToken = authTokens.get(token)
     if (!authToken) {
       return { userId: '', valid: false }
@@ -107,7 +107,7 @@ export class RateLimiter {
     this.maxRequests = maxRequests
   }
 
-  check(identifier: string): { allowed: boolean; remaining: number; resetAt: number } {
+  check(identifier: string): { allowed: boolean, remaining: number, resetAt: number } {
     const now = Date.now()
     const windowStart = now - this.windowMs
 
@@ -142,7 +142,7 @@ export class RateLimiter {
 
 // Cache with TTL support
 export class CacheService {
-  private cache = new Map<string, { value: unknown; expiresAt: number }>()
+  private cache = new Map<string, { value: unknown, expiresAt: number }>()
 
   set(key: string, value: unknown, ttlMs: number = 300000): void {
     this.cache.set(key, {
@@ -153,7 +153,8 @@ export class CacheService {
 
   get<T>(key: string): T | undefined {
     const entry = this.cache.get(key)
-    if (!entry) return undefined
+    if (!entry)
+      return undefined
 
     if (Date.now() > entry.expiresAt) {
       this.cache.delete(key)
@@ -231,7 +232,8 @@ export class UserService {
 
   async authenticate(email: string, password: string): Promise<User | null> {
     const user = this.users.get(email)
-    if (!user) return null
+    if (!user)
+      return null
 
     const auth = new AuthService()
     if (!auth.verifyPassword(password, user.passwordHash)) {
@@ -243,7 +245,8 @@ export class UserService {
 
   getUserById(id: string): User | undefined {
     for (const user of this.users.values()) {
-      if (user.id === id) return user
+      if (user.id === id)
+        return user
     }
     return undefined
   }

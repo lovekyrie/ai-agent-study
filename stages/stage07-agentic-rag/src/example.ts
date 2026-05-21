@@ -1,10 +1,11 @@
-import { Logger } from '@ai-agent-study/logger'
 import type { SearchResult } from '@ai-agent-study/vectorstore'
+import type { KnowledgeBase } from './index.js'
+import { Logger } from '@ai-agent-study/logger'
 import {
   AgenticRAG,
   HybridSearchEngine,
+
   MultiKnowledgeRouter,
-  type KnowledgeBase,
 } from './index.js'
 
 /**
@@ -25,7 +26,7 @@ function createMockKB(name: string, docs: string[]): KnowledgeBase {
     async search(query: string, topK = 5): Promise<SearchResult[]> {
       const lower = query.toLowerCase()
       return docs
-        .filter((d) => d.toLowerCase().includes(lower))
+        .filter(d => d.toLowerCase().includes(lower))
         .slice(0, topK)
         .map((content, i) => ({
           id: `${name}-${i}`,
@@ -58,13 +59,13 @@ async function main() {
       'TypeScript is a typed superset of JavaScript.',
       'TypeScript supports interfaces and generics.',
       'TypeScript compiles to plain JavaScript.',
-    ])
+    ]),
   )
   rag.registerKnowledgeBase(
     createMockKB('Rust', [
       'Rust is a systems programming language.',
       'Rust guarantees memory safety without garbage collection.',
-    ])
+    ]),
   )
 
   const plan = await rag.planRetrieval('How does TypeScript handle types?')
@@ -93,7 +94,7 @@ async function main() {
   const route = await router.route('What is the API for authentication?')
   logger.info('Route', {
     primary: route.primary?.name,
-    secondary: route.secondary.map((kb) => kb.name),
+    secondary: route.secondary.map(kb => kb.name),
   })
 
   // === 3. HybridSearchEngine ===
@@ -105,7 +106,7 @@ async function main() {
   const hybridResults = await hybrid.search('TypeScript', 5)
   logger.info('Hybrid results', {
     count: hybridResults.length,
-    topScores: hybridResults.slice(0, 2).map((r) => ({
+    topScores: hybridResults.slice(0, 2).map(r => ({
       score: r.score.toFixed(3),
       source: r.document.metadata?.source,
     })),

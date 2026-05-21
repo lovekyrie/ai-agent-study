@@ -1,8 +1,8 @@
 {
   "name": "stage11a-production-runtime",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 11A: Production runtime primitives for streaming agent APIs",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

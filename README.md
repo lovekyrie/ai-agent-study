@@ -104,7 +104,7 @@ pnpm build
 建立规范的工程化基础，配置开发环境。
 
 - Monorepo (pnpm workspace) / TypeScript 严格模式
-- ESLint + Prettier + Vitest
+- ESLint (antfu) + Vitest
 - 结构化日志 (pino) / 配置管理
 
 ### Stage 01: LLM API 基础 (1-2 周)
@@ -254,7 +254,7 @@ Agent 的核心能力，工具安全在此阶段就引入。
 
 以下为项目完成时的目标标准：
 
-- 所有代码通过 ESLint + Prettier
+- 所有代码通过 ESLint
 - TypeScript 严格模式
 - 单元测试覆盖率 > 80%
 - Docker Compose 一键启动

@@ -12,8 +12,8 @@ import type { SearchResult } from '@ai-agent-study/vectorstore'
 export interface KnowledgeBase {
   name: string
   description: string
-  search(query: string, topK?: number): Promise<SearchResult[]>
-  filter(metadata: Record<string, string | number | boolean>): Promise<SearchResult[]>
+  search: (query: string, topK?: number) => Promise<SearchResult[]>
+  filter: (metadata: Record<string, string | number | boolean>) => Promise<SearchResult[]>
 }
 
 /** LLM 规划出来的检索计划。 */
@@ -27,8 +27,8 @@ export interface RetrievalPlan {
 
 /** stage07 自己的"研究 agent 响应"结构（与 stage04 Agent 的 AgentResponse 不同：这里强调 sources）。 */
 export interface ResearchResponse {
-  message: { role: 'assistant'; content: string }
-  steps: { action: string; observation: string }[]
+  message: { role: 'assistant', content: string }
+  steps: { action: string, observation: string }[]
   sources?: SearchResult[]
   plan?: RetrievalPlan
 }

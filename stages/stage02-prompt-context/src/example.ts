@@ -1,27 +1,29 @@
+import type { PromptMessage } from '@ai-agent-study/prompt'
 import { getConfig } from '@ai-agent-study/config'
 import { createLLMClient } from '@ai-agent-study/llm-client'
 import { Logger } from '@ai-agent-study/logger'
 import {
-  render,
   buildMessages,
-  sanitizeUserInput,
-  truncateMessages,
   CodeExplainTemplate,
   EntityExtractTemplate,
-  SummaryTemplate,
+
   RAGQueryOptimizerTemplate,
-  type PromptMessage,
+  render,
+  sanitizeUserInput,
+  SummaryTemplate,
+  truncateMessages,
 } from '@ai-agent-study/prompt'
 
 async function runSection(
   logger: Logger,
   name: string,
-  fn: () => Promise<void>
+  fn: () => Promise<void>,
 ): Promise<void> {
   logger.info(`--- ${name} ---`)
   try {
     await fn()
-  } catch (error) {
+  }
+  catch (error) {
     logger.error(`Section "${name}" failed`, error instanceof Error ? error : undefined)
   }
 }
@@ -55,7 +57,7 @@ async function main() {
           { input: 'Thank you', output: '谢谢' },
         ],
       },
-      { text: 'Good morning' }
+      { text: 'Good morning' },
     )
     console.log('Messages:', JSON.stringify(messages, null, 2))
   })
@@ -72,11 +74,11 @@ async function main() {
 
   // 4. 摘要生成（流式）
   await runSection(logger, '4. Summary Generation', async () => {
-    const longContent =
-      '人工智能（AI）是计算机科学的一个分支，旨在创造能够模拟人类智能的机器。' +
-      'AI 技术包括机器学习、深度学习、自然语言处理等多个领域。近年来，' +
-      '大语言模型（LLM）的出现让 AI 在自然语言理解和生成方面取得了突破性进展。' +
-      'GPT、BERT、Claude 等模型展示了惊人的对话和推理能力。'
+    const longContent
+      = '人工智能（AI）是计算机科学的一个分支，旨在创造能够模拟人类智能的机器。'
+        + 'AI 技术包括机器学习、深度学习、自然语言处理等多个领域。近年来，'
+        + '大语言模型（LLM）的出现让 AI 在自然语言理解和生成方面取得了突破性进展。'
+        + 'GPT、BERT、Claude 等模型展示了惊人的对话和推理能力。'
 
     const summaryMessages = buildMessages(SummaryTemplate, {
       content: longContent,
@@ -84,7 +86,8 @@ async function main() {
     })
 
     for await (const chunk of client.stream(summaryMessages, { maxTokens: 200 })) {
-      if (!chunk.done) process.stdout.write(chunk.delta)
+      if (!chunk.done)
+        process.stdout.write(chunk.delta)
     }
     console.log()
   })
@@ -95,7 +98,8 @@ async function main() {
       question: 'TypeScript 的类型推断是如何工作的',
     })
     for await (const chunk of client.stream(queryOptMessages, { maxTokens: 300 })) {
-      if (!chunk.done) process.stdout.write(chunk.delta)
+      if (!chunk.done)
+        process.stdout.write(chunk.delta)
     }
     console.log()
   })
@@ -119,7 +123,7 @@ async function main() {
     ]
     const truncated = truncateMessages(longHistory, { maxChars: 200 })
     console.log(`原 ${longHistory.length} 条 → 裁剪后 ${truncated.length} 条`)
-    console.log('保留消息:', truncated.map((m) => `[${m.role}] ${m.content.slice(0, 20)}...`))
+    console.log('保留消息:', truncated.map(m => `[${m.role}] ${m.content.slice(0, 20)}...`))
   })
 
   logger.info('Stage 2 completed')

@@ -7,7 +7,7 @@ export interface AgenticRAGState {
   maxAttempts: number
   retrieved: RetrievalCandidate[]
   answer?: string
-  steps: Array<{ node: string; note: string }>
+  steps: Array<{ node: string, note: string }>
 }
 
 export interface AgenticRAGGraphOptions {
@@ -40,7 +40,8 @@ export class AgenticRAGGraph {
 
       const relevant = await (this.options.grade?.(state.query, state.retrieved) ?? Promise.resolve(state.retrieved.length > 0))
       state.steps.push({ node: 'grade', note: relevant ? 'relevant' : 'rewrite required' })
-      if (relevant) break
+      if (relevant)
+        break
 
       state.plannedQuery = await (this.options.rewrite?.(state.plannedQuery, state.attempts) ?? Promise.resolve(`${state.query} detailed explanation`))
       state.steps.push({ node: 'rewrite', note: state.plannedQuery })
@@ -53,7 +54,8 @@ export class AgenticRAGGraph {
 }
 
 function defaultAnswer(query: string, results: RetrievalCandidate[]): string {
-  if (results.length === 0) return `No context found for: ${query}`
-  const sources = results.map((result) => result.source).join(', ')
+  if (results.length === 0)
+    return `No context found for: ${query}`
+  const sources = results.map(result => result.source).join(', ')
   return `Answer for "${query}" using sources: ${sources}`
 }

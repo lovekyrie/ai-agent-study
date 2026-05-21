@@ -7,9 +7,12 @@ const DEFAULT_OVERLAP_CHARS = 160
 function validateOptions(options?: ChunkOptions): Required<ChunkOptions> {
   const maxChars = options?.maxChars ?? DEFAULT_MAX_CHARS
   const overlapChars = options?.overlapChars ?? DEFAULT_OVERLAP_CHARS
-  if (maxChars <= 0) throw new Error('maxChars must be greater than 0')
-  if (overlapChars < 0) throw new Error('overlapChars must be greater than or equal to 0')
-  if (overlapChars >= maxChars) throw new Error('overlapChars must be smaller than maxChars')
+  if (maxChars <= 0)
+    throw new Error('maxChars must be greater than 0')
+  if (overlapChars < 0)
+    throw new Error('overlapChars must be greater than or equal to 0')
+  if (overlapChars >= maxChars)
+    throw new Error('overlapChars must be smaller than maxChars')
   return { maxChars, overlapChars }
 }
 
@@ -19,7 +22,7 @@ function createChunk(
   index: number,
   metadata?: Record<string, string | number | boolean>,
   startLine?: number,
-  endLine?: number
+  endLine?: number,
 ): DocumentChunk {
   const hash = stableHash(`${document.source}:${index}:${content}`)
   return {
@@ -44,7 +47,8 @@ export const splitByCharacters: Splitter = (document, options) => {
     if (content) {
       chunks.push(createChunk(document, content, chunks.length, { splitter: 'characters' }))
     }
-    if (end === document.content.length) break
+    if (end === document.content.length)
+      break
     start = end - overlapChars
   }
 
@@ -53,17 +57,18 @@ export const splitByCharacters: Splitter = (document, options) => {
 
 export const splitMarkdownByHeading: Splitter = (document, options) => {
   const sections = document.content
-    .split(/(?=^#{1,6}\s+)/m)
-    .map((section) => section.trim())
+    .split(/(?=^#{1,6} )/m)
+    .map(section => section.trim())
     .filter(Boolean)
 
-  if (sections.length === 0) return splitByCharacters(document, options)
+  if (sections.length === 0)
+    return splitByCharacters(document, options)
 
   const chunks: DocumentChunk[] = []
   for (const section of sections) {
-    const heading = section.match(/^#{1,6}\s+(.+)$/m)?.[1] ?? 'untitled'
+    const heading = section.match(/^#{1,6} (.+)$/m)?.[1] ?? 'untitled'
     const pseudoDoc = { ...document, content: section }
-    const sectionChunks = splitByCharacters(pseudoDoc, options).map((chunk) => ({
+    const sectionChunks = splitByCharacters(pseudoDoc, options).map(chunk => ({
       ...chunk,
       id: `${chunk.id}-${chunks.length}`,
       index: chunks.length + chunk.index,
@@ -87,7 +92,8 @@ export const splitCodeByLines: Splitter = (document, options) => {
       size += lines[endLine].length + 1
       endLine++
     }
-    if (endLine === startLine) endLine++
+    if (endLine === startLine)
+      endLine++
     const content = lines.slice(startLine, endLine).join('\n').trim()
     if (content) {
       chunks.push(createChunk(
@@ -96,10 +102,11 @@ export const splitCodeByLines: Splitter = (document, options) => {
         chunks.length,
         { splitter: 'code-lines' },
         startLine + 1,
-        endLine
+        endLine,
       ))
     }
-    if (endLine >= lines.length) break
+    if (endLine >= lines.length)
+      break
     const overlapLines = Math.max(0, Math.ceil(overlapChars / Math.max(1, Math.floor(size / (endLine - startLine)))))
     startLine = Math.max(startLine + 1, endLine - overlapLines)
   }
@@ -108,14 +115,16 @@ export const splitCodeByLines: Splitter = (document, options) => {
 }
 
 export function chooseSplitter(source: string): Splitter {
-  if (/\.(ts|tsx|js|jsx|py|java|go|rs)$/i.test(source)) return splitCodeByLines
-  if (/\.(md|mdx)$/i.test(source)) return splitMarkdownByHeading
+  if (/\.(ts|tsx|js|jsx|py|java|go|rs)$/i.test(source))
+    return splitCodeByLines
+  if (/\.(md|mdx)$/i.test(source))
+    return splitMarkdownByHeading
   return splitByCharacters
 }
 
 export async function ingestDocuments(
   documents: SourceDocument[],
-  options?: ChunkOptions & { dedupe?: boolean }
+  options?: ChunkOptions & { dedupe?: boolean },
 ) {
   const seen = new Set<string>()
   const chunks: DocumentChunk[] = []

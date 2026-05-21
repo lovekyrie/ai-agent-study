@@ -1,43 +1,42 @@
+import { AuthService, CacheService, RateLimiter, UserService } from './auth.js'
+import { logger } from './logger.js'
+import { JobQueue } from './queue.js'
 // Auth & Rate Limiting
-export { AuthService, RateLimiter, CacheService, UserService, type AuthToken, type Session as AuthSession, type User } from './auth.js'
+// App Server - brings it all together
+import { HttpServer, withAuth, withCors, withJsonBody } from './server.js'
+import { SessionManager } from './session.js'
+import { MetricsCollector, TracingService } from './tracing.js'
+
+export { AuthService, type Session as AuthSession, type AuthToken, CacheService, RateLimiter, type User, UserService } from './auth.js'
+
+// Logging
+export { createRequestLogger, type LogContext, logger, Logger, type LogLevel } from './logger.js'
+
+// Queue (Job Processing)
+export { type Job, JobQueue, type JobState, type QueueEventType, type QueueOptions, Worker } from './queue.js'
 
 // Security (merged from former stage11-security): 输入净化 / 沙箱 / 访问控制 / 敏感信息 / 审计
 export {
+  AccessControl,
+  type AuditEvent,
+  AuditLogger,
   InputSanitizer,
   Sandbox,
-  AccessControl,
-  SecretDetector,
-  AuditLogger,
-  type Threat,
-  type SanitizeOptions,
   type SandboxOptions,
+  type SanitizeOptions,
+  SecretDetector,
   type SecretFinding,
-  type AuditEvent,
+  type Threat,
 } from './security.js'
 
-// Session Management
-export { SessionManager, CheckpointManager, requestContextStorage, getCurrentContext, runWithContext, type SessionData, type Message, type ToolCall, type WorkflowCheckpoint, type RequestContext as SessionRequestContext } from './session.js'
+// HTTP Server
+export { type HttpRequest, type HttpResponse, HttpServer, type Middleware, type RequestContext, type Route, type RouteHandler, withAuth, withCors, withJsonBody } from './server.js'
 
-// Logging
-export { logger, createRequestLogger, Logger, type LogLevel, type LogContext } from './logger.js'
+// Session Management
+export { CheckpointManager, getCurrentContext, type Message, requestContextStorage, runWithContext, type SessionData, SessionManager, type RequestContext as SessionRequestContext, type ToolCall, type WorkflowCheckpoint } from './session.js'
 
 // Tracing & Metrics
-export { TracingService, MetricsCollector, getCurrentSpan, getCurrentTraceId, tracing, metricsCollector, type Span, type Trace, type Metric } from './tracing.js'
-
-// Queue (Job Processing)
-export { JobQueue, Worker, type Job, type JobState, type QueueOptions, type QueueEventType } from './queue.js'
-
-// HTTP Server
-export { HttpServer, withAuth, withCors, withJsonBody, type HttpRequest, type HttpResponse, type Route, type RouteHandler, type Middleware, type RequestContext } from './server.js'
-
-// App Server - brings it all together
-import { HttpServer, withAuth, withCors, withJsonBody } from './server.js'
-import { AuthService, RateLimiter, CacheService } from './auth.js'
-import { SessionManager } from './session.js'
-import { logger } from './logger.js'
-import { TracingService, MetricsCollector } from './tracing.js'
-import { JobQueue } from './queue.js'
-import { UserService } from './auth.js'
+export { getCurrentSpan, getCurrentTraceId, type Metric, MetricsCollector, metricsCollector, type Span, type Trace, tracing, TracingService } from './tracing.js'
 
 export interface AppConfig {
   port: number
@@ -105,7 +104,7 @@ export class AppServer {
   // Auth endpoints
   registerAuthRoutes(): void {
     this.httpServer.post('/auth/register', async (req) => {
-      const { email, password } = req.body as { email: string; password: string }
+      const { email, password } = req.body as { email: string, password: string }
       if (!email || !password) {
         return { statusCode: 400, headers: {}, body: { error: 'Email and password required' } }
       }
@@ -118,7 +117,8 @@ export class AppServer {
           headers: {},
           body: { user: { id: user.id, email: user.email }, token },
         }
-      } catch (error) {
+      }
+      catch (error) {
         return {
           statusCode: 400,
           headers: {},
@@ -128,7 +128,7 @@ export class AppServer {
     })
 
     this.httpServer.post('/auth/login', async (req) => {
-      const { email, password } = req.body as { email: string; password: string }
+      const { email, password } = req.body as { email: string, password: string }
       if (!email || !password) {
         return { statusCode: 400, headers: {}, body: { error: 'Email and password required' } }
       }
@@ -176,7 +176,7 @@ export class AppServer {
       if (session.userId !== req.context?.userId) {
         return { statusCode: 403, headers: {}, body: { error: 'Forbidden' } }
       }
-      const limit = req.query.limit ? parseInt(req.query.limit) : undefined
+      const limit = req.query.limit ? Number.parseInt(req.query.limit) : undefined
       const history = this.sessionManager.getHistory(req.params.sessionId, limit)
       return { statusCode: 200, headers: {}, body: { history } }
     }, [withAuth(this.authService)])
@@ -189,7 +189,7 @@ export class AppServer {
       if (session.userId !== req.context?.userId) {
         return { statusCode: 403, headers: {}, body: { error: 'Forbidden' } }
       }
-      const { role, content, toolCalls } = req.body as { role: string; content: string; toolCalls?: unknown }
+      const { role, content, toolCalls } = req.body as { role: string, content: string, toolCalls?: unknown }
       const message = this.sessionManager.addMessage(req.params.sessionId, { role: role as 'user' | 'assistant' | 'system' | 'tool', content, toolCalls: toolCalls as any })
       if (!message) {
         return { statusCode: 404, headers: {}, body: { error: 'Session not found' } }
@@ -199,7 +199,7 @@ export class AppServer {
   }
 
   // Queue management
-  createQueue<T>(name: string, options?: { concurrency?: number; attempts?: number }): JobQueue<T> {
+  createQueue<T>(name: string, options?: { concurrency?: number, attempts?: number }): JobQueue<T> {
     const queue = new JobQueue<T>(name, { concurrency: options?.concurrency, defaultJobOptions: { attempts: options?.attempts } })
     this.queues.set(name, queue as unknown as JobQueue)
     return queue
@@ -212,7 +212,7 @@ export class AppServer {
   // Metrics endpoint
   registerMetricsRoutes(): void {
     this.httpServer.get('/metrics/summary', async (req) => {
-      const windowMs = req.query.window ? parseInt(req.query.window) : undefined
+      const windowMs = req.query.window ? Number.parseInt(req.query.window) : undefined
       const name = req.query.name as string | undefined
 
       if (name) {

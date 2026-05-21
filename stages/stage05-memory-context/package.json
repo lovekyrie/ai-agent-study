@@ -1,8 +1,8 @@
 {
   "name": "stage05-memory-context",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 05: Memory & Context Engineering — 短期/长期记忆、Token 预算、上下文压缩、Session 持久化",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

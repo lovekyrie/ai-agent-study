@@ -1,9 +1,9 @@
 import {
-  MCPServer,
-  MCPHTTPClient,
-  createMCPTool,
-  createMCPResource,
   createMCPPrompt,
+  createMCPResource,
+  createMCPTool,
+  MCPHTTPClient,
+  MCPServer,
 } from './index.js'
 
 // Example MCP Server with file system tools
@@ -16,7 +16,7 @@ function createFileServer(): MCPServer {
       async ({ path }) => {
         // Simulated file read - in real use, would use fs
         return { content: `Content of ${path}`, lines: 10 }
-      }
+      },
     ),
     createMCPTool(
       'file_write',
@@ -34,7 +34,7 @@ function createFileServer(): MCPServer {
           path,
           bytesWritten: (content as unknown as string).length,
         }
-      }
+      },
     ),
     createMCPTool(
       'file_list',
@@ -46,7 +46,7 @@ function createFileServer(): MCPServer {
           files: [`${path}/file1.txt`, `${path}/file2.txt`],
           directories: [`${path}/subdir`],
         }
-      }
+      },
     ),
   ]
 
@@ -56,14 +56,14 @@ function createFileServer(): MCPServer {
       'README',
       'Project README file',
       'text/markdown',
-      '# Project README\n\nThis is the README content.'
+      '# Project README\n\nThis is the README content.',
     ),
     createMCPResource(
       'file:///docs/API.md',
       'API Documentation',
       'API documentation',
       'text/markdown',
-      '# API Documentation\n\nAPI endpoints...'
+      '# API Documentation\n\nAPI endpoints...',
     ),
   ]
 
@@ -72,7 +72,7 @@ function createFileServer(): MCPServer {
       'summarize',
       'Summarize a document',
       'Please summarize the following document:\n\n{{content}}',
-      [{ name: 'content', description: 'Document content', required: true }]
+      [{ name: 'content', description: 'Document content', required: true }],
     ),
     createMCPPrompt(
       'explain_code',
@@ -81,7 +81,7 @@ function createFileServer(): MCPServer {
       [
         { name: 'code', description: 'Code to explain', required: true },
         { name: 'focus', description: 'What to focus on', required: false },
-      ]
+      ],
     ),
   ]
 
@@ -130,13 +130,14 @@ async function main() {
   // MCP HTTP Client
   console.log('\n--- MCP HTTP Client ---')
   const httpClient = new MCPHTTPClient('http://localhost:3001', {
-    'Authorization': 'Bearer token',
+    Authorization: 'Bearer token',
   })
 
   // In a real scenario, you would connect to an actual MCP HTTP server
   try {
     console.log('HTTP client configured for a running MCP-compatible HTTP server')
-  } catch (error) {
+  }
+  catch (error) {
     console.log('HTTP client ready (server not running)')
   }
 

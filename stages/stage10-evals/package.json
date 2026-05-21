@@ -1,7 +1,7 @@
 {
   "name": "stage10-evals",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
   "description": "Stage 10: 评估体系 — Golden Dataset / LLM Judge / Regression / Cost Tracking",
   "scripts": {
     "dev": "tsx src/example.ts",

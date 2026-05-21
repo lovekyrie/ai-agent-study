@@ -1,11 +1,11 @@
-import { Logger } from '@ai-agent-study/logger'
 import { createLLMClient } from '@ai-agent-study/llm-client'
+import { Logger } from '@ai-agent-study/logger'
 import {
-  Session,
-  enforceBudget,
-  estimateMessages,
   cjkEstimator,
   defaultEstimator,
+  enforceBudget,
+  estimateMessages,
+  Session,
 } from './index.js'
 
 /**
@@ -69,8 +69,8 @@ async function main() {
     totalMessages: withRetrieval.messages.length,
     retrieved: withRetrieval.retrievedCount,
     firstSystemBlocks: withRetrieval.messages
-      .filter((m) => m.role === 'system')
-      .map((m) => m.content.slice(0, 40)),
+      .filter(m => m.role === 'system')
+      .map(m => m.content.slice(0, 40)),
   })
 
   // —— 5) 演示两种估算器的差异 ——
@@ -115,10 +115,11 @@ async function main() {
       const afterCompress = await session.getMessagesForLLM()
       logger.info('Post-compress messages', {
         total: afterCompress.messages.length,
-        systemBlocks: afterCompress.messages.filter((m) => m.role === 'system').length,
+        systemBlocks: afterCompress.messages.filter(m => m.role === 'system').length,
       })
     }
-  } catch (error) {
+  }
+  catch (error) {
     logger.error('compress() failed', error instanceof Error ? error : undefined)
   }
 

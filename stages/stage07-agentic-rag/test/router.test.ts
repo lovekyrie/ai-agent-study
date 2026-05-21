@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest'
 import type { LLMClient } from '@ai-agent-study/llm-client'
 import type { SearchResult } from '@ai-agent-study/vectorstore'
-import { MultiKnowledgeRouter, type KnowledgeBase } from '../src/index.js'
+import type { KnowledgeBase } from '../src/index.js'
+import { describe, expect, it } from 'vitest'
+import { MultiKnowledgeRouter } from '../src/index.js'
 
 function makeKB(name: string): KnowledgeBase {
   return {
@@ -28,7 +29,7 @@ function mockClient(result: object): LLMClient {
   } as unknown as LLMClient
 }
 
-describe('MultiKnowledgeRouter', () => {
+describe('multiKnowledgeRouter', () => {
   it('returns empty when no KB registered', async () => {
     const router = new MultiKnowledgeRouter({ llmClient: mockClient({}) })
     const result = await router.route('any')
@@ -67,7 +68,7 @@ describe('MultiKnowledgeRouter', () => {
     const result = await router.route('q')
 
     expect(result.primary?.name).toBe('docs')
-    expect(result.secondary.map((kb) => kb.name)).toEqual(['wiki', 'api'])
+    expect(result.secondary.map(kb => kb.name)).toEqual(['wiki', 'api'])
   })
 
   it('falls back to first KB on LLM failure', async () => {
@@ -85,6 +86,6 @@ describe('MultiKnowledgeRouter', () => {
     const result = await router.route('q')
 
     expect(result.primary?.name).toBe('a')
-    expect(result.secondary.map((kb) => kb.name)).toEqual(['b', 'c'])
+    expect(result.secondary.map(kb => kb.name)).toEqual(['b', 'c'])
   })
 })

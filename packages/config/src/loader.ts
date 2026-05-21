@@ -1,6 +1,7 @@
-import dotenv from 'dotenv'
-import { ConfigSchema, type Config } from './schemas.js'
 import type { z } from 'zod'
+import type { Config } from './schemas.js'
+import dotenv from 'dotenv'
+import { ConfigSchema } from './schemas.js'
 
 function getEnvString(key: string, defaultValue?: string): string {
   return process.env[key] || defaultValue || ''
@@ -9,28 +10,30 @@ function getEnvString(key: string, defaultValue?: string): string {
 function parseNumeric(
   key: string,
   defaultValue: number,
-  parser: (raw: string) => number
+  parser: (raw: string) => number,
 ): number {
   const raw = process.env[key]
-  if (raw === undefined || raw === '') return defaultValue
+  if (raw === undefined || raw === '')
+    return defaultValue
   const n = parser(raw)
   if (!Number.isFinite(n)) {
-    throw new Error(`Environment variable ${key} must be a number, got: ${raw}`)
+    throw new TypeError(`Environment variable ${key} must be a number, got: ${raw}`)
   }
   return n
 }
 
 function getEnvNumber(key: string, defaultValue: number): number {
-  return parseNumeric(key, defaultValue, (raw) => Number(raw))
+  return parseNumeric(key, defaultValue, raw => Number(raw))
 }
 
 function getEnvFloat(key: string, defaultValue: number): number {
-  return parseNumeric(key, defaultValue, (raw) => Number.parseFloat(raw))
+  return parseNumeric(key, defaultValue, raw => Number.parseFloat(raw))
 }
 
 function getEnvBoolean(key: string, defaultValue: boolean): boolean {
   const value = process.env[key]
-  if (!value) return defaultValue
+  if (!value)
+    return defaultValue
   return value.toLowerCase() === 'true'
 }
 
@@ -54,7 +57,7 @@ export function loadConfig(): Config {
     database: {
       url: getEnvString(
         'DATABASE_URL',
-        'postgresql://user:pass@localhost:5432/agent'
+        'postgresql://user:pass@localhost:5432/agent',
       ),
       poolSize: getEnvNumber('DATABASE_POOL_SIZE', 10),
     },

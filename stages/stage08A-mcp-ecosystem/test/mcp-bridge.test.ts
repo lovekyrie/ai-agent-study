@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { ToolRegistry } from '@ai-agent-study/tools'
+import { describe, expect, it } from 'vitest'
 import { mcpToolToDefinition } from '../src/index.js'
 
 describe('stage08A MCP bridge', () => {
@@ -19,7 +19,7 @@ describe('stage08A MCP bridge', () => {
           return { content: [{ type: 'text', text: `result:${args.query}` }] }
         },
       },
-      { requiresApproval: true }
+      { requiresApproval: true },
     )
 
     const denied = await new ToolRegistry().register(tool).execute({ name: 'github_search', arguments: { query: 'agent' } })

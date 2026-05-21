@@ -1,14 +1,14 @@
+import type { EvalCase, EvalSuite } from '../src/index.js'
 import { describe, expect, it, vi } from 'vitest'
 import {
+  clampScore,
   CostTracker,
   EvalRunner,
   GoldenDataset,
   RegressionTracker,
   RuleBasedEvaluator,
   ToolCallingEvaluator,
-  clampScore,
 } from '../src/index.js'
-import type { EvalCase, EvalSuite } from '../src/index.js'
 
 vi.mock('@ai-agent-study/llm-client', () => ({
   createLLMClient: () => ({
@@ -17,7 +17,7 @@ vi.mock('@ai-agent-study/llm-client', () => ({
 }))
 
 /* ─────── RuleBasedEvaluator ─────── */
-describe('RuleBasedEvaluator', () => {
+describe('ruleBasedEvaluator', () => {
   const evaluator = new RuleBasedEvaluator()
 
   it('passes when all required terms found', () => {
@@ -58,7 +58,7 @@ describe('RuleBasedEvaluator', () => {
   it('supports custom validator', () => {
     const r = evaluator.evaluate(
       { content: 'hello world' },
-      { custom: (o) => o.content.length > 5 },
+      { custom: o => o.content.length > 5 },
     )
     expect(r.passed).toBe(true)
   })
@@ -66,7 +66,7 @@ describe('RuleBasedEvaluator', () => {
   it('fails on custom validator rejection', () => {
     const r = evaluator.evaluate(
       { content: 'hi' },
-      { custom: (o) => o.content.length > 5 },
+      { custom: o => o.content.length > 5 },
     )
     expect(r.passed).toBe(false)
     expect(r.score).toBe(0)
@@ -80,7 +80,7 @@ describe('RuleBasedEvaluator', () => {
 })
 
 /* ─────── ToolCallingEvaluator ─────── */
-describe('ToolCallingEvaluator', () => {
+describe('toolCallingEvaluator', () => {
   const evaluator = new ToolCallingEvaluator()
 
   it('perfect score when all expected tools called', () => {
@@ -127,12 +127,15 @@ describe('ToolCallingEvaluator', () => {
 })
 
 /* ─────── GoldenDataset ─────── */
-describe('GoldenDataset', () => {
+describe('goldenDataset', () => {
   it('add, get, list, size', () => {
     const ds = new GoldenDataset()
     const c: EvalCase = {
-      id: 'c1', name: 'Test', category: 'general',
-      input: { query: 'hi' }, expected: { contains: ['hello'] },
+      id: 'c1',
+      name: 'Test',
+      category: 'general',
+      input: { query: 'hi' },
+      expected: { contains: ['hello'] },
     }
     ds.add(c)
     expect(ds.size()).toBe(1)
@@ -151,7 +154,7 @@ describe('GoldenDataset', () => {
 })
 
 /* ─────── EvalRunner ─────── */
-describe('EvalRunner', () => {
+describe('evalRunner', () => {
   it('runs all cases with runFn and produces summary', async () => {
     const ds = new GoldenDataset()
     ds.add({ id: '1', name: 'A', category: 'general', input: { query: 'what is TS?' }, expected: { contains: ['typed'] } })
@@ -159,20 +162,22 @@ describe('EvalRunner', () => {
 
     const runner = new EvalRunner(ds)
     const suite = await runner.runAll({
-      runFn: async (tc) => ({ content: tc.id === '1' ? 'typed language' : 'no match' }),
+      runFn: async tc => ({ content: tc.id === '1' ? 'typed language' : 'no match' }),
     })
 
     expect(suite.summary.total).toBe(2)
     expect(suite.summary.passed).toBe(1)
     expect(suite.summary.failed).toBe(1)
     expect(suite.summary.passRate).toBe(0.5)
-    expect(suite.summary.categoryBreakdown['general'].total).toBe(2)
+    expect(suite.summary.categoryBreakdown.general.total).toBe(2)
   })
 
   it('evaluates tool_calling category with ToolCallingEvaluator', async () => {
     const ds = new GoldenDataset()
     ds.add({
-      id: 't1', name: 'Tool', category: 'tool_calling',
+      id: 't1',
+      name: 'Tool',
+      category: 'tool_calling',
       input: { query: 'read file' },
       expected: { tools: ['file_read'] },
     })
@@ -191,10 +196,12 @@ describe('EvalRunner', () => {
 })
 
 /* ─────── RegressionTracker ─────── */
-describe('RegressionTracker', () => {
+describe('regressionTracker', () => {
   function makeSuite(passRate: number, latency: number, cost: number, ts: Date): EvalSuite {
     return {
-      name: 'suite', cases: [], results: [],
+      name: 'suite',
+      cases: [],
+      results: [],
       summary: { total: 10, passed: passRate * 10, failed: (1 - passRate) * 10, passRate, avgLatencyMs: latency, totalCost: cost, categoryBreakdown: {} },
       timestamp: ts,
     }
@@ -231,7 +238,7 @@ describe('RegressionTracker', () => {
 })
 
 /* ─────── CostTracker ─────── */
-describe('CostTracker', () => {
+describe('costTracker', () => {
   it('tracks total tokens and cost', () => {
     const ct = new CostTracker()
     ct.record(1000, 500, 'gpt-4')
@@ -266,6 +273,6 @@ describe('clampScore', () => {
   it('returns 0 for non-numeric values', () => {
     expect(clampScore('hello')).toBe(0)
     expect(clampScore(undefined)).toBe(0)
-    expect(clampScore(NaN)).toBe(0)
+    expect(clampScore(Number.NaN)).toBe(0)
   })
 })

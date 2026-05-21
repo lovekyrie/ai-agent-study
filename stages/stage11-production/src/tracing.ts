@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from 'async_hooks'
+import { AsyncLocalStorage } from 'node:async_hooks'
 
 // OpenTelemetry-style tracing interfaces (simplified)
 export interface Span {
@@ -40,7 +40,7 @@ export class TracingService {
     this.serviceName = serviceName
   }
 
-  startTrace(name: string, attributes: Record<string, unknown> = {}): Trace {
+  startTrace(name: string, _attributes: Record<string, unknown> = {}): Trace {
     const trace: Trace = {
       id: this.generateId('trace'),
       spans: [],
@@ -55,7 +55,7 @@ export class TracingService {
   startSpan(
     name: string,
     attributes: Record<string, unknown> = {},
-    parentSpan?: Span
+    parentSpan?: Span,
   ): Span {
     const parent = parentSpan ?? spanStorage.getStore()
     const trace = traceStorage.getStore() ?? (this.lastTraceId ? activeTraces.get(this.lastTraceId) : undefined)
@@ -72,7 +72,8 @@ export class TracingService {
 
     if (parent) {
       parent.children.push(span)
-    } else {
+    }
+    else {
       trace?.spans.push(span)
     }
 
@@ -92,14 +93,15 @@ export class TracingService {
   recordSpan<T>(
     name: string,
     attributes: Record<string, unknown>,
-    fn: (span: Span) => T
+    fn: (span: Span) => T,
   ): T {
     const span = this.startSpan(name, attributes)
     try {
       const result = spanStorage.run(span, () => fn(span))
       this.endSpan(span, 'ok')
       return result
-    } catch (error) {
+    }
+    catch (error) {
       this.endSpan(span, 'error', error instanceof Error ? error.message : String(error))
       throw error
     }
@@ -116,7 +118,7 @@ export class TracingService {
   async recordSpanAsync<T>(
     name: string,
     attributes: Record<string, unknown>,
-    fn: (span: Span) => Promise<T>
+    fn: (span: Span) => Promise<T>,
   ): Promise<T> {
     const span = this.startSpan(name, attributes)
 
@@ -124,7 +126,8 @@ export class TracingService {
       const result = await spanStorage.run(span, () => fn(span))
       this.endSpan(span, 'ok')
       return result
-    } catch (error) {
+    }
+    catch (error) {
       this.endSpan(span, 'error', error instanceof Error ? error.message : String(error))
       throw error
     }
@@ -132,7 +135,8 @@ export class TracingService {
 
   endTrace(traceId: string): Trace | undefined {
     const trace = activeTraces.get(traceId)
-    if (!trace) return undefined
+    if (!trace)
+      return undefined
 
     trace.endTime = Date.now()
     trace.duration = trace.endTime - trace.startTime

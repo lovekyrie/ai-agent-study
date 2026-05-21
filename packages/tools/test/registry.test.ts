@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import type { ToolDefinition } from '../src/types.js'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { z } from 'zod'
-import { ToolRegistry } from '../src/registry.js'
 import {
   builtinTools,
-  readFileTool,
-  httpRequestTool,
   calculatorTool,
   getCurrentTimeTool,
+  httpRequestTool,
+  readFileTool,
 } from '../src/builtin.js'
-import type { ToolDefinition } from '../src/types.js'
+import { ToolRegistry } from '../src/registry.js'
 
 function createTestTool(name = 'test_tool'): ToolDefinition {
   return {
@@ -22,7 +22,7 @@ function createTestTool(name = 'test_tool'): ToolDefinition {
   }
 }
 
-describe('ToolRegistry: basic', () => {
+describe('toolRegistry: basic', () => {
   let registry: ToolRegistry
   beforeEach(() => {
     registry = new ToolRegistry()
@@ -59,7 +59,7 @@ describe('ToolRegistry: basic', () => {
   })
 })
 
-describe('ToolRegistry: execute', () => {
+describe('toolRegistry: execute', () => {
   let registry: ToolRegistry
   beforeEach(() => {
     registry = new ToolRegistry()
@@ -143,7 +143,7 @@ describe('ToolRegistry: execute', () => {
   })
 })
 
-describe('ToolRegistry: toLLMFormat', () => {
+describe('toolRegistry: toLLMFormat', () => {
   let registry: ToolRegistry
   beforeEach(() => {
     registry = new ToolRegistry()

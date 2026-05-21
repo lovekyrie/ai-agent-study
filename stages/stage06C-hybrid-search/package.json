@@ -1,8 +1,8 @@
 {
   "name": "stage06c-hybrid-search",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 06C: Elasticsearch/BM25 style lexical retrieval and hybrid RAG",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

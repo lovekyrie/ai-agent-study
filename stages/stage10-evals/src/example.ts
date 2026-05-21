@@ -1,12 +1,13 @@
+import type { ToolCall } from './index.js'
 import {
-  GoldenDataset,
-  EvalRunner,
-  RuleBasedEvaluator,
-  LLMJudge,
-  ToolCallingEvaluator,
-  RegressionTracker,
   CostTracker,
-  type ToolCall,
+  EvalRunner,
+  GoldenDataset,
+  LLMJudge,
+  RegressionTracker,
+  RuleBasedEvaluator,
+
+  ToolCallingEvaluator,
 } from './index.js'
 
 async function goldenDatasetDemo() {
@@ -55,19 +56,19 @@ async function ruleEvaluatorDemo() {
 
   const result1 = evaluator.evaluate(
     { content: 'TypeScript is a typed superset of JavaScript.' },
-    { contains: ['TypeScript', 'JavaScript'] }
+    { contains: ['TypeScript', 'JavaScript'] },
   )
   console.log('Test 1 (all terms found):', result1)
 
   const result2 = evaluator.evaluate(
     { content: 'TypeScript adds types to JavaScript.' },
-    { contains: ['TypeScript', 'Python', 'Java'] }
+    { contains: ['TypeScript', 'Python', 'Java'] },
   )
   console.log('Test 2 (some terms missing):', result2)
 
   const result3 = evaluator.evaluate(
     { content: 'TS is a typed superset of JS.' },
-    { pattern: /typescript/i }
+    { pattern: /typescript/i },
   )
   console.log('Test 3 (pattern match):', result3)
 }
@@ -100,7 +101,7 @@ async function llmJudgeDemo() {
   const result = await judge.judge(
     'What is TypeScript?',
     'TypeScript is a programming language that extends JavaScript with static typing. It was developed by Microsoft.',
-    'Evaluate accuracy and relevance'
+    'Evaluate accuracy and relevance',
   )
 
   console.log('LLM Judge result:')
@@ -119,7 +120,7 @@ async function ragMetricsDemo() {
     [
       'TypeScript is a language that extends JavaScript with type annotations.',
       'It provides compile-time type checking and modern JavaScript features.',
-    ]
+    ],
   )
 
   console.log('RAG Metrics:')
@@ -157,8 +158,8 @@ async function evalRunnerDemo() {
   console.log('- Total:', suite.summary.total)
   console.log('- Passed:', suite.summary.passed)
   console.log('- Failed:', suite.summary.failed)
-  console.log('- Pass Rate:', (suite.summary.passRate * 100).toFixed(1) + '%')
-  console.log('- Avg Latency:', suite.summary.avgLatencyMs.toFixed(0) + 'ms')
+  console.log('- Pass Rate:', `${(suite.summary.passRate * 100).toFixed(1)}%`)
+  console.log('- Avg Latency:', `${suite.summary.avgLatencyMs.toFixed(0)}ms`)
 }
 
 async function regressionTrackerDemo() {
@@ -205,8 +206,8 @@ async function regressionTrackerDemo() {
 
   console.log('Regression Report:')
   console.log('- Has Regression:', report.hasRegression)
-  console.log('- Pass Rate Delta:', (report.delta.passRate * 100).toFixed(1) + '%')
-  console.log('- Latency Delta:', report.delta.avgLatency.toFixed(0) + 'ms')
+  console.log('- Pass Rate Delta:', `${(report.delta.passRate * 100).toFixed(1)}%`)
+  console.log('- Latency Delta:', `${report.delta.avgLatency.toFixed(0)}ms`)
   console.log('- Regressions:', report.regressions.join(', ') || 'none')
 }
 
@@ -223,7 +224,7 @@ async function costTrackerDemo() {
   console.log('Total usage:')
   console.log('- Input tokens:', total.inputTokens)
   console.log('- Output tokens:', total.outputTokens)
-  console.log('- Estimated cost: $' + total.estimatedCost.toFixed(4))
+  console.log(`- Estimated cost: $${total.estimatedCost.toFixed(4)}`)
 
   const byModel = tracker.getByModel()
   console.log('\nBy model:')
@@ -243,7 +244,8 @@ async function main() {
     await regressionTrackerDemo()
     await costTrackerDemo()
     console.log('\n=== Demo Complete ===')
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Demo failed:', error)
   }
 }

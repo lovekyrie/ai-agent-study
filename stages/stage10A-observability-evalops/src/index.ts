@@ -1,4 +1,5 @@
-import { InMemoryTracer, type EvalCase } from '@ai-agent-study/observability'
+import type { EvalCase } from '@ai-agent-study/observability'
+import { InMemoryTracer } from '@ai-agent-study/observability'
 
 export interface RegressionGateInput {
   baselinePassRate: number
@@ -30,7 +31,8 @@ export async function runObservedAnswer(query: string, answerFn: (query: string)
     const answer = await answerFn(query)
     tracer.endSpan(span.id, { answer }, { inputTokens: query.length, outputTokens: answer.length, totalTokens: query.length + answer.length })
     tracer.finishRun(run.id, { answer })
-  } catch (error) {
+  }
+  catch (error) {
     tracer.failSpan(span.id, error instanceof Error ? error : String(error))
     tracer.failRun(run.id, error instanceof Error ? error : String(error))
   }

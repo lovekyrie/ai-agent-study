@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { InMemoryLongTerm, ShortTermMemory, buildContext } from '../src/index.js'
+import { buildContext, InMemoryLongTerm, ShortTermMemory } from '../src/index.js'
 
 describe('buildContext', () => {
   it('只给 systemPrompt + 空短期记忆 → 只有一条 system 消息', async () => {
@@ -23,13 +23,13 @@ describe('buildContext', () => {
       shortTerm: stm,
     })
 
-    expect(result.messages.map((m) => m.role)).toEqual([
+    expect(result.messages.map(m => m.role)).toEqual([
       'system',
       'user',
       'assistant',
       'user',
     ])
-    expect(result.messages.map((m) => m.content)).toEqual(['sys', 'u1', 'a1', 'u2'])
+    expect(result.messages.map(m => m.content)).toEqual(['sys', 'u1', 'a1', 'u2'])
   })
 
   it('累积摘要插入到 system prompt 之后', async () => {
@@ -83,7 +83,7 @@ describe('buildContext', () => {
 
     expect(result.retrievedCount).toBe(1)
     const retrievedBlock = result.messages.find(
-      (m) => m.role === 'system' && m.content.startsWith('[相关历史片段]')
+      m => m.role === 'system' && m.content.startsWith('[相关历史片段]'),
     )
     expect(retrievedBlock).toBeDefined()
     expect(retrievedBlock?.content).toContain('TypeScript')

@@ -1,4 +1,6 @@
-import { AsyncLocalStorage } from 'async_hooks'
+import { AsyncLocalStorage } from 'node:async_hooks'
+
+import crypto from 'node:crypto'
 
 // Session context for tracking user sessions
 export interface SessionData {
@@ -66,7 +68,8 @@ export class SessionManager {
 
   getUserSessions(userId: string): SessionData[] {
     const sessionIds = userSessions.get(userId)
-    if (!sessionIds) return []
+    if (!sessionIds)
+      return []
 
     return Array.from(sessionIds)
       .map(id => sessionStore.get(id))
@@ -75,7 +78,8 @@ export class SessionManager {
 
   addMessage(sessionId: string, message: Omit<Message, 'id' | 'timestamp'>): Message | null {
     const session = sessionStore.get(sessionId)
-    if (!session) return null
+    if (!session)
+      return null
 
     const newMessage: Message = {
       ...message,
@@ -96,7 +100,8 @@ export class SessionManager {
 
   getHistory(sessionId: string, limit?: number): Message[] {
     const session = sessionStore.get(sessionId)
-    if (!session) return []
+    if (!session)
+      return []
 
     if (limit) {
       return session.conversationHistory.slice(-limit)
@@ -106,7 +111,8 @@ export class SessionManager {
 
   updateMetadata(sessionId: string, metadata: Record<string, unknown>): boolean {
     const session = sessionStore.get(sessionId)
-    if (!session) return false
+    if (!session)
+      return false
 
     session.metadata = { ...session.metadata, ...metadata }
     session.updatedAt = new Date()
@@ -115,7 +121,8 @@ export class SessionManager {
 
   deleteSession(sessionId: string): boolean {
     const session = sessionStore.get(sessionId)
-    if (!session) return false
+    if (!session)
+      return false
 
     sessionStore.delete(sessionId)
 
@@ -166,7 +173,7 @@ export function getCurrentContext(): RequestContext | undefined {
 
 export function runWithContext<T>(
   context: RequestContext,
-  fn: () => T
+  fn: () => T,
 ): T {
   return requestContextStorage.run(context, fn)
 }
@@ -207,15 +214,17 @@ export class CheckpointManager {
     if (!workflowCheckpoints || workflowCheckpoints.length === 0) {
       return undefined
     }
-    return workflowCheckpoints[workflowCheckpoints.length - 1]
+    return workflowCheckpoints.at(-1)
   }
 
   markCompleted(workflowId: string, checkpointId: string): boolean {
     const workflowCheckpoints = checkpoints.get(workflowId)
-    if (!workflowCheckpoints) return false
+    if (!workflowCheckpoints)
+      return false
 
     const checkpoint = workflowCheckpoints.find(c => c.id === checkpointId)
-    if (!checkpoint) return false
+    if (!checkpoint)
+      return false
 
     checkpoint.completed = true
     return true
@@ -229,5 +238,3 @@ export class CheckpointManager {
     checkpoints.delete(workflowId)
   }
 }
-
-import crypto from 'crypto'

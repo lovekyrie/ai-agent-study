@@ -1,8 +1,8 @@
 {
   "name": "stage12-graph-rag",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 12: GraphRAG with entity/relation graph traversal",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

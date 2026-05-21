@@ -1,13 +1,13 @@
 import type { LLMClient } from '@ai-agent-study/llm-client'
-import type { ToolCallRequest, ToolResult, ToolDefinition } from '@ai-agent-study/tools'
+import type { ToolCallRequest, ToolDefinition, ToolResult } from '@ai-agent-study/tools'
 
-export type AgentStatus =
-  | 'idle'
-  | 'thinking'
-  | 'executing'
-  | 'done'
-  | 'error'
-  | 'max_iterations'
+export type AgentStatus
+  = | 'idle'
+    | 'thinking'
+    | 'executing'
+    | 'done'
+    | 'error'
+    | 'max_iterations'
 
 /** 单次 LLM 调用 + 该轮触发的工具执行结果（多个工具并行） */
 export interface AgentStep {

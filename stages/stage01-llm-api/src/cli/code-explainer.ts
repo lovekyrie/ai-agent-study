@@ -1,6 +1,7 @@
+import type { ChatMessage } from '@ai-agent-study/llm-client'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { createLLMClient, type ChatMessage } from '@ai-agent-study/llm-client'
+import { createLLMClient } from '@ai-agent-study/llm-client'
 import { Logger } from '@ai-agent-study/logger'
 
 const logger = new Logger({ name: 'code-explainer' })
@@ -55,21 +56,20 @@ export async function explainFile(filePath: string): Promise<void> {
 
     console.log('\nAI 解释：\n')
 
-    let fullResponse = ''
     for await (const chunk of client.stream(messages, {
       temperature: 0.7,
       maxTokens: 2000,
     })) {
       if (!chunk.done) {
         process.stdout.write(chunk.delta)
-        fullResponse += chunk.delta
       }
     }
 
     console.log('\n')
     console.log('-'.repeat(60))
     console.log('解释完成\n')
-  } catch (error) {
+  }
+  catch (error) {
     logger.error('Code explainer failed', error instanceof Error ? error : undefined)
     process.exit(1)
   }
@@ -92,8 +92,10 @@ export async function interactiveMode(): Promise<void> {
   try {
     while (true) {
       const question = (await rl.question('\n你 (输入 quit 退出): ')).trim()
-      if (question.toLowerCase() === 'quit') break
-      if (!question) continue
+      if (question.toLowerCase() === 'quit')
+        break
+      if (!question)
+        continue
 
       history.push({ role: 'user', content: question })
       process.stdout.write('\nAI: ')
@@ -108,13 +110,15 @@ export async function interactiveMode(): Promise<void> {
         }
         history.push({ role: 'assistant', content: response })
         process.stdout.write('\n')
-      } catch (error) {
+      }
+      catch (error) {
         // 失败时回滚 user message，避免污染下一轮上下文
         history.pop()
         console.error('\n错误:', error instanceof Error ? error.message : error)
       }
     }
-  } finally {
+  }
+  finally {
     rl.close()
   }
 }

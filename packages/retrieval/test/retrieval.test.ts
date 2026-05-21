@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   HybridRetriever,
+  ingestDocuments,
   InMemoryLexicalIndex,
   MemoryDocumentLoader,
-  ingestDocuments,
   reciprocalRankFusion,
   splitCodeByLines,
   weightedFusion,
@@ -30,7 +30,7 @@ describe('retrieval package', () => {
         source: 'agent.ts',
         content: ['export function plan() {', '  return "retrieve"', '}', 'export function answer() {}'].join('\n'),
       },
-      { maxChars: 45, overlapChars: 5 }
+      { maxChars: 45, overlapChars: 5 },
     )
 
     expect(chunks.length).toBeGreaterThan(1)

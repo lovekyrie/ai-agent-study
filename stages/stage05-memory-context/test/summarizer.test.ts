@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
 import type { ChatMessage, LLMClient } from '@ai-agent-study/llm-client'
+import { describe, expect, it, vi } from 'vitest'
 import { isSummaryMessage, summarizeHistory } from '../src/index.js'
 
 function fakeClient(response: string): {
@@ -97,7 +97,7 @@ describe('summarizeHistory', () => {
     expect(isSummaryMessage(result.messages[0])).toBe(true)
   })
 
-  it('LLM 失败时抛错（让上层决定降级策略）', async () => {
+  it('lLM 失败时抛错（让上层决定降级策略）', async () => {
     const client = {
       chat: vi.fn(async () => {
         throw new Error('LLM 500')
@@ -112,7 +112,7 @@ describe('summarizeHistory', () => {
     }))
 
     await expect(summarizeHistory(messages, client, { keepRecent: 2 })).rejects.toThrow(
-      /LLM 500/
+      /LLM 500/,
     )
   })
 

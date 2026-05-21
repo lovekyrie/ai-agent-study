@@ -62,5 +62,5 @@ export interface HandoffRequest {
 }
 
 export interface AgentExecutor {
-  execute(context: WorkflowContext): Promise<AgentExecutionResult>
+  execute: (context: WorkflowContext) => Promise<AgentExecutionResult>
 }

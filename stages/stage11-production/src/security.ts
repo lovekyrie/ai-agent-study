@@ -1,5 +1,5 @@
 // Input sanitization and injection prevention
-import path from 'path'
+import path from 'node:path'
 
 export interface SanitizeOptions {
   stripHtml?: boolean
@@ -50,7 +50,7 @@ export class InputSanitizer {
     this.promptInjectPatterns = PROMPT_INJECTION_PATTERNS
   }
 
-  sanitize(input: string): { sanitized: string; threats: Threat[] } {
+  sanitize(input: string): { sanitized: string, threats: Threat[] } {
     const threats: Threat[] = []
     let sanitized = input
 
@@ -109,7 +109,7 @@ export class InputSanitizer {
     return { sanitized, threats }
   }
 
-  detectPromptInjection(input: string): { isInjection: boolean; threats: Threat[] } {
+  detectPromptInjection(input: string): { isInjection: boolean, threats: Threat[] } {
     const threats: Threat[] = []
 
     for (const pattern of this.promptInjectPatterns) {
@@ -136,7 +136,7 @@ export class InputSanitizer {
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&')
       .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
+      .replace(/&#39;/g, '\'')
       .replace(/&nbsp;/g, ' ')
     return decoded.replace(/<[^>]*>/g, '')
   }
@@ -174,14 +174,16 @@ export class Sandbox {
   }
 
   isModuleAllowed(module: string): boolean {
-    if (this.blockedModules.has(module)) return false
-    if (this.allowedModules.size > 0) return this.allowedModules.has(module)
+    if (this.blockedModules.has(module))
+      return false
+    if (this.allowedModules.size > 0)
+      return this.allowedModules.has(module)
     return true
   }
 
   validateFilePath(filePath: string, allowedDirs: string[]): boolean {
     const target = pathModuleResolve(filePath)
-    return allowedDirs.some(dir => {
+    return allowedDirs.some((dir) => {
       const allowed = pathModuleResolve(dir)
       const relative = path.relative(allowed, target)
       return relative === '' || (!!relative && !relative.startsWith('..') && !path.isAbsolute(relative))
@@ -210,8 +212,10 @@ export class Sandbox {
           timeoutId = setTimeout(() => reject(new Error(`Sandbox timeout after ${this.timeout}ms`)), this.timeout)
         }),
       ])
-    } finally {
-      if (timeoutId) clearTimeout(timeoutId)
+    }
+    finally {
+      if (timeoutId)
+        clearTimeout(timeoutId)
       const after = process.memoryUsage().heapUsed
       if (!this.checkMemoryUsage(after)) {
         throw new Error('Memory limit exceeded after sandboxed operation completed')
@@ -243,8 +247,10 @@ export class AccessControl {
   }
 
   isToolAllowed(toolName: string): boolean {
-    if (this.toolDenylist.has(toolName)) return false
-    if (this.toolAllowlist.size > 0) return this.toolAllowlist.has(toolName)
+    if (this.toolDenylist.has(toolName))
+      return false
+    if (this.toolAllowlist.size > 0)
+      return this.toolAllowlist.has(toolName)
     return this.defaultAllow
   }
 
@@ -260,14 +266,16 @@ export class AccessControl {
     const denylist = this.resourceDenylist.get(resourceType)
     if (denylist) {
       for (const pattern of denylist) {
-        if (pattern.test(value)) return false
+        if (pattern.test(value))
+          return false
       }
     }
 
     const allowlist = this.resourceAllowlist.get(resourceType)
     if (allowlist) {
       for (const pattern of allowlist) {
-        if (pattern.test(value)) return true
+        if (pattern.test(value))
+          return true
       }
       return false
     }
@@ -292,18 +300,18 @@ function pathModuleResolve(value: string): string {
 
 // Secret detection and redaction
 const SECRET_PATTERNS = [
-  { name: 'api_key', pattern: /\b(?:api[_-]?key|apikey)[=:\s]*['"]?([a-zA-Z0-9_-]{20,})['"]?/gi },
+  { name: 'api_key', pattern: /\b(?:api[_-]?key|apikey)[=:\s]*['"]?([\w-]{20,})['"]?/gi },
   { name: 'password', pattern: /\b(?:password|passwd|pwd)[=:\s]*['"]?([^\s'"]{8,})['"]?/gi },
-  { name: 'token', pattern: /\b(?:token|auth[_-]?token|access[_-]?token)[=:\s]*['"]?([a-zA-Z0-9_-]{20,})['"]?/gi },
-  { name: 'secret', pattern: /\b(?:secret|client[_-]?secret)[=:\s]*['"]?([a-zA-Z0-9_/-]{20,})['"]?/gi },
+  { name: 'token', pattern: /\b(?:token|auth[_-]?token|access[_-]?token)[=:\s]*['"]?([\w-]{20,})['"]?/gi },
+  { name: 'secret', pattern: /\b(?:secret|client[_-]?secret)[=:\s]*['"]?([\w/-]{20,})['"]?/gi },
   { name: 'private_key', pattern: /-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/g },
   { name: 'aws_key', pattern: /\b(?:AKIA|ABIA|ACCA)[A-Z0-9]{16}\b/g },
-  { name: 'github_token', pattern: /gh[pousr]_[A-Za-z0-9_]{36,}/g },
-  { name: 'jwt', pattern: /eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*/g },
+  { name: 'github_token', pattern: /gh[pousr]_\w{36,}/g },
+  { name: 'jwt', pattern: /eyJ[\w-]*\.eyJ[\w-]*\.[\w-]*/g },
 ]
 
 export class SecretDetector {
-  private customPatterns: { name: string; pattern: RegExp }[] = []
+  private customPatterns: { name: string, pattern: RegExp }[] = []
 
   addPattern(name: string, pattern: RegExp): void {
     this.customPatterns.push({ name, pattern })
@@ -340,7 +348,8 @@ export class SecretDetector {
   }
 
   redact(input: string): string {
-    if (input.length <= 8) return '***'
+    if (input.length <= 8)
+      return '***'
     return input.slice(0, 4) + '*'.repeat(input.length - 8) + input.slice(-4)
   }
 

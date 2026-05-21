@@ -1,7 +1,7 @@
 {
   "name": "stage09-workflow",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
   "description": "Stage 09: Multi-Agent Workflow — Supervisor / Specialist / Checkpoint / 审批",
   "scripts": {
     "dev": "tsx src/example.ts",

@@ -48,12 +48,13 @@ export class Embedder {
   }
 
   async embed(texts: string[]): Promise<EmbeddingResult[]> {
-    if (texts.length === 0) return []
+    if (texts.length === 0)
+      return []
     const results: EmbeddingResult[] = []
     for (let i = 0; i < texts.length; i += this.batchSize) {
       const batch = texts.slice(i, i + this.batchSize)
-      const batchResults =
-        this.provider === 'openai'
+      const batchResults
+        = this.provider === 'openai'
           ? await this.embedOpenAI(batch)
           : this.embedStub(batch)
       results.push(...batchResults)
@@ -70,14 +71,14 @@ export class Embedder {
       { model: this.model, input: texts },
       {
         headers: {
-          Authorization: `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
         },
         timeout: 30_000,
-      }
+      },
     )
 
-    const items = (data?.data ?? []) as Array<{ index: number; embedding: number[] }>
+    const items = (data?.data ?? []) as Array<{ index: number, embedding: number[] }>
     return items
       .sort((a, b) => a.index - b.index)
       .map((item, i) => ({
@@ -122,13 +123,15 @@ export function pseudoVector(text: string, dim = DEFAULT_DIMENSIONS): number[] {
   }
   // L2 归一化
   const mag = Math.sqrt(vec.reduce((s, v) => s + v * v, 0))
-  if (mag === 0) return vec
+  if (mag === 0)
+    return vec
   for (let i = 0; i < dim; i++) vec[i] /= mag
   return vec
 }
 
 export function cosineSimilarity(a: number[], b: number[]): number {
-  if (a.length !== b.length || a.length === 0) return 0
+  if (a.length !== b.length || a.length === 0)
+    return 0
   let dot = 0
   let normA = 0
   let normB = 0

@@ -23,21 +23,26 @@ function newChunkId(): string {
 }
 
 function validateOptions(opts: ChunkOptions, unit: 'char' | 'line'): void {
-  if (opts.chunkSize <= 0) throw new Error(`chunkSize must be positive (${unit})`)
-  if (opts.chunkOverlap < 0) throw new Error(`chunkOverlap must be >= 0 (${unit})`)
+  if (opts.chunkSize <= 0)
+    throw new Error(`chunkSize must be positive (${unit})`)
+  if (opts.chunkOverlap < 0)
+    throw new Error(`chunkOverlap must be >= 0 (${unit})`)
   if (opts.chunkOverlap >= opts.chunkSize) {
     throw new Error(`chunkOverlap (${opts.chunkOverlap}) must be < chunkSize (${opts.chunkSize})`)
   }
-  if (opts.minChunkSize < 0) throw new Error(`minChunkSize must be >= 0`)
+  if (opts.minChunkSize < 0)
+    throw new Error(`minChunkSize must be >= 0`)
 }
 
 /** 计算 0-based 字符偏移对应的 1-based 行号 */
 function lineNumberAt(text: string, offset: number): number {
-  if (offset <= 0) return 1
+  if (offset <= 0)
+    return 1
   let count = 1
   const upto = Math.min(offset, text.length)
   for (let i = 0; i < upto; i++) {
-    if (text[i] === '\n') count++
+    if (text[i] === '\n')
+      count++
   }
   return count
 }
@@ -49,7 +54,7 @@ function lineNumberAt(text: string, offset: number): number {
 export function chunkText(
   text: string,
   source: string,
-  options: Partial<ChunkOptions> = {}
+  options: Partial<ChunkOptions> = {},
 ): Chunk[] {
   const chunkSize = options.chunkSize ?? 1000
   const opts: ChunkOptions = {
@@ -60,7 +65,8 @@ export function chunkText(
   }
   validateOptions(opts, 'char')
 
-  if (text.length === 0) return []
+  if (text.length === 0)
+    return []
   if (text.length <= opts.chunkSize) {
     return [
       {
@@ -88,9 +94,11 @@ export function chunkText(
       const paragraphBreak = text.lastIndexOf('\n\n', end)
       if (paragraphBreak > start + opts.minChunkSize) {
         end = paragraphBreak + 2
-      } else {
+      }
+      else {
         const spaceBreak = text.lastIndexOf(' ', end)
-        if (spaceBreak > start + opts.minChunkSize) end = spaceBreak + 1
+        if (spaceBreak > start + opts.minChunkSize)
+          end = spaceBreak + 1
       }
     }
 
@@ -112,10 +120,12 @@ export function chunkText(
     }
 
     // 到达末尾直接结束，避免在 end == text.length 时陷入"每次只前进 1 字符"的慢循环
-    if (end >= text.length) break
+    if (end >= text.length)
+      break
     // 字符级 overlap，单位一致，且保证 nextStart > start 防死循环
     const nextStart = Math.max(start + 1, end - opts.chunkOverlap)
-    if (nextStart >= text.length) break
+    if (nextStart >= text.length)
+      break
     start = nextStart
   }
 
@@ -129,7 +139,7 @@ export function chunkCode(
   code: string,
   source: string,
   language: string,
-  options: Partial<ChunkOptions> = {}
+  options: Partial<ChunkOptions> = {},
 ): Chunk[] {
   const opts: ChunkOptions = {
     chunkSize: options.chunkSize ?? 30,
@@ -139,7 +149,8 @@ export function chunkCode(
   validateOptions(opts, 'line')
 
   const lines = code.split('\n')
-  if (lines.length === 0) return []
+  if (lines.length === 0)
+    return []
 
   const chunks: Chunk[] = []
   let startLine = 1
@@ -150,7 +161,7 @@ export function chunkCode(
     const content = lines.slice(startLine - 1, endLine).join('\n').trimEnd()
 
     // 至少 minChunkSize 行（非空内容）才入选
-    const nonEmptyLineCount = content.split('\n').filter((l) => l.trim()).length
+    const nonEmptyLineCount = content.split('\n').filter(l => l.trim()).length
     if (nonEmptyLineCount >= opts.minChunkSize) {
       chunks.push({
         id: newChunkId(),
@@ -159,7 +170,8 @@ export function chunkCode(
       })
     }
 
-    if (endLine >= lines.length) break
+    if (endLine >= lines.length)
+      break
     startLine += stride
   }
 
@@ -172,8 +184,25 @@ export function chunkByFile(content: string, source: string, fileType: string): 
 
 function isCodeFile(fileType: string): boolean {
   const codeExtensions = new Set([
-    'ts', 'tsx', 'js', 'jsx', 'py', 'rs', 'go', 'java', 'cpp', 'c', 'h',
-    'cs', 'rb', 'php', 'swift', 'kt', 'scala', 'vue', 'svelte',
+    'ts',
+    'tsx',
+    'js',
+    'jsx',
+    'py',
+    'rs',
+    'go',
+    'java',
+    'cpp',
+    'c',
+    'h',
+    'cs',
+    'rb',
+    'php',
+    'swift',
+    'kt',
+    'scala',
+    'vue',
+    'svelte',
   ])
   return codeExtensions.has(fileType.toLowerCase())
 }

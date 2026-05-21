@@ -1,12 +1,14 @@
+import type { Chunk } from './index.js'
 import { getConfig } from '@ai-agent-study/config'
 import { Logger } from '@ai-agent-study/logger'
-import { AdvancedRAG, Embedder, chunkText, type Chunk } from './index.js'
+import { AdvancedRAG, chunkText, Embedder } from './index.js'
 
 async function runSection(logger: Logger, name: string, fn: () => Promise<void>) {
   logger.info(`\n========== ${name} ==========`)
   try {
     await fn()
-  } catch (error) {
+  }
+  catch (error) {
     logger.error(`Section "${name}" failed`, error instanceof Error ? error : undefined)
   }
 }
@@ -19,7 +21,7 @@ async function main() {
   const embedder = new Embedder()
   if (embedder.getProvider() === 'stub') {
     logger.warn(
-      'Embedder running in STUB mode (no semantic similarity). Set OPENAI_API_KEY for real embeddings.'
+      'Embedder running in STUB mode (no semantic similarity). Set OPENAI_API_KEY for real embeddings.',
     )
   }
 

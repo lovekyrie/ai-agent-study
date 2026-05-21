@@ -1,10 +1,10 @@
-export { InMemoryCollection } from './memory.js'
 export { ChromaVectorStore, InMemoryVectorStoreAdapter } from './adapters.js'
+export type { ChromaVectorStoreOptions, VectorStoreAdapter } from './adapters.js'
+export { InMemoryCollection } from './memory.js'
 export type {
-  VectorDocument,
-  SearchResult,
-  SearchOptions,
   CollectionStats,
   ICollection,
+  SearchOptions,
+  SearchResult,
+  VectorDocument,
 } from './types.js'
-export type { ChromaVectorStoreOptions, VectorStoreAdapter } from './adapters.js'

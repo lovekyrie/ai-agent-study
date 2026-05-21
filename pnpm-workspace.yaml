@@ -1,4 +1,10 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
 packages:
   - 'packages/*'
   - 'stages/*'
   - 'projects/*'
+overrides:
+  eslint-flat-config-utils: 3.0.2

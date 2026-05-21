@@ -1,4 +1,4 @@
-import { MemoryDocumentLoader, ingestDocuments } from '@ai-agent-study/retrieval'
+import { ingestDocuments, MemoryDocumentLoader } from '@ai-agent-study/retrieval'
 import { InMemoryVectorStoreAdapter } from '@ai-agent-study/vectorstore'
 import { indexChunks } from './index.js'
 

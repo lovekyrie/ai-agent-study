@@ -1,7 +1,8 @@
 import type { RequestContext } from './types.js'
 
 export function parseBearerToken(header?: string): string | undefined {
-  if (!header) return undefined
+  if (!header)
+    return undefined
   const match = header.match(/^Bearer\s+(.+)$/i)
   return match?.[1]
 }
@@ -12,6 +13,6 @@ export function createRequestContext(headers: Record<string, string | undefined>
     requestId,
     sessionId: headers['x-session-id'],
     userId: headers['x-user-id'],
-    traceId: headers['traceparent'] ?? requestId,
+    traceId: headers.traceparent ?? requestId,
   }
 }

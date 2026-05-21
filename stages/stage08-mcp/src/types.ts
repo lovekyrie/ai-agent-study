@@ -27,7 +27,7 @@ export interface MCPResource {
 export interface MCPPrompt {
   name: string
   description: string
-  arguments?: { name: string; description: string; required: boolean }[]
+  arguments?: { name: string, description: string, required: boolean }[]
   template: string
 }
 

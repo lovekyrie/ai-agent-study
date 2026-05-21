@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { Reranker } from '../src/reranker.js'
 
-describe('Reranker.parseScores', () => {
+describe('reranker.parseScores', () => {
   it('parses {scores: [...]} format', () => {
     expect(Reranker.parseScores('{"scores":[0.9, 0.3, 0.5]}', 3)).toEqual([0.9, 0.3, 0.5])
   })
@@ -36,7 +36,7 @@ describe('Reranker.parseScores', () => {
   })
 })
 
-describe('Reranker.rerank (with mock client)', () => {
+describe('reranker.rerank (with mock client)', () => {
   it('returns original on empty input', async () => {
     const r = new Reranker({
       client: { chat: async () => ({ content: '{"scores":[]}' }) } as never,
@@ -69,7 +69,7 @@ describe('Reranker.rerank (with mock client)', () => {
       { score: 0.5, document: { id: 'b', content: 'bbb' } },
       { score: 0.3, document: { id: 'c', content: 'ccc' } },
     ])
-    expect(result.map((r) => r.document.id)).toEqual(['b', 'c', 'a'])
+    expect(result.map(r => r.document.id)).toEqual(['b', 'c', 'a'])
   })
 
   it('falls back to original order on parse failure', async () => {
@@ -79,6 +79,6 @@ describe('Reranker.rerank (with mock client)', () => {
       { score: 0.9, document: { id: 'a', content: 'x' } },
       { score: 0.5, document: { id: 'b', content: 'y' } },
     ])
-    expect(result.map((r) => r.document.id)).toEqual(['a', 'b'])
+    expect(result.map(r => r.document.id)).toEqual(['a', 'b'])
   })
 })

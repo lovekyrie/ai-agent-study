@@ -35,7 +35,7 @@ export interface IngestionResult {
 }
 
 export interface Loader {
-  load(): Promise<SourceDocument[]>
+  load: () => Promise<SourceDocument[]>
 }
 
 export type Splitter = (document: SourceDocument, options?: ChunkOptions) => DocumentChunk[]

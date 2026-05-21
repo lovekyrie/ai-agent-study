@@ -23,10 +23,10 @@
 interface ToolDefinition<TParams = any> {
   name: string
   description: string
-  parameters: z.ZodType<TParams>           // ← 用 zod 而不是手写 JSON Schema
+  parameters: z.ZodType<TParams> // ← 用 zod 而不是手写 JSON Schema
   execute: (params: TParams, ctx?) => Promise<ToolResult>
   category?: string
-  requiresApproval?: boolean               // ← 审批门
+  requiresApproval?: boolean // ← 审批门
 }
 ```
 
@@ -40,7 +40,7 @@ for (let iter = 0; iter < MAX_ITER; iter++) {
 
   if (!response.toolCalls?.length) {
     history.push({ role: 'assistant', content: response.content })
-    break  // ← 模型不再请求工具，结束
+    break // ← 模型不再请求工具，结束
   }
 
   // 协议契约 1: assistant 消息必须保留 tool_calls 字段
@@ -48,7 +48,7 @@ for (let iter = 0; iter < MAX_ITER; iter++) {
 
   // 并行执行所有 tool_calls
   const results = await registry.executeBatch(
-    response.toolCalls.map((tc) => ({ id: tc.id, name: tc.function.name, arguments: JSON.parse(tc.function.arguments) }))
+    response.toolCalls.map(tc => ({ id: tc.id, name: tc.function.name, arguments: JSON.parse(tc.function.arguments) }))
   )
 
   // 协议契约 2: 每个 tool_call 都必须对应一条 role:'tool' 消息

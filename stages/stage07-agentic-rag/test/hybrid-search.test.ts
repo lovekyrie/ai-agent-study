@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest'
 import type { SearchResult } from '@ai-agent-study/vectorstore'
-import { HybridSearchEngine, type KnowledgeBase } from '../src/index.js'
+import type { KnowledgeBase } from '../src/index.js'
+import { describe, expect, it } from 'vitest'
+import { HybridSearchEngine } from '../src/index.js'
 
-function fixedKB(name: string, results: { id: string; score: number }[]): KnowledgeBase {
+function fixedKB(name: string, results: { id: string, score: number }[]): KnowledgeBase {
   return {
     name,
     description: `KB ${name}`,
@@ -19,7 +20,7 @@ function fixedKB(name: string, results: { id: string; score: number }[]): Knowle
   }
 }
 
-describe('HybridSearchEngine', () => {
+describe('hybridSearchEngine', () => {
   it('fuses vector and keyword scores with default weights', async () => {
     // Three docs per KB so min-max normalization doesn't crush mid scores to 0.
     // doc2 hits both KBs at high (but not max) score → wins after weighted sum:
@@ -73,7 +74,7 @@ describe('HybridSearchEngine', () => {
   it('slices to topK', async () => {
     const vectorKB = fixedKB(
       'v',
-      Array.from({ length: 20 }, (_, i) => ({ id: `v${i}`, score: 1 - i * 0.05 }))
+      Array.from({ length: 20 }, (_, i) => ({ id: `v${i}`, score: 1 - i * 0.05 })),
     )
     const keywordKB = fixedKB('k', [])
     const hybrid = new HybridSearchEngine(vectorKB, keywordKB)

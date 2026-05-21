@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { MCPClient } from '../src/client.js'
 
-describe('MCPClient', () => {
+describe('mCPClient', () => {
   let client: MCPClient
 
   beforeEach(() => {
@@ -30,13 +30,13 @@ describe('MCPClient', () => {
 
   it('should throw when calling tool without connect', async () => {
     await expect(
-      client.callTool({ name: 'test', arguments: {} })
+      client.callTool({ name: 'test', arguments: {} }),
     ).rejects.toThrow('not connected')
   })
 
   it('should throw when reading resource without connect', async () => {
     await expect(client.readResource('test://resource')).rejects.toThrow(
-      'not connected'
+      'not connected',
     )
   })
 

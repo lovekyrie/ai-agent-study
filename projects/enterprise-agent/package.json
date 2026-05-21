@@ -1,7 +1,7 @@
 {
   "name": "@ai-agent-study/enterprise-agent",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
   "description": "Enterprise Workflow Agent - Multi-Agent Workflow Automation",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@ai-agent-study/llm-client": "workspace:*",
-    "@ai-agent-study/tools": "workspace:*",
+    "@ai-agent-study/mcp": "workspace:*",
     "@ai-agent-study/memory": "workspace:*",
-    "@ai-agent-study/mcp": "workspace:*"
+    "@ai-agent-study/tools": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

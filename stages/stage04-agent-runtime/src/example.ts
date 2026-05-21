@@ -10,10 +10,10 @@ async function runTask(logger: Logger, agent: Agent, label: string, task: string
 
   logger.info(`Status: ${response.status} | iterations: ${response.trace.iterations}`)
   for (const step of response.trace.steps) {
-    const callSummary =
-      step.toolCalls.length > 0
+    const callSummary
+      = step.toolCalls.length > 0
         ? step.toolCalls
-            .map((c) => `${c.name}(${JSON.stringify(c.arguments)})`)
+            .map(c => `${c.name}(${JSON.stringify(c.arguments)})`)
             .join(', ')
         : '<final answer>'
     console.log(`  [step ${step.stepNumber}] ${callSummary}`)
@@ -35,7 +35,8 @@ async function main() {
     permissions: ['approve'],
     maxIterations: 6,
     onStep: (step) => {
-      if (step.error) console.error(`[step ${step.stepNumber}] error: ${step.error}`)
+      if (step.error)
+        console.error(`[step ${step.stepNumber}] error: ${step.error}`)
     },
   })
 
@@ -49,14 +50,14 @@ async function main() {
     logger,
     agent,
     'Task 3: 多步推理',
-    '请帮我：1）获取当前时间（Asia/Shanghai 时区）；2）告诉我现在大约是上午、下午还是晚上。'
+    '请帮我：1）获取当前时间（Asia/Shanghai 时区）；2）告诉我现在大约是上午、下午还是晚上。',
   )
 
   await runTask(
     logger,
     agent,
     'Task 4: 并行工具',
-    '请同时获取当前时间，以及计算 sqrt 是不支持的，请直接计算 2 ** 10 是多少。'
+    '请同时获取当前时间，以及计算 sqrt 是不支持的，请直接计算 2 ** 10 是多少。',
   )
 
   logger.info('\nStage 4 completed')

@@ -1,8 +1,8 @@
 {
   "name": "stage00-engineering",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 00: 工程基础 — Monorepo / TS / Vitest / 日志 / 配置",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

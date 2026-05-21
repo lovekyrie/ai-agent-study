@@ -1,4 +1,4 @@
-import { WorkflowBuilder, createCodeReviewWorkflow } from './index.js'
+import { createCodeReviewWorkflow, WorkflowBuilder } from './index.js'
 
 async function simpleWorkflowDemo() {
   console.log('=== Simple Workflow Demo ===\n')
@@ -8,19 +8,19 @@ async function simpleWorkflowDemo() {
       'supervisor',
       'Task Supervisor',
       'Supervisor Agent',
-      'You are a supervisor coordinating a multi-step task. Delegate to specialists as needed.'
+      'You are a supervisor coordinating a multi-step task. Delegate to specialists as needed.',
     )
     .addSpecialist(
       'research',
       'Research Specialist',
       'Research Agent',
-      'You research topics and provide detailed findings.'
+      'You research topics and provide detailed findings.',
     )
     .addSpecialist(
       'writer',
       'Writer Specialist',
       'Writing Agent',
-      'You write clear, concise content based on research findings.'
+      'You write clear, concise content based on research findings.',
     )
     .addEnd('end', 'Complete')
     .addEdge('supervisor', 'research')
@@ -91,7 +91,8 @@ async function main() {
     await codeReviewWorkflowDemo()
     await checkpointDemo()
     console.log('\n=== Demo Complete ===')
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Demo failed:', error)
   }
 }

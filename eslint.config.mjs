@@ -1,43 +1,40 @@
-import eslint from '@eslint/js'
-import tseslint from '@typescript-eslint/eslint-plugin'
-import tsparser from '@typescript-eslint/parser'
-import prettier from 'eslint-config-prettier'
+import antfu from '@antfu/eslint-config'
 
-export default [
-  eslint.configs.recommended,
-  prettier,
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    languageOptions: {
-      parser: tsparser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': tseslint,
-    },
-    rules: {
-      ...tseslint.configs.recommended.rules,
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        },
-      ],
-    },
+export default antfu({
+  typescript: true,
+  ignores: [
+    'node_modules',
+    'dist',
+    'build',
+    'coverage',
+    '**/README.md',
+  ],
+  rules: {
+    'node/prefer-global/process': 'off',
+    'node/prefer-global/buffer': 'off',
+    'e18e/prefer-static-regex': 'off',
+    'no-cond-assign': 'off',
+    'unicorn/no-new-array': 'off',
+    'regexp/no-unused-capturing-group': 'off',
+    'regexp/no-super-linear-backtracking': 'off',
+    'regexp/no-dupe-disjunctions': 'off',
+    'no-new': 'off',
+    'no-unsafe-finally': 'off',
   },
-  {
-    // 测试文件放宽：允许 any，便于 mock
-    files: ['**/*.test.ts', '**/*.spec.ts', '**/test/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-    },
+}, {
+  files: ['**/*.test.ts', '**/*.spec.ts', '**/test/**/*.ts'],
+  rules: {
+    'no-console': 'off',
+    'antfu/no-top-level-await': 'off',
+    'ts/no-explicit-any': 'off',
+    'unused-imports/no-unused-vars': 'off',
+    'style/max-statements-per-line': 'off',
   },
-  {
-    ignores: ['node_modules/**', 'dist/**', 'build/**', 'coverage/**'],
+}, {
+  files: ['**/example.ts', '**/example*.ts'],
+  rules: {
+    'no-console': 'off',
+    'antfu/no-top-level-await': 'off',
+    'unused-imports/no-unused-vars': 'off',
   },
-]
+})

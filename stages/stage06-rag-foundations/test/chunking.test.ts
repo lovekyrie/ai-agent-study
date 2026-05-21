@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { chunkText, chunkCode, chunkByFile } from '../src/chunking.js'
+import { describe, expect, it } from 'vitest'
+import { chunkByFile, chunkCode, chunkText } from '../src/chunking.js'
 
 describe('chunkText', () => {
   it('returns empty for empty input', () => {
@@ -26,7 +26,7 @@ describe('chunkText', () => {
     const chunks = chunkText(text, 'src.txt', { chunkSize: 20, chunkOverlap: 0, minChunkSize: 1 })
     // 第一块应当从第 1 行开始，最后一块应当覆盖到最后一行
     expect(chunks[0].metadata.startLine).toBe(1)
-    expect(chunks[chunks.length - 1].metadata.endLine).toBeGreaterThanOrEqual(5)
+    expect(chunks.at(-1).metadata.endLine).toBeGreaterThanOrEqual(5)
   })
 
   it('rejects invalid options', () => {

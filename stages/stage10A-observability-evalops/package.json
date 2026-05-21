@@ -1,8 +1,8 @@
 {
   "name": "stage10a-observability-evalops",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 10A: Observability and EvalOps for agent systems",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

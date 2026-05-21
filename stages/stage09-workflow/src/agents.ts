@@ -1,19 +1,20 @@
-import { createLLMClient, type ChatMessage, type LLMClient } from '@ai-agent-study/llm-client'
+import type { ChatMessage, LLMClient } from '@ai-agent-study/llm-client'
 import type {
   AgentConfig,
   AgentExecutionResult,
   AgentExecutor,
   WorkflowContext,
 } from './types.js'
+import { createLLMClient } from '@ai-agent-study/llm-client'
 
 export class SupervisorAgent implements AgentExecutor {
   protected agentConfig: AgentConfig
-  protected listNodes: () => { id: string; type: string; name: string }[]
+  protected listNodes: () => { id: string, type: string, name: string }[]
   private cachedClient?: LLMClient
 
   constructor(
     config: AgentConfig,
-    listNodes: () => { id: string; type: string; name: string }[],
+    listNodes: () => { id: string, type: string, name: string }[],
     llmClient?: LLMClient,
   ) {
     this.agentConfig = config
@@ -22,7 +23,8 @@ export class SupervisorAgent implements AgentExecutor {
   }
 
   protected getClient(): LLMClient {
-    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    if (!this.cachedClient)
+      this.cachedClient = createLLMClient()
     return this.cachedClient
   }
 
@@ -63,7 +65,8 @@ What should happen next? Provide your decision and any necessary actions.`,
       }
 
       return { success: true, output: response.content }
-    } catch (error) {
+    }
+    catch (error) {
       return {
         success: false,
         output: error instanceof Error ? error.message : String(error),
@@ -71,7 +74,7 @@ What should happen next? Provide your decision and any necessary actions.`,
     }
   }
 
-  protected parseSupervisorDecision(content: string): { handoff?: string; reason?: string } {
+  protected parseSupervisorDecision(content: string): { handoff?: string, reason?: string } {
     const handoffMatch = content.match(/handoff:\s*([\w-]+)/i) || content.match(/delegate to:\s*([\w-]+)/i)
     const reasonMatch = content.match(/reason:(.+)/i)
 
@@ -96,7 +99,8 @@ export class SpecialistAgent implements AgentExecutor {
   }
 
   protected getClient(): LLMClient {
-    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    if (!this.cachedClient)
+      this.cachedClient = createLLMClient()
     return this.cachedClient
   }
 
@@ -131,7 +135,8 @@ Complete your specialized task and report the results. If you need to handoff ba
       }
 
       return { success: true, output: response.content }
-    } catch (error) {
+    }
+    catch (error) {
       return {
         success: false,
         output: error instanceof Error ? error.message : String(error),

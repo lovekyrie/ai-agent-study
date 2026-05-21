@@ -20,7 +20,8 @@ async function main() {
       { role: 'user', content: '用一句话介绍 TypeScript。' },
     ])
     console.log('Response:', response.content)
-  } catch (error) {
+  }
+  catch (error) {
     logger.error('Non-streaming call failed', error instanceof Error ? error : undefined)
   }
 
@@ -30,10 +31,12 @@ async function main() {
     for await (const chunk of client.stream([
       { role: 'user', content: '写一首五言绝句，关于编程。' },
     ])) {
-      if (!chunk.done) process.stdout.write(chunk.delta)
+      if (!chunk.done)
+        process.stdout.write(chunk.delta)
     }
     console.log('\nStream completed')
-  } catch (error) {
+  }
+  catch (error) {
     logger.error('Streaming call failed', error instanceof Error ? error : undefined)
   }
 
@@ -54,10 +57,11 @@ async function main() {
       },
     ])
     console.log('Structured result:', JSON.stringify(result, null, 2))
-  } catch (error) {
+  }
+  catch (error) {
     logger.error(
       'JSON structured output failed',
-      error instanceof Error ? error : undefined
+      error instanceof Error ? error : undefined,
     )
   }
 

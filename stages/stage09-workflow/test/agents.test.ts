@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
-import { SupervisorAgent, SpecialistAgent } from '../src/agents.js'
 import type { WorkflowContext } from '../src/types.js'
+import { describe, expect, it, vi } from 'vitest'
+import { SpecialistAgent, SupervisorAgent } from '../src/agents.js'
 
 const mockChat = vi.fn()
 
@@ -22,7 +22,7 @@ function makeContext(overrides: Partial<WorkflowContext> = {}): WorkflowContext 
   }
 }
 
-describe('SupervisorAgent', () => {
+describe('supervisorAgent', () => {
   it('returns handoff when LLM mentions handoff:<target>', async () => {
     mockChat.mockResolvedValueOnce({ content: 'handoff: security\nreason: needs review', role: 'assistant' })
 
@@ -64,7 +64,7 @@ describe('SupervisorAgent', () => {
   })
 })
 
-describe('SpecialistAgent', () => {
+describe('specialistAgent', () => {
   it('returns handoff when LLM says handoff:supervisor', async () => {
     mockChat.mockResolvedValueOnce({ content: 'Review done. handoff:supervisor', role: 'assistant' })
 

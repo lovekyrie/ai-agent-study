@@ -54,9 +54,9 @@ const engine = new WorkflowBuilder()
   .addSpecialist('security', 'Security', 'Security Expert', 'Review for vulns')
   .addApproval('approve', 'Manager Approval', 'Human review required')
   .addEnd('end', 'Done')
-  .addEdge('sup', 'security', (ctx) => !ctx.data['securityDone'])
+  .addEdge('sup', 'security', ctx => !ctx.data.securityDone)
   .addEdge('security', 'sup')
-  .addEdge('sup', 'approve', (ctx) => ctx.data['securityDone'] === true)
+  .addEdge('sup', 'approve', ctx => ctx.data.securityDone === true)
   .addEdge('approve', 'end')
   .build()
 ```
@@ -65,8 +65,8 @@ const engine = new WorkflowBuilder()
 
 ```typescript
 const result = await engine.execute('wf-001', { prTitle: 'feat: add login' })
-console.log(result.state)    // 'waiting_approval' | 'completed' | 'failed'
-console.log(result.history)  // 每步 nodeId + action + timestamp
+console.log(result.state) // 'waiting_approval' | 'completed' | 'failed'
+console.log(result.history) // 每步 nodeId + action + timestamp
 ```
 
 ### 3. 人工审批

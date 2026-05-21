@@ -1,8 +1,8 @@
 {
   "name": "stage08a-mcp-ecosystem",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 08A: Real MCP ecosystem bridge into the local ToolRegistry",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

@@ -1,4 +1,4 @@
-import { createLLMClient, type LLMClient } from '@ai-agent-study/llm-client'
+import type { LLMClient } from '@ai-agent-study/llm-client'
 import type {
   EvalExpected,
   EvalOutput,
@@ -7,21 +7,23 @@ import type {
   ToolCall,
   ToolCallingEvalResult,
 } from './types.js'
+import { createLLMClient } from '@ai-agent-study/llm-client'
 
 export class RuleBasedEvaluator {
-  evaluate(output: EvalOutput, expected: EvalExpected): { passed: boolean; score: number; details: string } {
+  evaluate(output: EvalOutput, expected: EvalExpected): { passed: boolean, score: number, details: string } {
     let score = 1.0
     const reasons: string[] = []
     let hardFailure = false
 
     if (expected.contains) {
-      const found = expected.contains.filter((term) =>
+      const found = expected.contains.filter(term =>
         output.content.toLowerCase().includes(term.toLowerCase()),
       )
-      const missing = expected.contains.filter((term) => !found.includes(term))
+      const missing = expected.contains.filter(term => !found.includes(term))
       if (missing.length === 0) {
         reasons.push('All required terms found')
-      } else {
+      }
+      else {
         const ratio = expected.contains.length > 0 ? found.length / expected.contains.length : 1
         score = Math.min(score, ratio)
         hardFailure = true
@@ -32,7 +34,8 @@ export class RuleBasedEvaluator {
     if (expected.pattern) {
       if (expected.pattern.test(output.content)) {
         reasons.push('Pattern matched')
-      } else {
+      }
+      else {
         score -= 0.5
         hardFailure = true
         reasons.push('Pattern not matched')
@@ -43,7 +46,8 @@ export class RuleBasedEvaluator {
       const scoreVal = typeof output.metadata.score === 'number' ? output.metadata.score : 0
       if (scoreVal >= expected.minScore) {
         reasons.push(`Score ${scoreVal} >= ${expected.minScore}`)
-      } else {
+      }
+      else {
         score -= (expected.minScore - scoreVal)
         hardFailure = true
         reasons.push(`Score ${scoreVal} < ${expected.minScore}`)
@@ -54,7 +58,8 @@ export class RuleBasedEvaluator {
       const customResult = expected.custom(output, expected)
       if (customResult) {
         reasons.push('Custom validation passed')
-      } else {
+      }
+      else {
         score = 0
         hardFailure = true
         reasons.push('Custom validation failed')
@@ -81,7 +86,8 @@ export class LLMJudge {
   }
 
   private getClient(): LLMClient {
-    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    if (!this.cachedClient)
+      this.cachedClient = createLLMClient()
     return this.cachedClient
   }
 
@@ -89,7 +95,7 @@ export class LLMJudge {
     question: string,
     answer: string,
     criteria: string = 'Is the answer helpful, accurate, and relevant to the question?',
-  ): Promise<{ score: number; reasoning: string }> {
+  ): Promise<{ score: number, reasoning: string }> {
     const prompt = `You are an expert evaluator. Judge the following answer based on the given criteria.
 
 Question: ${question}
@@ -116,7 +122,8 @@ Provide your evaluation in JSON format:
         score: clampScore(parsed.score),
         reasoning,
       }
-    } catch (error) {
+    }
+    catch (error) {
       return {
         score: 0,
         reasoning: `Error: ${error instanceof Error ? error.message : String(error)}`,
@@ -165,7 +172,8 @@ Provide JSON:
         contextPrecision: clampScore(parsed.contextPrecision),
         contextRecall: clampScore(parsed.contextRecall),
       }
-    } catch (error) {
+    }
+    catch {
       return {
         faithfulness: 0,
         answerRelevance: 0,
@@ -180,7 +188,8 @@ Provide JSON:
     if (match) {
       try {
         return JSON.parse(match[0]) as Record<string, unknown>
-      } catch {
+      }
+      catch {
         return {}
       }
     }
@@ -191,13 +200,13 @@ Provide JSON:
 export class ToolCallingEvaluator {
   evaluate(toolCalls: ToolCall[], expectedTools: string[]): ToolCallingEvalResult {
     const expectedSet = new Set(expectedTools)
-    const calledSet = new Set(toolCalls.map((t) => t.tool))
+    const calledSet = new Set(toolCalls.map(t => t.tool))
 
-    const correctCalls = toolCalls.filter((t) =>
+    const correctCalls = toolCalls.filter(t =>
       expectedSet.has(t.tool) && t.success !== false,
     )
-    const missedTools = expectedTools.filter((t) => !calledSet.has(t))
-    const extraTools = toolCalls.map((t) => t.tool).filter((t) => !expectedSet.has(t))
+    const missedTools = expectedTools.filter(t => !calledSet.has(t))
+    const extraTools = toolCalls.map(t => t.tool).filter(t => !expectedSet.has(t))
 
     const precision = toolCalls.length > 0
       ? correctCalls.length / toolCalls.length

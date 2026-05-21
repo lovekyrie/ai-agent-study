@@ -1,4 +1,5 @@
-import { collectEventStream, type AgentStreamEvent } from '@ai-agent-study/server'
+import type { AgentStreamEvent } from '@ai-agent-study/server'
+import { collectEventStream } from '@ai-agent-study/server'
 
 export async function* runStreamingAgent(runId: string, query: string): AsyncIterable<AgentStreamEvent> {
   yield { type: 'retrieval', runId, query, hits: 1, sources: ['demo.md'] }

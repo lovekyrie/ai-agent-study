@@ -1,4 +1,5 @@
-import pino, { type LoggerOptions, type Level } from 'pino'
+import type { Level, LoggerOptions } from 'pino'
+import pino from 'pino'
 
 export interface LoggerConfig {
   level?: Level
@@ -12,9 +13,11 @@ export interface LogContext {
 }
 
 function resolvePretty(explicit: boolean | undefined): boolean {
-  if (explicit !== undefined) return explicit
+  if (explicit !== undefined)
+    return explicit
   const envValue = process.env.LOG_PRETTY
-  if (envValue === undefined) return true
+  if (envValue === undefined)
+    return true
   return envValue.toLowerCase() !== 'false'
 }
 
@@ -23,8 +26,8 @@ class Logger {
 
   constructor(configOrPino: LoggerConfig | pino.Logger = {}) {
     // 内部分支：用已有 pino 实例构造（供 child 复用）
-    if (typeof (configOrPino as pino.Logger).child === 'function' &&
-        typeof (configOrPino as pino.Logger).level === 'string') {
+    if (typeof (configOrPino as pino.Logger).child === 'function'
+      && typeof (configOrPino as pino.Logger).level === 'string') {
       this.logger = configOrPino as pino.Logger
       return
     }
@@ -53,7 +56,8 @@ class Logger {
   info(message: string, context?: LogContext): void {
     if (context) {
       this.logger.info(context, message)
-    } else {
+    }
+    else {
       this.logger.info(message)
     }
   }
@@ -69,11 +73,13 @@ class Logger {
           },
           ...context,
         },
-        message
+        message,
       )
-    } else if (error) {
+    }
+    else if (error) {
       this.logger.error({ ...error, ...context }, message)
-    } else {
+    }
+    else {
       this.logger.error(message)
     }
   }
@@ -81,7 +87,8 @@ class Logger {
   warn(message: string, context?: LogContext): void {
     if (context) {
       this.logger.warn(context, message)
-    } else {
+    }
+    else {
       this.logger.warn(message)
     }
   }
@@ -89,7 +96,8 @@ class Logger {
   debug(message: string, context?: LogContext): void {
     if (context) {
       this.logger.debug(context, message)
-    } else {
+    }
+    else {
       this.logger.debug(message)
     }
   }
@@ -97,7 +105,8 @@ class Logger {
   trace(message: string, context?: LogContext): void {
     if (context) {
       this.logger.trace(context, message)
-    } else {
+    }
+    else {
       this.logger.trace(message)
     }
   }
@@ -114,8 +123,9 @@ class Logger {
 // 惰性单例，避免 import 即触发 pino-pretty transport 启动
 let _defaultLogger: Logger | null = null
 function getDefaultLogger(): Logger {
-  if (!_defaultLogger) _defaultLogger = new Logger()
+  if (!_defaultLogger)
+    _defaultLogger = new Logger()
   return _defaultLogger
 }
 
-export { Logger, getDefaultLogger }
+export { getDefaultLogger, Logger }

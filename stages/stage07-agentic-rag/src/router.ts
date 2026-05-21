@@ -1,5 +1,6 @@
-import { createLLMClient, type LLMClient } from '@ai-agent-study/llm-client'
+import type { LLMClient } from '@ai-agent-study/llm-client'
 import type { KnowledgeBase } from './types.js'
+import { createLLMClient } from '@ai-agent-study/llm-client'
 
 export interface RouterOptions {
   llmClient?: LLMClient
@@ -28,7 +29,8 @@ export class MultiKnowledgeRouter {
   }
 
   private getClient(): LLMClient {
-    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    if (!this.cachedClient)
+      this.cachedClient = createLLMClient()
     return this.cachedClient
   }
 
@@ -38,15 +40,17 @@ export class MultiKnowledgeRouter {
 
   async route(query: string): Promise<RouteResult> {
     const kbs = Array.from(this.knowledgeBases.values())
-    if (kbs.length === 0) return { primary: null, secondary: [] }
-    if (kbs.length === 1) return { primary: kbs[0], secondary: [] }
+    if (kbs.length === 0)
+      return { primary: null, secondary: [] }
+    if (kbs.length === 1)
+      return { primary: kbs[0], secondary: [] }
 
     const prompt = `Route this query to the best knowledge base(s):
 
 Query: ${query}
 
 Knowledge Bases:
-${kbs.map((kb) => `- ${kb.name}: ${kb.description}`).join('\n')}
+${kbs.map(kb => `- ${kb.name}: ${kb.description}`).join('\n')}
 
 Respond with JSON:
 {
@@ -60,7 +64,7 @@ Respond with JSON:
           { role: 'system', content: 'You are a knowledge base routing assistant.' },
           { role: 'user', content: prompt },
         ],
-        { jsonMode: true }
+        { jsonMode: true },
       )
 
       const result = JSON.parse(response.content) as {
@@ -70,9 +74,11 @@ Respond with JSON:
       const secondaryKbs: KnowledgeBase[] = []
       const secondary = Array.isArray(result.secondary) ? result.secondary : []
       for (const name of secondary) {
-        if (typeof name !== 'string') continue
+        if (typeof name !== 'string')
+          continue
         const kb = this.knowledgeBases.get(name)
-        if (kb) secondaryKbs.push(kb)
+        if (kb)
+          secondaryKbs.push(kb)
       }
       return {
         primary:
@@ -81,7 +87,8 @@ Respond with JSON:
             : null,
         secondary: secondaryKbs,
       }
-    } catch {
+    }
+    catch {
       // LLM 失败兜底：取第一个作为 primary，其余作为 secondary
       return { primary: kbs[0], secondary: kbs.slice(1) }
     }

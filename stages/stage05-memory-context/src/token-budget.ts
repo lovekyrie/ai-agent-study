@@ -11,12 +11,12 @@ import type { ChatMessage } from '@ai-agent-study/llm-client'
  * stage11 会在这里接入真实 tokenizer；本阶段重点是 API 形状与裁剪策略，不是估算精度。
  */
 export interface TokenEstimator {
-  estimate(text: string): number
+  estimate: (text: string) => number
 }
 
 /** 默认估算器：chars/4，向上取整。对英文/代码够用。 */
 export const defaultEstimator: TokenEstimator = {
-  estimate: (text) => Math.ceil(text.length / 4),
+  estimate: text => Math.ceil(text.length / 4),
 }
 
 /**
@@ -31,7 +31,7 @@ export const cjkEstimator: TokenEstimator = {
     let total = 0
     for (const ch of text) {
       // \u4e00-\u9fff: CJK Unified Ideographs；扩展区不全覆盖但够用
-      total += /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(ch) ? 1 : 0.25
+      total += /[\u4E00-\u9FFF\u3000-\u303F\uFF00-\uFFEF]/.test(ch) ? 1 : 0.25
     }
     return Math.ceil(total)
   },
@@ -98,8 +98,8 @@ export function enforceBudget(messages: ChatMessage[], options: BudgetOptions): 
     return { messages: [], tokensUsed: 0, tokensBudget: budget, trimmedCount: 0 }
   }
 
-  const systemHead =
-    preserveSystem && messages[0]?.role === 'system' ? [messages[0]] : []
+  const systemHead
+    = preserveSystem && messages[0]?.role === 'system' ? [messages[0]] : []
   const rest = messages.slice(systemHead.length)
 
   // 起手成本 = system + priming
@@ -109,7 +109,8 @@ export function enforceBudget(messages: ChatMessage[], options: BudgetOptions): 
   // 从最新一条往前走
   for (let i = rest.length - 1; i >= 0; i--) {
     const cost = estimateMessage(rest[i], estimator)
-    if (used + cost > budget && kept.length > 0) break
+    if (used + cost > budget && kept.length > 0)
+      break
     kept.unshift(rest[i])
     used += cost
   }

@@ -1,8 +1,8 @@
 {
   "name": "stage07-agentic-rag",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 07: Agentic RAG — LLM 决定检索策略（plan → retrieve → synthesize）",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

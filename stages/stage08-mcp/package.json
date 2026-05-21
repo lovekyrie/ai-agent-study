@@ -1,8 +1,8 @@
 {
   "name": "stage08-mcp",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 08: MCP — Model Context Protocol 集成（本地工具 ↔ 远端工具桥接）",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

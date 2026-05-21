@@ -1,5 +1,5 @@
+import { ingestDocuments, MemoryDocumentLoader } from '@ai-agent-study/retrieval'
 import { describe, expect, it } from 'vitest'
-import { MemoryDocumentLoader, ingestDocuments } from '@ai-agent-study/retrieval'
 import { compareHybridStrategies } from '../src/index.js'
 
 describe('stage06C hybrid search', () => {

@@ -7,19 +7,19 @@
 //   - server.ts: MCPServer + 工厂函数（声明 → 业务测试 → 转 SDK 实例 → stdio）
 //   - client.ts: MCPClient（SDK 包装，stdio + http transport）+ MCPHTTPClient（轻量 fetch 版）
 
-export type {
-  MCPTool,
-  MCPResource,
-  MCPPrompt,
-  MCPServerConfig,
-  MCPClientConfig,
-} from './types.js'
+export { MCPClient, MCPHTTPClient } from './client.js'
 
 export {
-  MCPServer,
-  createMCPTool,
-  createMCPResource,
   createMCPPrompt,
+  createMCPResource,
+  createMCPTool,
+  MCPServer,
 } from './server.js'
 
-export { MCPClient, MCPHTTPClient } from './client.js'
+export type {
+  MCPClientConfig,
+  MCPPrompt,
+  MCPResource,
+  MCPServerConfig,
+  MCPTool,
+} from './types.js'

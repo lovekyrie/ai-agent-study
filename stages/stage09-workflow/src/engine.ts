@@ -1,4 +1,3 @@
-import { SupervisorAgent, SpecialistAgent } from './agents.js'
 import type {
   AgentExecutor,
   Checkpoint,
@@ -7,6 +6,7 @@ import type {
   WorkflowEdge,
   WorkflowNode,
 } from './types.js'
+import { SpecialistAgent, SupervisorAgent } from './agents.js'
 
 export class WorkflowEngine {
   private nodes: Map<string, WorkflowNode> = new Map()
@@ -21,10 +21,10 @@ export class WorkflowEngine {
           this.agents.set(
             node.id,
             new SupervisorAgent(node.agent, () =>
-              this.listNodes().map((n) => ({ id: n.id, type: n.type, name: n.name })),
-            ),
+              this.listNodes().map(n => ({ id: n.id, type: n.type, name: n.name }))),
           )
-        } else if (node.type === 'specialist') {
+        }
+        else if (node.type === 'specialist') {
           this.agents.set(node.id, new SpecialistAgent(node.agent))
         }
       }
@@ -83,33 +83,35 @@ export class WorkflowEngine {
         if (result.nextNode) {
           context.currentNode = result.nextNode
           context.updatedAt = new Date()
-        } else {
+        }
+        else {
           context.state = 'completed'
         }
-      } catch (error) {
+      }
+      catch (error) {
         context.state = 'failed'
-        context.data['error'] = error instanceof Error ? error.message : String(error)
+        context.data.error = error instanceof Error ? error.message : String(error)
         break
       }
     }
 
     if (iterations >= maxIterations) {
       context.state = 'failed'
-      context.data['error'] = 'Max iterations exceeded'
+      context.data.error = 'Max iterations exceeded'
     }
 
     return context
   }
 
   private findStartNode(): string {
-    const startNodes = Array.from(this.nodes.values()).filter((n) => n.type === 'supervisor')
+    const startNodes = Array.from(this.nodes.values()).filter(n => n.type === 'supervisor')
     return startNodes[0]?.id || ''
   }
 
   private async executeNode(
     node: WorkflowNode,
     context: WorkflowContext,
-  ): Promise<{ nextNode?: string; waitForApproval?: boolean; output?: unknown; handoff?: HandoffRequest }> {
+  ): Promise<{ nextNode?: string, waitForApproval?: boolean, output?: unknown, handoff?: HandoffRequest }> {
     if (node.type === 'end') {
       return { nextNode: undefined }
     }
@@ -134,18 +136,19 @@ export class WorkflowEngine {
     }
 
     if (!result.success) {
-      context.data['lastAgentError'] = result.output
+      context.data.lastAgentError = result.output
     }
 
     if (result.handoff) {
-      context.data['lastHandoff'] = result.handoff
+      context.data.lastHandoff = result.handoff
       if (this.nodes.has(result.handoff.to)) {
         return { nextNode: result.handoff.to, output: result.output, handoff: result.handoff }
       }
     }
 
     const nextEdge = this.selectNextEdge(node, context)
-    if (!nextEdge) return { nextNode: undefined }
+    if (!nextEdge)
+      return { nextNode: undefined }
 
     if (typeof node.next === 'function') {
       return { nextNode: node.next(context), output: result.output }
@@ -155,10 +158,11 @@ export class WorkflowEngine {
   }
 
   private selectNextEdge(node: WorkflowNode, context: WorkflowContext): WorkflowEdge | undefined {
-    const outgoing = this.edges.filter((e) => e.from === node.id)
-    const conditional = outgoing.find((e) => e.condition?.(context) === true)
-    if (conditional) return conditional
-    return outgoing.find((e) => !e.condition)
+    const outgoing = this.edges.filter(e => e.from === node.id)
+    const conditional = outgoing.find(e => e.condition?.(context) === true)
+    if (conditional)
+      return conditional
+    return outgoing.find(e => !e.condition)
   }
 
   getNode(id: string): WorkflowNode | undefined {
@@ -183,7 +187,8 @@ export class WorkflowEngine {
 
   async restoreFromCheckpoint(context: WorkflowContext, nodeId: string): Promise<boolean> {
     const checkpoint = context.checkpoints.get(nodeId) as Checkpoint | undefined
-    if (!checkpoint) return false
+    if (!checkpoint)
+      return false
 
     context.state = checkpoint.state
     context.data = { ...checkpoint.data }
@@ -205,7 +210,7 @@ export class WorkflowEngine {
     context.state = 'running'
     context.updatedAt = new Date()
 
-    const nextEdge = this.edges.find((e) => e.from === approvalNode.id)
+    const nextEdge = this.edges.find(e => e.from === approvalNode.id)
     if (nextEdge) {
       context.currentNode = nextEdge.to
     }

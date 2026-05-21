@@ -55,22 +55,26 @@ class Logger {
   error(message: string, error?: Error, context?: LogContext): void {
     this.logger.error({
       ...this.formatMessage('error', message, context),
-      err: error ? {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      } : undefined,
+      err: error
+        ? {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+          }
+        : undefined,
     })
   }
 
   fatal(message: string, error?: Error, context?: LogContext): void {
     this.logger.fatal({
       ...this.formatMessage('fatal', message, context),
-      err: error ? {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      } : undefined,
+      err: error
+        ? {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+          }
+        : undefined,
     })
   }
 

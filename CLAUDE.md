@@ -8,8 +8,7 @@
 
 ### 代码风格
 - 使用 TypeScript 严格模式
-- 遵循 ESLint 规则
-- 使用 Prettier 格式化
+- 遵循 ESLint 规则（@antfu/eslint-config，含格式化）
 - 命名清晰胜过简短
 
 ### 提交信息

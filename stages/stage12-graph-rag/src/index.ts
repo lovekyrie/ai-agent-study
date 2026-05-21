@@ -26,32 +26,37 @@ export class KnowledgeGraph {
   }
 
   upsertRelation(relation: Relation): void {
-    if (!this.entities.has(relation.from)) throw new Error(`Missing source entity ${relation.from}`)
-    if (!this.entities.has(relation.to)) throw new Error(`Missing target entity ${relation.to}`)
-    const exists = this.relations.some((item) => item.from === relation.from && item.to === relation.to && item.type === relation.type)
-    if (!exists) this.relations.push(relation)
+    if (!this.entities.has(relation.from))
+      throw new Error(`Missing source entity ${relation.from}`)
+    if (!this.entities.has(relation.to))
+      throw new Error(`Missing target entity ${relation.to}`)
+    const exists = this.relations.some(item => item.from === relation.from && item.to === relation.to && item.type === relation.type)
+    if (!exists)
+      this.relations.push(relation)
   }
 
   neighbors(entityId: string): Entity[] {
     const ids = new Set(
       this.relations
-        .filter((relation) => relation.from === entityId || relation.to === entityId)
-        .map((relation) => relation.from === entityId ? relation.to : relation.from)
+        .filter(relation => relation.from === entityId || relation.to === entityId)
+        .map(relation => relation.from === entityId ? relation.to : relation.from),
     )
-    return Array.from(ids).map((id) => this.entities.get(id)).filter((entity): entity is Entity => Boolean(entity))
+    return Array.from(ids).map(id => this.entities.get(id)).filter((entity): entity is Entity => Boolean(entity))
   }
 
   findPaths(from: string, to: string, maxDepth = 3): GraphPath[] {
     const results: GraphPath[] = []
     const visit = (current: string, target: string, visited: string[], relations: Relation[]) => {
-      if (visited.length > maxDepth + 1) return
+      if (visited.length > maxDepth + 1)
+        return
       if (current === target) {
-        const entities = visited.map((id) => this.entities.get(id)).filter((entity): entity is Entity => Boolean(entity))
+        const entities = visited.map(id => this.entities.get(id)).filter((entity): entity is Entity => Boolean(entity))
         results.push({ entities, relations })
         return
       }
-      for (const relation of this.relations.filter((item) => item.from === current)) {
-        if (visited.includes(relation.to)) continue
+      for (const relation of this.relations.filter(item => item.from === current)) {
+        if (visited.includes(relation.to))
+          continue
         visit(relation.to, target, [...visited, relation.to], [...relations, relation])
       }
     }
@@ -62,9 +67,10 @@ export class KnowledgeGraph {
 
 export function buildGraphContext(graph: KnowledgeGraph, from: string, to: string): string {
   const paths = graph.findPaths(from, to)
-  if (paths.length === 0) return 'No graph path found.'
+  if (paths.length === 0)
+    return 'No graph path found.'
   return paths
-    .map((path) => path.relations.map((relation, index) => {
+    .map(path => path.relations.map((relation, index) => {
       const source = path.entities[index]
       const target = path.entities[index + 1]
       return `${source.name} -[${relation.type}]-> ${target.name}`

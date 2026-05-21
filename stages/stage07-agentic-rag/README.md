@@ -37,9 +37,9 @@ rag.registerKnowledgeBase(kbA)
 rag.registerKnowledgeBase(kbB)
 
 // 三步分别可调用
-const plan = await rag.planRetrieval('how does X work')       // LLM 规划
-const sources = await rag.retrieveWithPlan(plan)              // 确定性执行
-const research = await rag.runResearch('how does X work')     // 一次性走完
+const plan = await rag.planRetrieval('how does X work') // LLM 规划
+const sources = await rag.retrieveWithPlan(plan) // 确定性执行
+const research = await rag.runResearch('how does X work') // 一次性走完
 // research = { message, steps, sources, plan }
 ```
 

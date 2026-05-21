@@ -2,9 +2,9 @@ import type { CodeChunk, SearchResult } from './indexer.js'
 
 // Interface for vector store operations
 interface VectorStoreAdapter {
-  add(vectors: { id: string; content: string; metadata: Record<string, unknown> }[]): Promise<void>
-  search(query: string, options?: { topK?: number; filter?: Record<string, unknown> }): Promise<{ id: string; content: string; score: number; metadata: Record<string, unknown> }[]>
-  deleteByFilter(filter: Record<string, unknown>): Promise<void>
+  add: (vectors: { id: string, content: string, metadata: Record<string, unknown> }[]) => Promise<void>
+  search: (query: string, options?: { topK?: number, filter?: Record<string, unknown> }) => Promise<{ id: string, content: string, score: number, metadata: Record<string, unknown> }[]>
+  deleteByFilter: (filter: Record<string, unknown>) => Promise<void>
 }
 
 export interface RetrievalConfig {
@@ -62,7 +62,7 @@ export class CodeRetriever {
     let searchResults: SearchResult[] = results
       .filter((r: { score: number }) => r.score >= this.config.minScore)
       .slice(0, this.config.topK)
-      .map((r: { id: string; content: string; score: number; metadata: Record<string, unknown> }) => this.toSearchResult(r))
+      .map((r: { id: string, content: string, score: number, metadata: Record<string, unknown> }) => this.toSearchResult(r))
 
     if (this.config.rerank && searchResults.length > 1) {
       searchResults = await this.rerank(query, searchResults)
@@ -71,7 +71,7 @@ export class CodeRetriever {
     return searchResults.slice(0, this.config.maxContextChunks)
   }
 
-  private toSearchResult(result: { id: string; content: string; score: number; metadata: Record<string, unknown> }): SearchResult {
+  private toSearchResult(result: { id: string, content: string, score: number, metadata: Record<string, unknown> }): SearchResult {
     const chunk: CodeChunk = {
       id: result.id,
       content: result.content,
@@ -119,7 +119,8 @@ export class CodeRetriever {
     let context = `\`\`\`${chunk.language}\n`
     context += `// ${chunk.type}${chunk.symbol ? `: ${chunk.symbol}` : ''} @ ${location}\n`
     context += chunk.content.slice(0, 2000)
-    if (chunk.content.length > 2000) context += '\n// ... (truncated)'
+    if (chunk.content.length > 2000)
+      context += '\n// ... (truncated)'
     context += '\n```'
 
     return context
@@ -129,7 +130,7 @@ export class CodeRetriever {
     const queryTerms = query.toLowerCase().split(/\s+/)
 
     return results
-      .map(r => {
+      .map((r) => {
         const content = r.chunk.content.toLowerCase()
         const termMatches = queryTerms.filter(term => content.includes(term)).length
         const symbolBonus = r.chunk.symbol && query.toLowerCase().includes(r.chunk.symbol.toLowerCase()) ? 0.2 : 0
@@ -145,7 +146,7 @@ export class CodeRetriever {
     await this.vectorStore.deleteByFilter({ projectId })
   }
 
-  async getStats(projectId: string): Promise<{ totalChunks: number; filesIndexed: number }> {
+  async getStats(projectId: string): Promise<{ totalChunks: number, filesIndexed: number }> {
     const results = await this.vectorStore.search('', {
       topK: 10000,
       filter: { projectId },
@@ -161,9 +162,9 @@ export class CodeRetriever {
 
 // In-memory vector store implementation (fallback)
 export class InMemoryVectorStore implements VectorStoreAdapter {
-  private vectors = new Map<string, { content: string; metadata: Record<string, unknown>; embedding?: number[] }>()
+  private vectors = new Map<string, { content: string, metadata: Record<string, unknown>, embedding?: number[] }>()
 
-  async add(vectors: { id: string; content: string; metadata: Record<string, unknown> }[]): Promise<void> {
+  async add(vectors: { id: string, content: string, metadata: Record<string, unknown> }[]): Promise<void> {
     for (const v of vectors) {
       this.vectors.set(v.id, {
         content: v.content,
@@ -173,11 +174,11 @@ export class InMemoryVectorStore implements VectorStoreAdapter {
     }
   }
 
-  async search(query: string, options?: { topK?: number; filter?: Record<string, unknown> }): Promise<{ id: string; content: string; score: number; metadata: Record<string, unknown> }[]> {
+  async search(query: string, options?: { topK?: number, filter?: Record<string, unknown> }): Promise<{ id: string, content: string, score: number, metadata: Record<string, unknown> }[]> {
     const queryEmbedding = this.simpleEmbedding(query)
     const topK = options?.topK || 5
 
-    const results: { id: string; content: string; score: number; metadata: Record<string, unknown> }[] = []
+    const results: { id: string, content: string, score: number, metadata: Record<string, unknown> }[] = []
 
     for (const [id, vec] of this.vectors) {
       if (options?.filter) {
@@ -188,7 +189,8 @@ export class InMemoryVectorStore implements VectorStoreAdapter {
             break
           }
         }
-        if (!matches) continue
+        if (!matches)
+          continue
       }
 
       const score = this.cosineSimilarity(queryEmbedding, vec.embedding || [0])
@@ -214,7 +216,8 @@ export class InMemoryVectorStore implements VectorStoreAdapter {
           break
         }
       }
-      if (matches) toDelete.push(id)
+      if (matches)
+        toDelete.push(id)
     }
 
     for (const id of toDelete) {
@@ -223,7 +226,7 @@ export class InMemoryVectorStore implements VectorStoreAdapter {
   }
 
   private simpleEmbedding(text: string): number[] {
-    const embedding = new Array(128).fill(0)
+    const embedding = Array.from({ length: 128 }).fill(0)
     const words = text.toLowerCase().split(/\s+/)
 
     for (let i = 0; i < words.length; i++) {
@@ -244,7 +247,8 @@ export class InMemoryVectorStore implements VectorStoreAdapter {
   }
 
   private cosineSimilarity(a: number[], b: number[]): number {
-    if (a.length !== b.length) return 0
+    if (a.length !== b.length)
+      return 0
 
     let dot = 0
     let normA = 0

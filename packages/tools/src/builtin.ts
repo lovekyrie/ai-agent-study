@@ -1,7 +1,7 @@
+import type { ToolDefinition } from './types.js'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import { z } from 'zod'
-import type { ToolDefinition } from './types.js'
 
 // ============================================================================
 // read_file：限定 base dir + 大小限制 + 路径遍历防护
@@ -33,7 +33,8 @@ export const readFileTool: ToolDefinition<z.infer<typeof readFileSchema>> = {
     let stat: Awaited<ReturnType<typeof fs.stat>>
     try {
       stat = await fs.stat(resolvedTarget)
-    } catch {
+    }
+    catch {
       return { content: '', error: `File not found: ${params.path}` }
     }
     if (!stat.isFile()) {
@@ -70,19 +71,21 @@ const httpRequestSchema = z.object({
 
 function isPrivateHost(hostname: string): boolean {
   const lower = hostname.toLowerCase()
-  if (lower === 'localhost' || lower === '::1' || lower === '0.0.0.0') return true
+  if (lower === 'localhost' || lower === '::1' || lower === '0.0.0.0')
+    return true
   // IPv4 私网段 + loopback + 链路本地 + 云元数据
   if (
-    /^127\./.test(lower) ||
-    /^10\./.test(lower) ||
-    /^192\.168\./.test(lower) ||
-    /^169\.254\./.test(lower) ||
-    /^172\.(1[6-9]|2\d|3[01])\./.test(lower)
+    /^127\./.test(lower)
+    || /^10\./.test(lower)
+    || /^192\.168\./.test(lower)
+    || /^169\.254\./.test(lower)
+    || /^172\.(1[6-9]|2\d|3[01])\./.test(lower)
   ) {
     return true
   }
   // IPv6 简单判断
-  if (lower.startsWith('fc') || lower.startsWith('fd') || lower.startsWith('fe80')) return true
+  if (lower.startsWith('fc') || lower.startsWith('fd') || lower.startsWith('fe80'))
+    return true
   return false
 }
 
@@ -96,7 +99,8 @@ export const httpRequestTool: ToolDefinition<z.infer<typeof httpRequestSchema>> 
     let parsedUrl: URL
     try {
       parsedUrl = new URL(params.url)
-    } catch {
+    }
+    catch {
       return { content: '', error: `Invalid URL: ${params.url}` }
     }
     if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
@@ -130,7 +134,8 @@ export const httpRequestTool: ToolDefinition<z.infer<typeof httpRequestSchema>> 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read()
-          if (done) break
+          if (done)
+            break
           if (value) {
             received += value.byteLength
             if (received > HTTP_MAX_RESPONSE_BYTES) {
@@ -145,12 +150,13 @@ export const httpRequestTool: ToolDefinition<z.infer<typeof httpRequestSchema>> 
           }
         }
       }
-      const text = Buffer.concat(chunks.map((c) => Buffer.from(c))).toString('utf-8')
+      const text = Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf-8')
       return {
         content: text,
         metadata: { status: response.status, bytes: received },
       }
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         return { content: '', error: `HTTP request timeout (>${HTTP_DEFAULT_TIMEOUT_MS}ms)` }
       }
@@ -158,7 +164,8 @@ export const httpRequestTool: ToolDefinition<z.infer<typeof httpRequestSchema>> 
         content: '',
         error: `HTTP request failed: ${error instanceof Error ? error.message : String(error)}`,
       }
-    } finally {
+    }
+    finally {
       clearTimeout(timeoutId)
     }
   },
@@ -187,7 +194,8 @@ export const getCurrentTimeTool: ToolDefinition<z.infer<typeof getCurrentTimeSch
         content: timeString,
         metadata: { timestamp: now.getTime(), timezone: params.timezone ?? 'UTC' },
       }
-    } catch (error) {
+    }
+    catch (error) {
       return {
         content: '',
         error: `Invalid timezone "${params.timezone}": ${
@@ -225,7 +233,8 @@ function evalExpression(input: string): number {
     if (peek() === '(') {
       consume()
       const v = parseAddSub()
-      if (consume() !== ')') throw new Error('Mismatched parentheses')
+      if (consume() !== ')')
+        throw new Error('Mismatched parentheses')
       return v
     }
     if (peek() === '-') {
@@ -238,9 +247,11 @@ function evalExpression(input: string): number {
     }
     let numStr = ''
     while (/[0-9.]/.test(peek())) numStr += consume()
-    if (numStr === '' || numStr === '.') throw new Error(`Unexpected token at position ${pos}`)
+    if (numStr === '' || numStr === '.')
+      throw new Error(`Unexpected token at position ${pos}`)
     const n = Number(numStr)
-    if (!Number.isFinite(n)) throw new Error(`Invalid number: ${numStr}`)
+    if (!Number.isFinite(n))
+      throw new Error(`Invalid number: ${numStr}`)
     return n
   }
 
@@ -258,12 +269,16 @@ function evalExpression(input: string): number {
     let left = parsePower()
     while (peek() === '*' || peek() === '/' || peek() === '%') {
       // ** 已经在 parsePower 处理，避免误吞
-      if (peek() === '*' && src[pos + 1] === '*') break
+      if (peek() === '*' && src[pos + 1] === '*')
+        break
       const op = consume()
       const right = parsePower()
-      if ((op === '/' || op === '%') && right === 0) throw new Error('Division by zero')
-      if (op === '*') left *= right
-      else if (op === '/') left /= right
+      if ((op === '/' || op === '%') && right === 0)
+        throw new Error('Division by zero')
+      if (op === '*')
+        left *= right
+      else if (op === '/')
+        left /= right
       else left %= right
     }
     return left
@@ -280,8 +295,10 @@ function evalExpression(input: string): number {
   }
 
   const result = parseAddSub()
-  if (pos < src.length) throw new Error(`Unexpected token at position ${pos}: ${src[pos]}`)
-  if (!Number.isFinite(result)) throw new Error(`Result is not a finite number`)
+  if (pos < src.length)
+    throw new Error(`Unexpected token at position ${pos}: ${src[pos]}`)
+  if (!Number.isFinite(result))
+    throw new Error(`Result is not a finite number`)
   return result
 }
 
@@ -294,7 +311,8 @@ export const calculatorTool: ToolDefinition<z.infer<typeof calculatorSchema>> = 
     try {
       const result = evalExpression(params.expression)
       return { content: String(result), metadata: { expression: params.expression } }
-    } catch (error) {
+    }
+    catch (error) {
       return {
         content: '',
         error: `Failed to evaluate "${params.expression}": ${

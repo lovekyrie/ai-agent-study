@@ -22,9 +22,9 @@ export interface CollectionStats {
 }
 
 export interface ICollection {
-  add(documents: VectorDocument[]): Promise<void>
-  search(query: string, options?: SearchOptions): Promise<SearchResult[]>
-  delete(ids: string[]): Promise<void>
-  update(id: string, document: Partial<VectorDocument>): Promise<void>
-  stats(): Promise<CollectionStats>
+  add: (documents: VectorDocument[]) => Promise<void>
+  search: (query: string, options?: SearchOptions) => Promise<SearchResult[]>
+  delete: (ids: string[]) => Promise<void>
+  update: (id: string, document: Partial<VectorDocument>) => Promise<void>
+  stats: () => Promise<CollectionStats>
 }

@@ -1,8 +1,8 @@
 {
   "name": "stage06a-data-ingestion",
+  "type": "module",
   "version": "0.1.0",
   "description": "Stage 06A: Data ingestion, loader and splitter engineering",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/example.ts",

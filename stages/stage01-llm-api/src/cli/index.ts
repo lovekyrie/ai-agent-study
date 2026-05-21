@@ -1,5 +1,5 @@
+import * as path from 'node:path'
 import { explainFile, interactiveMode } from './code-explainer.js'
-import * as path from 'path'
 
 const args = process.argv.slice(2)
 

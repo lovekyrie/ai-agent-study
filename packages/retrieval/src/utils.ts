@@ -1,5 +1,5 @@
-import { createHash } from 'node:crypto'
 import type { MetadataValue } from './types.js'
+import { createHash } from 'node:crypto'
 
 export function stableHash(value: string): string {
   return createHash('sha256').update(value).digest('hex').slice(0, 16)
@@ -11,7 +11,7 @@ export function normalizeWhitespace(content: string): string {
 
 export function mergeMetadata(
   left?: Record<string, MetadataValue>,
-  right?: Record<string, MetadataValue>
+  right?: Record<string, MetadataValue>,
 ): Record<string, MetadataValue> {
   return { ...(left ?? {}), ...(right ?? {}) }
 }
@@ -21,5 +21,5 @@ export function tokenize(input: string): string[] {
     .toLowerCase()
     .replace(/[^\p{L}\p{N}_]+/gu, ' ')
     .split(/\s+/)
-    .filter((token) => token.length > 1)
+    .filter(token => token.length > 1)
 }

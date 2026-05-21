@@ -7,7 +7,7 @@ export function encodeSSE(event: AgentStreamEvent, eventId?: string): string {
     `data: ${JSON.stringify(event)}`,
     '',
     '',
-  ].filter((line) => line !== undefined)
+  ].filter(line => line !== undefined)
   return lines.join('\n')
 }
 

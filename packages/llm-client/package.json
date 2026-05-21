@@ -1,16 +1,16 @@
 {
   "name": "@ai-agent-study/llm-client",
+  "type": "module",
   "version": "0.1.0",
   "description": "统一的 LLM 客户端，支持多模型、流式响应、结构化输出",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

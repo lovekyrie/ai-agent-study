@@ -1,7 +1,7 @@
 {
   "name": "stage11-production",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
   "description": "Stage 11: 生产工程化教学 — JWT/限流/队列/追踪（内存模拟；真实 Postgres/Redis/OTel 见 README）",
   "scripts": {
     "dev": "tsx src/example.ts",
