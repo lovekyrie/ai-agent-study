@@ -2,7 +2,7 @@
   "name": "stage11-production",
   "version": "1.0.0",
   "type": "module",
-  "description": "Stage 11: 生产工程化 + 安全 — JWT / Postgres / Redis / OTel / 输入净化 / 沙箱 / 审计",
+  "description": "Stage 11: 生产工程化教学 — JWT/限流/队列/追踪（内存模拟；真实 Postgres/Redis/OTel 见 README）",
   "scripts": {
     "dev": "tsx src/example.ts",
     "build": "tsc",
@@ -17,6 +17,6 @@
     "@types/node": "^20.11.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.0",
-    "vitest": "^1.2.0"
+    "vitest": "^2.0.0"
   }
 }

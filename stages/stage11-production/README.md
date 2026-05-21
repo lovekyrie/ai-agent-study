@@ -1,6 +1,6 @@
-# Stage 10: Production Engineering
+# Stage 11: Production Engineering
 
-生产级服务工程化，包含 API 鉴权、会话管理、结构化日志、追踪、指标和任务队列。
+生产级服务**教学模拟**：JWT、会话、结构化日志、追踪、指标、任务队列、输入净化等均以**内存实现**演示接口与流程；真实 Postgres / Redis / OpenTelemetry 见文末「生产部署注意事项」。
 
 ## 核心功能
 
@@ -149,6 +149,14 @@ metrics.timing('llm.response.time', 150, { model: 'gpt-4o' })
 
 const summary = metrics.summarize('llm.response.time')
 console.log(summary.avg)
+```
+
+## 运行
+
+```bash
+cp .env.example .env
+pnpm --filter stage11-production test
+pnpm --filter stage11-production dev
 ```
 
 ## 生产部署注意事项

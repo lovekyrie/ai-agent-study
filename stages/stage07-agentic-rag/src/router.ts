@@ -21,10 +21,15 @@ export interface RouteResult {
  */
 export class MultiKnowledgeRouter {
   private readonly knowledgeBases = new Map<string, KnowledgeBase>()
-  private readonly client: LLMClient
+  private cachedClient?: LLMClient
 
   constructor(options: RouterOptions = {}) {
-    this.client = options.llmClient ?? createLLMClient()
+    this.cachedClient = options.llmClient
+  }
+
+  private getClient(): LLMClient {
+    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    return this.cachedClient
   }
 
   register(kb: KnowledgeBase): void {
@@ -50,7 +55,7 @@ Respond with JSON:
 }`
 
     try {
-      const response = await this.client.chat(
+      const response = await this.getClient().chat(
         [
           { role: 'system', content: 'You are a knowledge base routing assistant.' },
           { role: 'user', content: prompt },

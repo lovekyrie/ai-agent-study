@@ -1,4 +1,4 @@
-import { createLLMClient, type ChatMessage } from '@ai-agent-study/llm-client'
+import { createLLMClient, type ChatMessage, type LLMClient } from '@ai-agent-study/llm-client'
 import type {
   AgentConfig,
   AgentExecutionResult,
@@ -9,14 +9,21 @@ import type {
 export class SupervisorAgent implements AgentExecutor {
   protected agentConfig: AgentConfig
   protected listNodes: () => { id: string; type: string; name: string }[]
-  protected client = createLLMClient()
+  private cachedClient?: LLMClient
 
   constructor(
     config: AgentConfig,
     listNodes: () => { id: string; type: string; name: string }[],
+    llmClient?: LLMClient,
   ) {
     this.agentConfig = config
     this.listNodes = listNodes
+    this.cachedClient = llmClient
+  }
+
+  protected getClient(): LLMClient {
+    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    return this.cachedClient
   }
 
   async execute(context: WorkflowContext): Promise<AgentExecutionResult> {
@@ -40,7 +47,7 @@ What should happen next? Provide your decision and any necessary actions.`,
     ]
 
     try {
-      const response = await this.client.chat(messages)
+      const response = await this.getClient().chat(messages)
       const decision = this.parseSupervisorDecision(response.content)
 
       if (decision.handoff) {
@@ -81,10 +88,16 @@ What should happen next? Provide your decision and any necessary actions.`,
 
 export class SpecialistAgent implements AgentExecutor {
   protected agentConfig: AgentConfig
-  protected client = createLLMClient()
+  private cachedClient?: LLMClient
 
-  constructor(config: AgentConfig) {
+  constructor(config: AgentConfig, llmClient?: LLMClient) {
     this.agentConfig = config
+    this.cachedClient = llmClient
+  }
+
+  protected getClient(): LLMClient {
+    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    return this.cachedClient
   }
 
   async execute(context: WorkflowContext): Promise<AgentExecutionResult> {
@@ -102,7 +115,7 @@ Complete your specialized task and report the results. If you need to handoff ba
     ]
 
     try {
-      const response = await this.client.chat(messages)
+      const response = await this.getClient().chat(messages)
 
       const isHandoff = /handoff:supervisor/i.test(response.content)
       if (isHandoff) {

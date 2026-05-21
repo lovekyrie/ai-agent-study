@@ -133,10 +133,8 @@ src/
 ## 快速开始
 
 ```bash
-# 跑测试（不需要 API Key）
+cp .env.example .env   # compress 演示需要 OPENAI_API_KEY；测试不需要
 pnpm --filter stage05-memory-context test
-
-# 跑完整 demo（无 API Key 也能跑大部分，含 compress() 会自动跳过）
 pnpm --filter stage05-memory-context dev
 ```
 

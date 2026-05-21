@@ -86,6 +86,8 @@ engine.createCheckpoint(context, 'security')
 await engine.restoreFromCheckpoint(context, 'security')
 ```
 
+> **存储说明**：Checkpoint 保存在 `WorkflowContext.checkpoints`（内存 `Map`），进程结束即丢失。生产持久化见 stage11 README。
+
 ---
 
 ## Handoff 机制

@@ -1,0 +1,20 @@
+{
+  "name": "stage06a-data-ingestion",
+  "version": "0.1.0",
+  "description": "Stage 06A: Data ingestion, loader and splitter engineering",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/example.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-agent-study/retrieval": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

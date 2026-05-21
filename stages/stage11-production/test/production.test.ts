@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { AuthService, JobQueue } from '../src/index.js'
 
-describe('stage10 production primitives', () => {
+describe('stage11 production primitives', () => {
   it('generates tokens that can be verified', () => {
     const auth = new AuthService('test-secret')
     const token = auth.generateToken('user-1')

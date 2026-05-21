@@ -1,0 +1,22 @@
+{
+  "name": "stage08a-mcp-ecosystem",
+  "version": "0.1.0",
+  "description": "Stage 08A: Real MCP ecosystem bridge into the local ToolRegistry",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/example.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-agent-study/mcp": "workspace:*",
+    "@ai-agent-study/tools": "workspace:*",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

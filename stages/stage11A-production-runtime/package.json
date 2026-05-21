@@ -1,0 +1,20 @@
+{
+  "name": "stage11a-production-runtime",
+  "version": "0.1.0",
+  "description": "Stage 11A: Production runtime primitives for streaming agent APIs",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/example.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@ai-agent-study/server": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

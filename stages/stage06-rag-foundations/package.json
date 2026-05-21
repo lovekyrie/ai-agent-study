@@ -1,7 +1,7 @@
 {
   "name": "stage06-rag-foundations",
   "version": "0.1.0",
-  "description": "Stage 06: RAG 基础 — Chunking / Embedding / Hybrid Search / Rerank / Query Rewrite + 基础评估",
+  "description": "Stage 06: RAG 基础 — Chunking / Embedding / Rerank / Query Rewrite + 基础评估（Hybrid 见 stage07）",
   "type": "module",
   "scripts": {
     "build": "tsc",

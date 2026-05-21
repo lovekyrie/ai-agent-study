@@ -22,12 +22,17 @@ export interface AgenticRAGOptions {
  */
 export class AgenticRAG {
   private readonly knowledgeBases = new Map<string, KnowledgeBase>()
-  private readonly client: LLMClient
+  private cachedClient?: LLMClient
   private readonly maxTopK: number
 
   constructor(options: AgenticRAGOptions = {}) {
-    this.client = options.llmClient ?? createLLMClient()
+    this.cachedClient = options.llmClient
     this.maxTopK = options.maxTopK ?? 20
+  }
+
+  private getClient(): LLMClient {
+    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    return this.cachedClient
   }
 
   registerKnowledgeBase(kb: KnowledgeBase): void {
@@ -65,7 +70,7 @@ Respond with JSON:
 }`
 
     try {
-      const response = await this.client.chat(
+      const response = await this.getClient().chat(
         [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: query },
@@ -153,7 +158,7 @@ ${result.document.content}`
       })
       .join('\n\n')
 
-    const response = await this.client.chat(
+    const response = await this.getClient().chat(
       [
         {
           role: 'system',

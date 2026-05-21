@@ -1,6 +1,21 @@
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@ai-agent-study/config': new URL('./packages/config/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/logger': new URL('./packages/logger/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/llm-client': new URL('./packages/llm-client/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/mcp': new URL('./packages/mcp/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/memory': new URL('./packages/memory/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/observability': new URL('./packages/observability/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/prompt': new URL('./packages/prompt/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/retrieval': new URL('./packages/retrieval/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/server': new URL('./packages/server/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/tools': new URL('./packages/tools/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/vectorstore': new URL('./packages/vectorstore/src/index.ts', import.meta.url).pathname,
+    },
+  },
   test: {
     globals: true,
     environment: 'node',

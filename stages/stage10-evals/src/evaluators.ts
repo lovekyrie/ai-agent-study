@@ -1,4 +1,4 @@
-import { createLLMClient } from '@ai-agent-study/llm-client'
+import { createLLMClient, type LLMClient } from '@ai-agent-study/llm-client'
 import type {
   EvalExpected,
   EvalOutput,
@@ -72,11 +72,17 @@ export class RuleBasedEvaluator {
 }
 
 export class LLMJudge {
-  private client = createLLMClient()
+  private cachedClient?: LLMClient
   private config: LLMJudgeConfig
 
-  constructor(config: LLMJudgeConfig = {}) {
+  constructor(config: LLMJudgeConfig = {}, llmClient?: LLMClient) {
     this.config = { temperature: 0, ...config }
+    this.cachedClient = llmClient
+  }
+
+  private getClient(): LLMClient {
+    if (!this.cachedClient) this.cachedClient = createLLMClient()
+    return this.cachedClient
   }
 
   async judge(
@@ -99,7 +105,7 @@ Provide your evaluation in JSON format:
 }`
 
     try {
-      const response = await this.client.chat([
+      const response = await this.getClient().chat([
         { role: 'system', content: 'You are a fair and strict evaluator. Respond only with valid JSON.' },
         { role: 'user', content: prompt },
       ], { jsonMode: true, temperature: this.config.temperature ?? 0, maxTokens: 500 })
@@ -147,7 +153,7 @@ Provide JSON:
 }`
 
     try {
-      const response = await this.client.chat([
+      const response = await this.getClient().chat([
         { role: 'system', content: 'You are a RAG evaluation expert. Respond only with valid JSON.' },
         { role: 'user', content: prompt },
       ], { jsonMode: true, temperature: this.config.temperature ?? 0, maxTokens: 700 })
