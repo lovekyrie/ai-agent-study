@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 export const LLMConfigSchema = z.object({
   apiKey: z.string().min(1, 'API Key is required'),
-  baseURL: z.string().url().default('https://api.openai.com/v1'),
-  model: z.string().default('gpt-4o'),
+  baseURL: z.string().url().default('https://api.minimaxi.com/v1'),
+  model: z.string().default('MiniMax-M2.7'),
   temperature: z.number().min(0).max(2).default(0.7),
   // 上限按主流模型最大上下文做一次 sanity check
   maxTokens: z.number().int().min(1).max(200_000).default(1000),

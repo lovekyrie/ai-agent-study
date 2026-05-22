@@ -41,7 +41,7 @@ export class Embedder {
     this.model = options.model ?? 'text-embedding-3-small'
     this.dimensions = options.dimensions ?? DEFAULT_DIMENSIONS
     this.batchSize = options.batchSize ?? 100
-    this.baseURL = options.baseURL ?? process.env.OPENAI_API_BASE ?? 'https://api.openai.com/v1'
+    this.baseURL = options.baseURL ?? process.env.OPENAI_API_BASE ?? 'https://api.minimaxi.com/v1'
     this.apiKey = options.apiKey ?? process.env.OPENAI_API_KEY ?? ''
     // 默认按是否有 apiKey 自动选 provider；用户可显式覆盖
     this.provider = options.provider ?? (this.apiKey ? 'openai' : 'stub')

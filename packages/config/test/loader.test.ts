@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { getConfig, loadConfig, resetConfigCache } from '../src/loader.js'
-import { applyTestEnv, clearTestEnv } from '../src/testing.js'
+import { applyTestEnv, clearTestEnv, loadTestEnvFile } from '../src/testing.js'
+
+const testEnv = loadTestEnvFile()
 
 describe('config Loader', () => {
   beforeEach(() => {
@@ -16,9 +18,9 @@ describe('config Loader', () => {
   it('should load config with default values', () => {
     const config = loadConfig()
 
-    expect(config.llm.apiKey).toBe('test-key')
-    expect(config.llm.baseURL).toBe('https://api.openai.com/v1')
-    expect(config.llm.model).toBe('gpt-4o')
+    expect(config.llm.apiKey).toBe(testEnv.OPENAI_API_KEY)
+    expect(config.llm.baseURL).toBe(testEnv.OPENAI_API_BASE)
+    expect(config.llm.model).toBe(testEnv.DEFAULT_MODEL)
     expect(config.llm.temperature).toBe(0.7)
     expect(config.llm.maxTokens).toBe(1000)
   })

@@ -43,8 +43,8 @@ export function loadConfig(): Config {
   const rawConfig = {
     llm: {
       apiKey: getEnvString('OPENAI_API_KEY'),
-      baseURL: getEnvString('OPENAI_API_BASE', 'https://api.openai.com/v1'),
-      model: getEnvString('DEFAULT_MODEL', 'gpt-4o'),
+      baseURL: getEnvString('OPENAI_API_BASE', 'https://api.minimaxi.com/v1'),
+      model: getEnvString('DEFAULT_MODEL', 'MiniMax-M2.7'),
       temperature: getEnvFloat('DEFAULT_TEMPERATURE', 0.7),
       maxTokens: getEnvNumber('DEFAULT_MAX_TOKENS', 1000),
     },

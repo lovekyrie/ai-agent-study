@@ -1,0 +1,69 @@
+# 2026-05-19 TypeScript 学习笔记
+
+## Q1: tsconfig.base.json 里各选项什么意思？
+
+**上下文**：`tsconfig.base.json` 第 3–13 行
+
+**要点**：
+
+- `target` / `lib`：输出 JS 版本与内置 API 类型范围
+- `module` + `moduleResolution: NodeNext`：Node ESM 模块解析
+- `strict`：严格类型检查
+- `declaration` / `sourceMap`：类型声明与调试映射
+
+**详文**：[../typescript/tsconfig-base-options.md](../typescript/tsconfig-base-options.md)
+
+---
+
+## Q2: 根 tsconfig.json 里 noEmit: true 什么意思？
+
+**上下文**：`tsconfig.json`
+
+**要点**：
+
+- 只类型检查，不生成 `.js`/`.d.ts`
+- 根配置用于 monorepo 全仓扫描
+- 各子包单独 `tsc` 负责 emit
+
+**详文**：[../typescript/no-emit.md](../typescript/no-emit.md)
+
+---
+
+## Q3: loader.ts 为什么 import 写 `.js`？
+
+**上下文**：`packages/config/src/loader.ts:2`
+
+**要点**：
+
+- 项目为 ESM + NodeNext
+- import 路径应对应编译后的 `.js` 文件名
+- TS 类型检查仍关联 `.ts` 源文件
+
+**详文**：[../typescript/esm-import-js-extension.md](../typescript/esm-import-js-extension.md)
+
+---
+
+## Q4: loader.ts 里 zod 和 dotenv 是干什么用的？
+
+**上下文**：`packages/config/src/loader.ts:1`、`loader.ts:3`
+
+**要点**：
+
+- `dotenv`：启动时 `dotenv.config()`，把 `.env` 载入 `process.env`
+- `zod`：schema 在 `schemas.ts`；loader 用 `ConfigSchema.safeParse` 校验；第 1 行 `import type { z }` 只给错误类型 `ZodIssue` 用
+
+**详文**：[../packages/config/zod-and-dotenv.md](../packages/config/zod-and-dotenv.md)
+
+---
+
+## Q5: TS 泛型到底是什么，有哪些用处？
+
+**上下文**：TypeScript 基础概念（结合本仓库 `z.infer`、工具类型等）
+
+**要点**：
+
+- 泛型 = 类型层面的参数，用时再指定具体类型
+- 用处：复用逻辑且不丢类型、`extends` 约束、API 响应包装、从 schema 推导类型
+- 比 `any` 安全：编译期仍能推断和报错
+
+**详文**：[../typescript/generics.md](../typescript/generics.md)

@@ -4,6 +4,7 @@ import {
   clearTestEnv,
   getConfig,
   loadConfig,
+  loadTestEnvFile,
   resetConfigCache,
 } from '@ai-agent-study/config'
 import { Logger } from '@ai-agent-study/logger'
@@ -35,7 +36,7 @@ describe('stage 0: Engineering Foundation', () => {
     it('should have correct default LLM settings', () => {
       const config = loadConfig()
 
-      expect(config.llm.model).toBe('gpt-4o')
+      expect(config.llm.model).toBe(loadTestEnvFile().DEFAULT_MODEL)
       expect(config.llm.temperature).toBe(0.7)
       expect(config.llm.maxTokens).toBe(1000)
     })

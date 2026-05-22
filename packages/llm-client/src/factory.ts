@@ -31,8 +31,8 @@ export function createLLMClient(config?: Partial<LLMConfig>): LLMClient {
 
   const merged: LLMConfig = {
     apiKey,
-    baseURL: config?.baseURL ?? process.env.OPENAI_API_BASE ?? 'https://api.openai.com/v1',
-    model: config?.model ?? process.env.DEFAULT_MODEL ?? 'gpt-4o',
+    baseURL: config?.baseURL ?? process.env.OPENAI_API_BASE ?? 'https://api.minimaxi.com/v1',
+    model: config?.model ?? process.env.DEFAULT_MODEL ?? 'MiniMax-M2.7',
     temperature:
       config?.temperature ?? parseFloatSafe(process.env.DEFAULT_TEMPERATURE, 0.7, 'DEFAULT_TEMPERATURE'),
     maxTokens:
