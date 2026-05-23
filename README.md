@@ -19,43 +19,28 @@
 
 ```
 ai-agent-study/
-├── packages/                       # 共享包（阶段产物的沉淀地）
-│   ├── config/                    # 配置管理
-│   ├── logger/                    # 结构化日志
-│   ├── llm-client/                # LLM 客户端
-│   ├── prompt/                    # Prompt 模板
-│   ├── tools/                     # 工具库
-│   ├── memory/                    # 记忆管理
-│   ├── vectorstore/               # 向量存储
-│   ├── retrieval/                 # Loader / Splitter / Hybrid retrieval
-│   ├── mcp/                       # MCP 客户端
-│   ├── observability/             # Trace / EvalOps
-│   └── server/                    # Agent SSE API primitives
-├── stages/                         # 学习阶段（按序学习）
-│   ├── stage00-engineering/       # 工程基础
-│   ├── stage01-llm-api/           # LLM API 基础
-│   ├── stage02-prompt-context/    # Prompt + 基础上下文
-│   ├── stage03-tool-calling/      # 工具调用（含工具安全）
-│   ├── stage04-agent-runtime/     # Agent Runtime — ReAct Loop
-│   ├── stage05-memory-context/    # Memory & Context Engineering 🆕
-│   ├── stage06-rag-foundations/   # RAG 基础 + 基础评估
-│   ├── stage07-agentic-rag/       # Agentic RAG
-│   ├── stage08-mcp/               # MCP 集成
-│   ├── stage09-workflow/          # 多 Agent 工作流
-│   ├── stage10-evals/             # 评估体系（系统化）
-│   ├── stage11-production/        # 生产工程化 + 安全（融合）
-│   ├── stage06A-data-ingestion/   # Loader / Splitter / 数据清洗
-│   ├── stage06B-vector-db/        # 真实向量库 adapter
-│   ├── stage06C-hybrid-search/    # BM25 + Hybrid retrieval
-│   ├── stage07A-langgraph-agentic-rag/ # LangGraph-style RAG 状态图
-│   ├── stage08A-mcp-ecosystem/    # MCP 生态桥接
-│   ├── stage10A-observability-evalops/ # Trace + EvalOps
-│   ├── stage11A-production-runtime/    # SSE Agent API runtime
-│   └── stage12-graph-rag/         # GraphRAG
-├── projects/                       # 综合项目
-│   ├── codebase-agent/            # AI Codebase Agent（基于 stage00–07）
-│   └── enterprise-agent/          # Enterprise Workflow Agent（基于 stage00–11）
-└── docs/                           # 文档
+├── backend/
+│   ├── apps/
+│   │   └── api/                   # Hono API，前端唯一 LLM 调用入口
+│   ├── packages/                  # 共享包（阶段产物的沉淀地）
+│   │   ├── config/                # 配置管理
+│   │   ├── logger/                # 结构化日志
+│   │   ├── llm-client/            # LLM 客户端
+│   │   ├── prompt/                # Prompt 模板
+│   │   ├── tools/                 # 工具库
+│   │   ├── memory/                # 记忆管理
+│   │   ├── vectorstore/           # 向量存储
+│   │   ├── retrieval/             # Loader / Splitter / Hybrid retrieval
+│   │   ├── mcp/                   # MCP 客户端
+│   │   ├── observability/         # Trace / EvalOps
+│   │   └── server/                # Agent SSE API primitives
+│   ├── stages/                    # 学习阶段（按序学习）
+│   ├── projects/                  # 综合项目
+│   └── docs/                      # 文档
+├── frontend/                      # Vue + Vite LLM 调用展示端
+├── package.json
+├── pnpm-workspace.yaml
+└── tsconfig.base.json
 ```
 
 ## 快速开始
@@ -85,6 +70,15 @@ cp .env.example .env
 pnpm test
 ```
 
+### 启动展示端
+
+```bash
+pnpm dev:backend
+pnpm dev:frontend
+```
+
+后端默认监听 `http://localhost:3000`，前端默认监听 `http://localhost:5173`，前端通过相对路径 `/api/...` 访问后端。
+
 ### 构建所有包
 
 ```bash
@@ -96,9 +90,9 @@ pnpm build
 > **设计原则**：
 >
 > - **评估贯穿**：从 stage06 起每个阶段必须产出该阶段的评估输出（不是只在 stage10 才学评估）
-> - **安全融入**：安全能力沉淀在 packages/tools（工具审批）和 stage11（生产防护）；stage03/05 引入安全意识，不再有独立的「安全阶段」
+> - **安全融入**：安全能力沉淀在 `backend/packages/tools`（工具审批）和 stage11（生产防护）；stage03/05 引入安全意识，不再有独立的「安全阶段」
 > - **真实存储递进**：stage06→06B 接 Chroma、stage09 计划接 Postgres、stage11 接 Redis + OTel
-> - **沉淀到 packages**：每个阶段的产出最终归位到 `packages/*`，禁止重复造轮子
+> - **沉淀到 packages**：每个阶段的产出最终归位到 `backend/packages/*`，禁止重复造轮子
 
 ### Stage 00: 工程基础 (1-2 周)
 建立规范的工程化基础，配置开发环境。
@@ -117,7 +111,7 @@ pnpm build
 - 多模型适配层
 
 ### Stage 02: Prompt + 基础上下文 (1 周)
-设计可维护的提示词；把模板系统沉淀到 `packages/prompt`。
+设计可维护的提示词；把模板系统沉淀到 `backend/packages/prompt`。
 
 - 模板插值 + Few-shot examples
 - 输出格式约束
@@ -129,7 +123,7 @@ Agent 的核心能力，工具安全在此阶段就引入。
 
 - Tool schema 设计 / Zod 参数校验
 - Tool Registry / 类别管理
-- **工具安全**：白名单、`requiresApproval` 审批流、并行执行隔离（沉淀在 packages/tools）
+- **工具安全**：白名单、`requiresApproval` 审批流、并行执行隔离（沉淀在 `backend/packages/tools`）
 - 失败重试、错误聚合
 
 ### Stage 04: Agent Runtime (2 周)

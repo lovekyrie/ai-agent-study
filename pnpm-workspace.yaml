@@ -3,8 +3,10 @@ shellEmulator: true
 trustPolicy: no-downgrade
 
 packages:
-  - 'packages/*'
-  - 'stages/*'
-  - 'projects/*'
+  - 'backend/packages/*'
+  - 'backend/stages/*'
+  - 'backend/projects/*'
+  - 'backend/apps/*'
+  - frontend
 overrides:
   eslint-flat-config-utils: 3.0.2

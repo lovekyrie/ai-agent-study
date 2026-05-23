@@ -2,6 +2,7 @@ import antfu from '@antfu/eslint-config'
 
 export default antfu({
   typescript: true,
+  vue: true,
   ignores: [
     'node_modules',
     'dist',
@@ -9,6 +10,8 @@ export default antfu({
     'coverage',
     '**/README.md',
     'docs/**',
+    'backend/docs/**',
+    'frontend/dist/**',
   ],
   rules: {
     'node/prefer-global/process': 'off',

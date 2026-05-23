@@ -1,0 +1,25 @@
+{
+  "name": "@ai-agent-study/frontend",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vue playground for comparing non-streaming and streaming LLM calls",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-vue-next": "^0.468.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.0",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.0.0",
+    "vue-tsc": "^2.1.0"
+  }
+}

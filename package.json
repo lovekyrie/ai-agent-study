@@ -20,15 +20,16 @@
   },
   "scripts": {
     "build": "pnpm -r run build",
-    "dev": "pnpm --filter stage01-llm-api dev",
+    "dev:backend": "pnpm --filter @ai-agent-study/api dev",
+    "dev:frontend": "pnpm --filter @ai-agent-study/frontend dev",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "clean": "rm -rf node_modules dist packages/*/node_modules stages/*/node_modules projects/*/node_modules",
-    "typecheck": "tsc --noEmit"
+    "clean": "rm -rf node_modules dist backend/packages/*/node_modules backend/stages/*/node_modules backend/projects/*/node_modules backend/apps/*/node_modules frontend/node_modules",
+    "typecheck": "tsc --noEmit && pnpm --filter @ai-agent-study/frontend typecheck"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.0.0",

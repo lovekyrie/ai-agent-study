@@ -1,12 +1,28 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@ai-agent-study/config": ["backend/packages/config/src/index.ts"],
+      "@ai-agent-study/logger": ["backend/packages/logger/src/index.ts"],
+      "@ai-agent-study/llm-client": ["backend/packages/llm-client/src/index.ts"],
+      "@ai-agent-study/mcp": ["backend/packages/mcp/src/index.ts"],
+      "@ai-agent-study/memory": ["backend/packages/memory/src/index.ts"],
+      "@ai-agent-study/observability": ["backend/packages/observability/src/index.ts"],
+      "@ai-agent-study/prompt": ["backend/packages/prompt/src/index.ts"],
+      "@ai-agent-study/retrieval": ["backend/packages/retrieval/src/index.ts"],
+      "@ai-agent-study/server": ["backend/packages/server/src/index.ts"],
+      "@ai-agent-study/tools": ["backend/packages/tools/src/index.ts"],
+      "@ai-agent-study/vectorstore": ["backend/packages/vectorstore/src/index.ts"],
+      "@ai-agent-study/workspace": ["backend/packages/workspace/src/index.ts"]
+    },
     "noEmit": true
   },
   "include": [
-    "packages/*/src/**/*",
-    "stages/*/src/**/*",
-    "projects/*/src/**/*"
+    "backend/packages/*/src/**/*",
+    "backend/stages/*/src/**/*",
+    "backend/projects/*/src/**/*",
+    "backend/apps/*/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }
