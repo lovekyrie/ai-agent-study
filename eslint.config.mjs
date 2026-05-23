@@ -8,6 +8,7 @@ export default antfu({
     'build',
     'coverage',
     '**/README.md',
+    'docs/**',
   ],
   rules: {
     'node/prefer-global/process': 'off',

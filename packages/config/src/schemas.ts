@@ -5,7 +5,7 @@ export const LLMConfigSchema = z.object({
   baseURL: z.string().url().default('https://api.minimaxi.com/v1'),
   model: z.string().default('MiniMax-M2.7'),
   temperature: z.number().min(0).max(2).default(0.7),
-  // 上限按主流模型最大上下文做一次 sanity check
+  // 上限按主流模型最大上下文做一次 sanity check 单次对话输出token上限
   maxTokens: z.number().int().min(1).max(200_000).default(1000),
 })
 

@@ -1,34 +1,26 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { findMonorepoRoot } from '@ai-agent-study/workspace'
 import dotenv from 'dotenv'
 
 /** 最近一次 applyTestEnv 写入的键，供 clearTestEnv 清理 */
 let lastAppliedKeys: string[] = []
 
-function findMonorepoRoot(startDir: string): string {
-  let dir = resolve(startDir)
-  while (true) {
-    if (existsSync(resolve(dir, 'pnpm-workspace.yaml'))) return dir
-    const parent = dirname(dir)
-    if (parent === dir) break
-    dir = parent
-  }
-  return process.cwd()
-}
-
 const REPO_ROOT = findMonorepoRoot(
-  fileURLToPath(new URL('../../..', import.meta.url)),
+  fileURLToPath(new URL('.', import.meta.url)),
 )
 
 const DEFAULT_CANDIDATES = ['.env.test', '.env.test.example'] as const
 
 function resolveTestEnvPath(customPath?: string): string {
-  if (customPath) return resolve(customPath)
+  if (customPath)
+    return resolve(customPath)
 
   for (const name of DEFAULT_CANDIDATES) {
     const candidate = resolve(REPO_ROOT, name)
-    if (existsSync(candidate)) return candidate
+    if (existsSync(candidate))
+      return candidate
   }
 
   return resolve(REPO_ROOT, '.env.test')
@@ -73,5 +65,6 @@ export function clearTestEnv(keys?: string[]): void {
   for (const key of toClear) {
     delete process.env[key]
   }
-  if (!keys) lastAppliedKeys = []
+  if (!keys)
+    lastAppliedKeys = []
 }

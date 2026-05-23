@@ -38,6 +38,7 @@ describe('config Loader', () => {
   })
 
   it('should load config from environment variables', () => {
+    // 覆盖配置的默认值
     process.env.OPENAI_API_BASE = 'https://custom.api.com/v1'
     process.env.DEFAULT_MODEL = 'gpt-4o-mini'
     process.env.PORT = '4000'
@@ -69,7 +70,8 @@ describe('config Loader', () => {
   })
 
   it('should throw error for invalid API key', () => {
-    delete process.env.OPENAI_API_KEY
+    // 采用空字符串， dotenv 不会覆盖已存在的 env
+    process.env.OPENAI_API_KEY = ''
 
     expect(() => loadConfig()).toThrow('API Key is required')
   })

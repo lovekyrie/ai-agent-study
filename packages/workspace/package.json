@@ -1,8 +1,8 @@
 {
-  "name": "@ai-agent-study/config",
+  "name": "@ai-agent-study/workspace",
   "type": "module",
   "version": "0.1.0",
-  "description": "配置管理，支持环境变量、多环境",
+  "description": "Monorepo workspace 公共工具",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -15,11 +15,6 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "vitest"
-  },
-  "dependencies": {
-    "@ai-agent-study/workspace": "workspace:*",
-    "dotenv": "^16.4.0",
-    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

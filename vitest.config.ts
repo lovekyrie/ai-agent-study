@@ -14,6 +14,7 @@ export default defineConfig({
       '@ai-agent-study/server': new URL('./packages/server/src/index.ts', import.meta.url).pathname,
       '@ai-agent-study/tools': new URL('./packages/tools/src/index.ts', import.meta.url).pathname,
       '@ai-agent-study/vectorstore': new URL('./packages/vectorstore/src/index.ts', import.meta.url).pathname,
+      '@ai-agent-study/workspace': new URL('./packages/workspace/src/index.ts', import.meta.url).pathname,
     },
   },
   test: {

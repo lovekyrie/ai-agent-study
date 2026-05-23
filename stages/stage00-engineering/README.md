@@ -101,12 +101,12 @@ ai-agent-study/
 
 ## 验收清单
 
-- [ ] `pnpm install` 一次成功
-- [ ] `pnpm test` 全绿（当前 195 个）
-- [ ] `pnpm typecheck` 全绿
-- [ ] `pnpm lint` 通过
-- [ ] 能解释"为什么 `packages/logger` 不依赖 `packages/config`"
-- [ ] 能画出本仓库的依赖图
+- [x] `pnpm install` 一次成功
+- [x] `pnpm test` 全绿（当前 195 个）
+- [x] `pnpm typecheck` 全绿
+- [x] `pnpm lint` 通过
+- [x] 能解释"为什么 `packages/logger` 不依赖 `packages/config`"
+- [x] 能画出本仓库的依赖图
 
 ## 快速开始
 

@@ -1,7 +1,25 @@
 import type { z } from 'zod'
 import type { Config } from './schemas.js'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { findMonorepoRoot } from '@ai-agent-study/workspace'
 import dotenv from 'dotenv'
 import { ConfigSchema } from './schemas.js'
+
+function loadEnvFiles(): void {
+  const repoRoot = findMonorepoRoot(
+    fileURLToPath(new URL('.', import.meta.url)),
+  )
+  // 先从仓库根目录加载，再从当前工作目录加载 (但是当前目录是没有 .env 文件的)
+  for (const envPath of [
+    resolve(repoRoot, '.env'),
+    resolve(process.cwd(), '.env'),
+  ]) {
+    if (existsSync(envPath))
+      dotenv.config({ path: envPath })
+  }
+}
 
 function getEnvString(key: string, defaultValue?: string): string {
   return process.env[key] || defaultValue || ''
@@ -38,7 +56,7 @@ function getEnvBoolean(key: string, defaultValue: boolean): boolean {
 }
 
 export function loadConfig(): Config {
-  dotenv.config()
+  loadEnvFiles()
 
   const rawConfig = {
     llm: {

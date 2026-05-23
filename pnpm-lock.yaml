@@ -35,6 +35,9 @@ importers:
 
   packages/config:
     dependencies:
+      '@ai-agent-study/workspace':
+        specifier: workspace:*
+        version: link:../workspace
       dotenv:
         specifier: ^16.4.0
         version: 16.6.1
@@ -190,6 +193,18 @@ importers:
       chromadb:
         specifier: ^1.8.0
         version: 1.10.5
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.19
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@22.19.19)(@vitest/ui@2.1.9)
+
+  packages/workspace:
     devDependencies:
       '@types/node':
         specifier: ^22.0.0

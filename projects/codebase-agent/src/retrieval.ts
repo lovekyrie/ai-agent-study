@@ -226,7 +226,7 @@ export class InMemoryVectorStore implements VectorStoreAdapter {
   }
 
   private simpleEmbedding(text: string): number[] {
-    const embedding = Array.from({ length: 128 }).fill(0)
+    const embedding = Array.from({ length: 128 }).fill(0) as number[]
     const words = text.toLowerCase().split(/\s+/)
 
     for (let i = 0; i < words.length; i++) {
