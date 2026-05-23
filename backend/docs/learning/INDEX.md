@@ -2,6 +2,7 @@
 
 | 日期 | 主题 | 文件 |
 |------|------|------|
+| 2026-05-23 | for await...of 异步迭代 | [2026-05-23-for-await-of.md](./2026-05-23-for-await-of.md) |
 | 2026-05-23 | index barrel、.js import 与调试 | [2026-05-23-esm-import-debug.md](./2026-05-23-esm-import-debug.md) |
 | 2026-05-23 | VS Code 调试 tasks 与 vitest alias | [2026-05-23-vscode-debug-vitest-alias.md](./2026-05-23-vscode-debug-vitest-alias.md) |
 | 2026-05-22 | workspace 类型入口 dist | [2026-05-22-workspace-dist-types.md](./2026-05-22-workspace-dist-types.md) |
@@ -13,6 +14,7 @@
 ## 专题
 
 - [TypeScript / tsconfig](../typescript/tsconfig-base-options.md)
+- [TypeScript / for await...of 与 AsyncGenerator](../typescript/for-await-async-generator.md)
 - [TypeScript / import 写 .js 与调试 source map](../typescript/esm-import-debug-sourcemaps.md)
 - [TypeScript / 泛型](../typescript/generics.md)
 - [packages/config — zod 与 dotenv](../packages/config/zod-and-dotenv.md)
