@@ -69,11 +69,11 @@ const data = await client.jsonStructured<{ name: string }>(messages)
 
 ## 验收清单
 
-- [ ] 看完 `src/example.ts` 能解释三种模式各自的适用场景
-- [ ] 不看代码也能说出"为什么 SSE 解析必须按 `\n` 缓冲"
-- [ ] `pnpm --filter stage01-llm-api test` 通过
-- [ ] 配置好 `.env` 后 `pnpm --filter stage01-llm-api dev` 能跑通三种模式
-- [ ] 能把 `OPENAI_API_BASE` 改成本地 Ollama 端点而不动业务代码
+- [x] 看完 `src/example.ts` 能解释三种模式各自的适用场景
+- [x] 不看代码也能说出"为什么 SSE 解析必须按 `\n` 缓冲"
+- [x] `pnpm --filter stage01-llm-api test` 通过
+- [x] 配置好 `.env` 后 `pnpm --filter stage01-llm-api dev` 能跑通三种模式
+- [x] 能把 `OPENAI_API_BASE` 改成本地 Ollama 端点而不动业务代码
 
 ## 快速开始
 
